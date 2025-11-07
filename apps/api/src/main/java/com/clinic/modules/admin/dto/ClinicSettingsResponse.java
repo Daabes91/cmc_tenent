@@ -29,7 +29,11 @@ public record ClinicSettingsResponse(
         Map<String, BigDecimal> exchangeRates,
         String timezone,
         String cloudflareAccountId,
-        String cloudflareApiToken
+        String cloudflareApiToken,
+        String sendgridApiKey,
+        String emailFrom,
+        String emailFromName,
+        Boolean emailEnabled
 ) {
     public record WorkingHours(
             String monday,

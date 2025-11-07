@@ -3077,6 +3077,10 @@
       "cloudflare": {
         "title": "صور Cloudflare",
         "subtitle": "تسليم الوسائط عبر شبكة Cloudflare العالمية"
+      },
+      "email": {
+        "title": "إعداد البريد الإلكتروني",
+        "subtitle": "تهيئة SendGrid وهوية المرسل"
       }
     },
     "form": {
@@ -3179,6 +3183,27 @@
           "placeholder": "أدخل الرمز السري لـ PayPal",
           "hint": "احتفظ بهذا الرمز بسرية؛ فهو مطلوب للمصادقة مع PayPal."
         }
+      },
+      "sendgrid": {
+        "apiKey": {
+          "label": "مفتاح SendGrid API",
+          "placeholder": "أدخل مفتاح SendGrid API",
+          "hint": "أنشئ مفتاحاً بصلاحيات Mail Send فقط."
+        },
+        "fromEmail": {
+          "label": "بريد المرسل",
+          "placeholder": "notifications\\u0040yourclinic.com",
+          "hint": "سيظهر للمرضى كعنوان المُرسِل."
+        },
+        "fromName": {
+          "label": "اسم المرسل",
+          "placeholder": "اسم العيادة",
+          "hint": "يُستخدم في عناوين البريد والتواقيع."
+        },
+        "enableEmails": {
+          "label": "تفعيل رسائل البريد",
+          "hint": "أوقف الخيار لإيقاف جميع الإشعارات مؤقتاً."
+        }
       }
     },
     "weekDays": {
@@ -3227,6 +3252,13 @@
       "description": "خزّن عمليات الرفع في Cloudflare Images للحصول على تسليم أسرع وأكثر أماناً عبر المنصة.",
       "hint": "أدخل معرّف الحساب ورمز واجهة برمجة التطبيقات بصلاحيات Images من لوحة تحكم Cloudflare.",
       "configured": "تم حفظ بيانات اعتماد Cloudflare Images."
+    },
+    "email": {
+      "title": "البريد الإلكتروني التشغيلي",
+      "description": "استخدم SendGrid لإرسال تأكيدات المواعيد والتذكيرات.",
+      "hint": "يمكن تخزين بيانات الاعتماد لكل عيادة للحفاظ على هوية فريدة.",
+      "configured": "تم إعداد SendGrid لهذه العيادة.",
+      "incomplete": "أضف مفتاح SendGrid وبريد واسم المرسل لتفعيل الإشعارات."
     },
     "metrics": {
       "identity": {
@@ -3278,6 +3310,10 @@
       "logoError": {
         "title": "فشل الرفع",
         "description": "غير قادر على رفع الشعار. يرجى المحاولة مرة أخرى."
+      },
+      "emailValidation": {
+        "title": "أكمل إعداد البريد",
+        "description": "يرجى إدخال مفتاح API وبريد واسم المرسل قبل تفعيل الرسائل."
       }
     }
   },

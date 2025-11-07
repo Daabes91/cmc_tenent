@@ -7,8 +7,6 @@ import com.clinic.modules.core.settings.ClinicSettingsEntity;
 import com.clinic.modules.core.settings.ClinicSettingsRepository;
 import com.clinic.modules.core.tenant.TenantContextHolder;
 import com.clinic.modules.core.tenant.TenantService;
-import com.clinic.modules.core.tenant.TenantContextHolder;
-import com.clinic.modules.core.tenant.TenantService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +30,18 @@ public class ClinicSettingsService {
 
     @Value("${paypal.environment:sandbox}")
     private String paypalEnvironment;
+
+    @Value("${security.email.sendgrid-api-key:}")
+    private String defaultSendgridApiKey;
+
+    @Value("${security.email.from-email:}")
+    private String defaultEmailFrom;
+
+    @Value("${security.email.from-name:Clinic}")
+    private String defaultEmailFromName;
+
+    @Value("${security.email.enabled:true}")
+    private Boolean defaultEmailEnabled;
 
     public ClinicSettingsService(ClinicSettingsRepository settingsRepository,
                                  ClinicTimezoneConfig clinicTimezoneConfig,
@@ -92,6 +102,20 @@ public class ClinicSettingsService {
             if (social.instagram() != null) settings.setInstagramUrl(social.instagram());
             if (social.twitter() != null) settings.setTwitterUrl(social.twitter());
             if (social.linkedin() != null) settings.setLinkedinUrl(social.linkedin());
+        }
+
+        // Update SendGrid / email settings
+        if (request.sendgridApiKey() != null) {
+            settings.setSendgridApiKey(normalize(request.sendgridApiKey()));
+        }
+        if (request.emailFrom() != null) {
+            settings.setEmailFrom(normalize(request.emailFrom()));
+        }
+        if (request.emailFromName() != null) {
+            settings.setEmailFromName(normalize(request.emailFromName()));
+        }
+        if (request.emailEnabled() != null) {
+            settings.setEmailEnabled(request.emailEnabled());
         }
 
         // Update PayPal settings
@@ -157,6 +181,11 @@ public class ClinicSettingsService {
         settings.setCurrency("AED");
         settings.setLocale("en-AE");
         settings.setSlotDurationMinutes(30);
+        settings.setTimezone(clinicTimezoneConfig.getZoneId());
+        settings.setSendgridApiKey(defaultSendgridApiKey);
+        settings.setEmailFrom(defaultEmailFrom);
+        settings.setEmailFromName(defaultEmailFromName);
+        settings.setEmailEnabled(defaultEmailEnabled);
         return settingsRepository.save(settings);
     }
 
@@ -181,6 +210,11 @@ public class ClinicSettingsService {
         String resolvedPaypalEnvironment = resolveOrDefault(entity.getPaypalEnvironment(), paypalEnvironment);
         String resolvedPaypalClientId = resolveOrDefault(entity.getPaypalClientId(), paypalClientId);
         String resolvedPaypalClientSecret = resolveOrDefault(entity.getPaypalClientSecret(), paypalClientSecret);
+        String resolvedSendgridKey = resolveOrDefault(entity.getSendgridApiKey(), defaultSendgridApiKey);
+        String resolvedEmailFrom = resolveOrDefault(entity.getEmailFrom(), defaultEmailFrom);
+        String resolvedEmailFromName = resolveOrDefault(entity.getEmailFromName(), defaultEmailFromName);
+        Boolean resolvedEmailEnabled = entity.getEmailEnabled() != null ? entity.getEmailEnabled() : defaultEmailEnabled;
+        String resolvedTimezone = resolveOrDefault(entity.getTimezone(), clinicTimezoneConfig.getZoneId());
 
         return new ClinicSettingsResponse(
                 entity.getId(),
@@ -206,9 +240,13 @@ public class ClinicSettingsService {
                 resolvedPaypalClientId,
                 resolvedPaypalClientSecret,
                 entity.getExchangeRates(),
-                clinicTimezoneConfig.getZoneId(),
+                resolvedTimezone,
                 entity.getCloudflareAccountId(),
-                entity.getCloudflareApiToken()
+                entity.getCloudflareApiToken(),
+                resolvedSendgridKey,
+                resolvedEmailFrom,
+                resolvedEmailFromName,
+                resolvedEmailEnabled
         );
     }
 

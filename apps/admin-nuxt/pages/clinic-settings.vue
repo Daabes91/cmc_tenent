@@ -545,6 +545,97 @@
                     <span>{{ t('clinicSettings.cloudflare.configured') }}</span>
                   </div>
                 </div>
+            </div>
+          </div>
+
+            <!-- Email Delivery Section -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
+              <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <UIcon name="i-lucide-mail" class="h-5 w-5 text-white" />
+                  <div>
+                    <h2 class="text-lg font-semibold text-white">{{ t('clinicSettings.sections.email.title') }}</h2>
+                    <p class="text-sm text-emerald-100">{{ t('clinicSettings.sections.email.subtitle') }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="p-6 space-y-6">
+                <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4">
+                  <div class="flex items-start gap-3">
+                    <UIcon name="i-lucide-info" class="h-5 w-5 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 class="font-semibold text-emerald-900 dark:text-emerald-100 mb-2">{{ t('clinicSettings.email.title') }}</h4>
+                      <p class="text-sm text-emerald-700 dark:text-emerald-300 mb-3">
+                        {{ t('clinicSettings.email.description') }}
+                      </p>
+                      <p class="text-xs text-emerald-600 dark:text-emerald-400">
+                        {{ t('clinicSettings.email.hint') }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <UFormGroup
+                    class="md:col-span-2"
+                    :label="t('clinicSettings.form.sendgrid.apiKey.label')"
+                    :hint="t('clinicSettings.form.sendgrid.apiKey.hint')"
+                  >
+                    <UInput
+                      v-model="formData.sendgridApiKey"
+                      type="password"
+                      size="lg"
+                      :placeholder="t('clinicSettings.form.sendgrid.apiKey.placeholder')"
+                      icon="i-lucide-key-round"
+                    />
+                  </UFormGroup>
+
+                  <UFormGroup
+                    :label="t('clinicSettings.form.sendgrid.fromEmail.label')"
+                    :hint="t('clinicSettings.form.sendgrid.fromEmail.hint')"
+                  >
+                    <UInput
+                      v-model="formData.emailFrom"
+                      size="lg"
+                      type="email"
+                      :placeholder="t('clinicSettings.form.sendgrid.fromEmail.placeholder')"
+                      icon="i-lucide-at-sign"
+                    />
+                  </UFormGroup>
+
+                  <UFormGroup
+                    :label="t('clinicSettings.form.sendgrid.fromName.label')"
+                    :hint="t('clinicSettings.form.sendgrid.fromName.hint')"
+                  >
+                    <UInput
+                      v-model="formData.emailFromName"
+                      size="lg"
+                      :placeholder="t('clinicSettings.form.sendgrid.fromName.placeholder')"
+                      icon="i-lucide-contact"
+                    />
+                  </UFormGroup>
+                </div>
+
+                <div class="flex flex-col gap-3 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-900/20 p-4 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p class="font-semibold text-emerald-900 dark:text-emerald-100">
+                      {{ t('clinicSettings.form.sendgrid.enableEmails.label') }}
+                    </p>
+                    <p class="text-sm text-emerald-700 dark:text-emerald-300">
+                      {{ t('clinicSettings.form.sendgrid.enableEmails.hint') }}
+                    </p>
+                  </div>
+                  <UToggle v-model="formData.emailEnabled" :disabled="!emailConfigComplete" />
+                </div>
+
+                <div v-if="formData.emailEnabled && emailConfigComplete" class="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3">
+                  <UIcon name="i-lucide-check-circle-2" class="h-4 w-4" />
+                  <span>{{ t('clinicSettings.email.configured') }}</span>
+                </div>
+                <div v-else-if="!emailConfigComplete" class="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
+                  <UIcon name="i-lucide-alert-triangle" class="h-4 w-4" />
+                  <span>{{ t('clinicSettings.email.incomplete') }}</span>
+                </div>
               </div>
             </div>
 
@@ -805,6 +896,10 @@ interface ClinicSettingsForm {
   paypalClientSecret: string;
   cloudflareAccountId: string;
   cloudflareApiToken: string;
+  sendgridApiKey: string;
+  emailFrom: string;
+  emailFromName: string;
+  emailEnabled: boolean;
 }
 
 const DEFAULT_CURRENCY = "AED";
@@ -897,7 +992,11 @@ const formData = ref<ClinicSettingsForm>({
   paypalClientId: "",
   paypalClientSecret: "",
   cloudflareAccountId: "",
-  cloudflareApiToken: ""
+  cloudflareApiToken: "",
+  sendgridApiKey: "",
+  emailFrom: "",
+  emailFromName: "",
+  emailEnabled: false
 });
 
 const saving = ref(false);
@@ -911,6 +1010,23 @@ const paypalEnvironment = computed(() => {
 const selectedCurrencyOption = computed(() => {
   return currencyOptions.find(option => option.value === formData.value.currency) ?? currencyOptions[0];
 });
+
+const emailConfigComplete = computed(() => {
+  const apiKey = formData.value.sendgridApiKey?.trim();
+  const fromEmail = formData.value.emailFrom?.trim();
+  const fromName = formData.value.emailFromName?.trim();
+  return Boolean(apiKey && fromEmail && fromName);
+});
+
+watch(
+  emailConfigComplete,
+  complete => {
+    if (!complete && formData.value.emailEnabled) {
+      formData.value.emailEnabled = false;
+    }
+  },
+  { immediate: true }
+);
 
 watch(
   settings,
@@ -953,7 +1069,11 @@ watch(
       paypalClientId: newSettings.paypalClientId || "",
       paypalClientSecret: newSettings.paypalClientSecret || "",
       cloudflareAccountId: newSettings.cloudflareAccountId || "",
-      cloudflareApiToken: newSettings.cloudflareApiToken || ""
+      cloudflareApiToken: newSettings.cloudflareApiToken || "",
+      sendgridApiKey: newSettings.sendgridApiKey || "",
+      emailFrom: newSettings.emailFrom || "",
+      emailFromName: newSettings.emailFromName || "",
+      emailEnabled: newSettings.emailEnabled ?? true
     };
   },
   { immediate: true }
@@ -1024,6 +1144,16 @@ const overviewMetrics = computed(() => {
 });
 
 async function saveSettings() {
+  if (formData.value.emailEnabled && !emailConfigComplete.value) {
+    toast.add({
+      title: t('clinicSettings.toasts.emailValidation.title'),
+      description: t('clinicSettings.toasts.emailValidation.description'),
+      color: "amber",
+      icon: "i-lucide-alert-triangle"
+    });
+    return;
+  }
+
   saving.value = true;
   try {
     const feeValue = formData.value.virtualConsultationFee
@@ -1037,6 +1167,8 @@ async function saveSettings() {
     const paypalClientIdValue = formData.value.paypalClientId?.trim() ?? "";
     const paypalClientSecretValue = formData.value.paypalClientSecret?.trim() ?? "";
 
+    const sanitize = (value: string) => value?.trim() || null;
+
     const payload = {
       ...formData.value,
       virtualConsultationFee: feeValue,
@@ -1049,7 +1181,11 @@ async function saveSettings() {
       paypalClientId: paypalClientIdValue,
       paypalClientSecret: paypalClientSecretValue,
       cloudflareAccountId: formData.value.cloudflareAccountId.trim(),
-      cloudflareApiToken: formData.value.cloudflareApiToken.trim()
+      cloudflareApiToken: formData.value.cloudflareApiToken.trim(),
+      sendgridApiKey: sanitize(formData.value.sendgridApiKey),
+      emailFrom: sanitize(formData.value.emailFrom),
+      emailFromName: sanitize(formData.value.emailFromName),
+      emailEnabled: formData.value.emailEnabled
     };
 
     await request("/settings", {
@@ -1138,7 +1274,11 @@ function resetForm() {
     paypalClientId: current.paypalClientId || "",
     paypalClientSecret: current.paypalClientSecret || "",
     cloudflareAccountId: current.cloudflareAccountId || "",
-    cloudflareApiToken: current.cloudflareApiToken || ""
+    cloudflareApiToken: current.cloudflareApiToken || "",
+    sendgridApiKey: current.sendgridApiKey || "",
+    emailFrom: current.emailFrom || "",
+    emailFromName: current.emailFromName || "",
+    emailEnabled: current.emailEnabled ?? true
   };
 }
 </script>

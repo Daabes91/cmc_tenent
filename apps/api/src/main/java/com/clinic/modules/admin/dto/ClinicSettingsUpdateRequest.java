@@ -30,7 +30,11 @@ public record ClinicSettingsUpdateRequest(
         String paypalClientId,
         String paypalClientSecret,
         String cloudflareAccountId,
-        String cloudflareApiToken
+        String cloudflareApiToken,
+        String sendgridApiKey,
+        @Email String emailFrom,
+        String emailFromName,
+        Boolean emailEnabled
 ) {
     public record WorkingHoursUpdate(
             String monday,

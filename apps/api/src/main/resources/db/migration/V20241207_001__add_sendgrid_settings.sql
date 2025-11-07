@@ -1,0 +1,5 @@
+ALTER TABLE clinic_settings
+    ADD COLUMN IF NOT EXISTS sendgrid_api_key TEXT,
+    ADD COLUMN IF NOT EXISTS email_from VARCHAR(150),
+    ADD COLUMN IF NOT EXISTS email_from_name VARCHAR(150),
+    ADD COLUMN IF NOT EXISTS email_enabled BOOLEAN DEFAULT TRUE;

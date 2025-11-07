@@ -3203,6 +3203,10 @@
       "cloudflare": {
         "title": "Cloudflare Images",
         "subtitle": "Deliver media through Cloudflare's global network"
+      },
+      "email": {
+        "title": "Email Delivery",
+        "subtitle": "Configure SendGrid credentials and sender identity"
       }
     },
     "form": {
@@ -3305,7 +3309,35 @@
           "placeholder": "Enter your PayPal client secret",
           "hint": "Keep this value safe; it authenticates requests to PayPal."
         }
+      },
+      "sendgrid": {
+        "apiKey": {
+          "label": "SendGrid API key",
+          "placeholder": "Enter your SendGrid API key",
+          "hint": "Create a restricted API key with Mail Send permissions."
+        },
+        "fromEmail": {
+          "label": "Sender email address",
+          "placeholder": "notifications\\u0040yourclinic.com",
+          "hint": "Patients will see this as the from address."
+        },
+        "fromName": {
+          "label": "Sender name",
+          "placeholder": "Your Clinic Name",
+          "hint": "Used in email subject lines and signatures."
+        },
+        "enableEmails": {
+          "label": "Enable transactional emails",
+          "hint": "Turn off to temporarily pause all outgoing notifications."
+        }
       }
+    },
+    "email": {
+      "title": "Transactional Email",
+      "description": "Use SendGrid to deliver appointment confirmations, reminders, and staff invitations.",
+      "hint": "Store credentials per clinic to keep branding and sender information unique.",
+      "configured": "SendGrid is configured for this clinic.",
+      "incomplete": "Add an API key, sender email, and sender name to enable notifications."
     },
     "weekDays": {
       "monday": "Monday",
@@ -3404,6 +3436,10 @@
       "logoError": {
         "title": "Upload failed",
         "description": "Unable to upload logo. Please try again."
+      },
+      "emailValidation": {
+        "title": "Complete email settings",
+        "description": "Provide an API key, sender email, and sender name before enabling transactional emails."
       }
     }
   },

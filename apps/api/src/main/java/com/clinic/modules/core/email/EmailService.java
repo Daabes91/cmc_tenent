@@ -1,6 +1,9 @@
 package com.clinic.modules.core.email;
 
 import com.clinic.config.SecurityProperties;
+import com.clinic.modules.core.settings.ClinicSettingsEntity;
+import com.clinic.modules.core.settings.ClinicSettingsRepository;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Attachments;
@@ -23,12 +26,15 @@ public class EmailService {
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     private final SecurityProperties securityProperties;
-    private final SendGrid sendGridClient;
+    private final ClinicSettingsRepository clinicSettingsRepository;
+    private final TenantContextHolder tenantContextHolder;
 
-    public EmailService(SecurityProperties securityProperties) {
+    public EmailService(SecurityProperties securityProperties,
+                        ClinicSettingsRepository clinicSettingsRepository,
+                        TenantContextHolder tenantContextHolder) {
         this.securityProperties = securityProperties;
-        String apiKey = securityProperties.email().sendgridApiKey();
-        this.sendGridClient = StringUtils.hasText(apiKey) ? new SendGrid(apiKey) : null;
+        this.clinicSettingsRepository = clinicSettingsRepository;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     public void sendAppointmentConfirmation(
@@ -40,17 +46,25 @@ public class EmailService {
             String appointmentTime,
             String consultationType
     ) {
-        if (!isEmailEnabled()) {
+        ClinicSettingsEntity settings = currentClinicSettings();
+        if (!isEmailEnabled(settings)) {
             log.info("Email sending is disabled. Would have sent confirmation email to {}", toEmail);
             return;
         }
 
-        String subject = "Appointment Confirmation - " + securityProperties.email().fromName();
+        SendGrid client = resolveSendGridClient(settings);
+        if (client == null) {
+            log.warn("SendGrid API key missing; skipping confirmation email to {}", toEmail);
+            return;
+        }
+
+        String clinicName = resolveFromName(settings);
+        String subject = "Appointment Confirmation - " + clinicName;
         String htmlContent = buildConfirmationEmailHtml(
-                patientName, doctorName, serviceName, appointmentDate, appointmentTime, consultationType
+                patientName, doctorName, serviceName, appointmentDate, appointmentTime, consultationType, clinicName
         );
 
-        sendEmail(toEmail, subject, htmlContent);
+        sendEmail(settings, client, toEmail, subject, htmlContent);
     }
 
     public void sendAppointmentCancellation(
@@ -61,17 +75,25 @@ public class EmailService {
             String appointmentDate,
             String appointmentTime
     ) {
-        if (!isEmailEnabled()) {
+        ClinicSettingsEntity settings = currentClinicSettings();
+        if (!isEmailEnabled(settings)) {
             log.info("Email sending is disabled. Would have sent cancellation email to {}", toEmail);
             return;
         }
 
-        String subject = "Appointment Cancelled - " + securityProperties.email().fromName();
+        SendGrid client = resolveSendGridClient(settings);
+        if (client == null) {
+            log.warn("SendGrid API key missing; skipping cancellation email to {}", toEmail);
+            return;
+        }
+
+        String clinicName = resolveFromName(settings);
+        String subject = "Appointment Cancelled - " + clinicName;
         String htmlContent = buildCancellationEmailHtml(
-                patientName, doctorName, serviceName, appointmentDate, appointmentTime
+                patientName, doctorName, serviceName, appointmentDate, appointmentTime, clinicName
         );
 
-        sendEmail(toEmail, subject, htmlContent);
+        sendEmail(settings, client, toEmail, subject, htmlContent);
     }
 
     /**
@@ -86,15 +108,23 @@ public class EmailService {
             ZonedDateTime appointmentEndTime,
             String meetingLink
     ) {
-        if (!isEmailEnabled()) {
+        ClinicSettingsEntity settings = currentClinicSettings();
+        if (!isEmailEnabled(settings)) {
             log.info("Email sending is disabled. Would have sent virtual consultation email to {}", toEmail);
+            return;
+        }
+
+        SendGrid client = resolveSendGridClient(settings);
+        if (client == null) {
+            log.warn("SendGrid API key missing; skipping virtual consultation email to {}", toEmail);
             return;
         }
 
         String meetLink = StringUtils.hasText(meetingLink)
                 ? meetingLink
                 : securityProperties.email().googleMeetLink();
-        String subject = "Virtual Consultation Confirmed - " + securityProperties.email().fromName();
+        String clinicName = resolveFromName(settings);
+        String subject = "Virtual Consultation Confirmed - " + clinicName;
 
         // Format dates for display
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy");
@@ -122,7 +152,8 @@ public class EmailService {
                 formattedDate,
                 formattedTime,
                 meetLink,
-                googleCalendarUrl
+                googleCalendarUrl,
+                clinicName
         );
 
         // Generate .ics calendar file
@@ -136,15 +167,13 @@ public class EmailService {
         );
 
         // Send email with calendar attachment
-        sendEmailWithAttachment(toEmail, subject, htmlContent, icsContent, "appointment.ics");
+        sendEmailWithAttachment(settings, client, toEmail, subject, htmlContent, icsContent, "appointment.ics");
     }
 
-    private void sendEmail(String toEmail, String subject, String htmlContent) {
+    private void sendEmail(ClinicSettingsEntity settings, SendGrid client,
+                           String toEmail, String subject, String htmlContent) {
         try {
-            Email from = new Email(
-                    securityProperties.email().fromEmail(),
-                    securityProperties.email().fromName()
-            );
+            Email from = new Email(resolveFromEmail(settings), resolveFromName(settings));
             Email to = new Email(toEmail);
             Content content = new Content("text/html", htmlContent);
             Mail mail = new Mail(from, subject, to, content);
@@ -154,7 +183,7 @@ public class EmailService {
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
 
-            Response response = sendGridClient.api(request);
+            Response response = client.api(request);
 
             if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
                 log.info("Email sent successfully to {} with subject: {}", toEmail, subject);
@@ -167,13 +196,11 @@ public class EmailService {
         }
     }
 
-    private void sendEmailWithAttachment(String toEmail, String subject, String htmlContent,
+    private void sendEmailWithAttachment(ClinicSettingsEntity settings, SendGrid client,
+                                         String toEmail, String subject, String htmlContent,
                                          String attachmentContent, String attachmentFilename) {
         try {
-            Email from = new Email(
-                    securityProperties.email().fromEmail(),
-                    securityProperties.email().fromName()
-            );
+            Email from = new Email(resolveFromEmail(settings), resolveFromName(settings));
             Email to = new Email(toEmail);
             Content content = new Content("text/html", htmlContent);
             Mail mail = new Mail(from, subject, to, content);
@@ -192,7 +219,7 @@ public class EmailService {
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
 
-            Response response = sendGridClient.api(request);
+            Response response = client.api(request);
 
             if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
                 log.info("Email with attachment sent successfully to {} with subject: {}", toEmail, subject);
@@ -205,8 +232,45 @@ public class EmailService {
         }
     }
 
-    private boolean isEmailEnabled() {
-        return securityProperties.email().enabled() && sendGridClient != null;
+    private ClinicSettingsEntity currentClinicSettings() {
+        try {
+            Long tenantId = tenantContextHolder.requireTenantId();
+            return clinicSettingsRepository.findByTenantId(tenantId).orElse(null);
+        } catch (IllegalStateException ex) {
+            return null;
+        }
+    }
+
+    private boolean isEmailEnabled(ClinicSettingsEntity settings) {
+        Boolean enabled = settings != null ? settings.getEmailEnabled() : null;
+        boolean allowed = enabled != null ? enabled : securityProperties.email().enabled();
+        return allowed && StringUtils.hasText(resolveSendgridApiKey(settings));
+    }
+
+    private SendGrid resolveSendGridClient(ClinicSettingsEntity settings) {
+        String apiKey = resolveSendgridApiKey(settings);
+        return StringUtils.hasText(apiKey) ? new SendGrid(apiKey) : null;
+    }
+
+    private String resolveSendgridApiKey(ClinicSettingsEntity settings) {
+        if (settings != null && StringUtils.hasText(settings.getSendgridApiKey())) {
+            return settings.getSendgridApiKey().trim();
+        }
+        return securityProperties.email().sendgridApiKey();
+    }
+
+    private String resolveFromEmail(ClinicSettingsEntity settings) {
+        if (settings != null && StringUtils.hasText(settings.getEmailFrom())) {
+            return settings.getEmailFrom().trim();
+        }
+        return securityProperties.email().fromEmail();
+    }
+
+    private String resolveFromName(ClinicSettingsEntity settings) {
+        if (settings != null && StringUtils.hasText(settings.getEmailFromName())) {
+            return settings.getEmailFromName().trim();
+        }
+        return securityProperties.email().fromName();
     }
 
     private String buildConfirmationEmailHtml(
@@ -215,9 +279,9 @@ public class EmailService {
             String serviceName,
             String appointmentDate,
             String appointmentTime,
-            String consultationType
+            String consultationType,
+            String clinicName
     ) {
-        String clinicName = securityProperties.email().fromName();
         return "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +
@@ -273,9 +337,9 @@ public class EmailService {
             String doctorName,
             String serviceName,
             String appointmentDate,
-            String appointmentTime
+            String appointmentTime,
+            String clinicName
     ) {
-        String clinicName = securityProperties.email().fromName();
         return "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +
@@ -327,9 +391,9 @@ public class EmailService {
             String appointmentDate,
             String appointmentTime,
             String meetLink,
-            String googleCalendarUrl
+            String googleCalendarUrl,
+            String clinicName
     ) {
-        String clinicName = securityProperties.email().fromName();
         return "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +
@@ -407,23 +471,31 @@ public class EmailService {
             String setupUrl,
             long validityDays
     ) {
-        if (!isEmailEnabled()) {
+        ClinicSettingsEntity settings = currentClinicSettings();
+        if (!isEmailEnabled(settings)) {
             log.info("Email sending is disabled. Would have sent staff invitation to {}", toEmail);
             return;
         }
 
-        String subject = "Welcome to " + securityProperties.email().fromName() + " - Set Up Your Account";
-        String htmlContent = buildStaffInvitationEmailHtml(staffName, setupUrl, validityDays);
+        SendGrid client = resolveSendGridClient(settings);
+        if (client == null) {
+            log.warn("SendGrid API key missing; skipping staff invitation to {}", toEmail);
+            return;
+        }
 
-        sendEmail(toEmail, subject, htmlContent);
+        String clinicName = resolveFromName(settings);
+        String subject = "Welcome to " + clinicName + " - Set Up Your Account";
+        String htmlContent = buildStaffInvitationEmailHtml(staffName, setupUrl, validityDays, clinicName);
+
+        sendEmail(settings, client, toEmail, subject, htmlContent);
     }
 
     private String buildStaffInvitationEmailHtml(
             String staffName,
             String setupUrl,
-            long validityDays
+            long validityDays,
+            String clinicName
     ) {
-        String clinicName = securityProperties.email().fromName();
         return "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +

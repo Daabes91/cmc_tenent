@@ -120,6 +120,19 @@ public class ClinicSettingsEntity {
     @Column(name = "cloudflare_api_token", length = 500)
     private String cloudflareApiToken;
 
+    // SendGrid Email Configuration
+    @Column(name = "sendgrid_api_key", length = 500)
+    private String sendgridApiKey;
+
+    @Column(name = "email_from", length = 150)
+    private String emailFrom;
+
+    @Column(name = "email_from_name", length = 150)
+    private String emailFromName;
+
+    @Column(name = "email_enabled")
+    private Boolean emailEnabled = Boolean.TRUE;
+
     // PayPal Credentials Configuration
     @Column(name = "paypal_client_id", length = 200)
     private String paypalClientId;
@@ -419,6 +432,38 @@ public class ClinicSettingsEntity {
 
     public void setCloudflareApiToken(String cloudflareApiToken) {
         this.cloudflareApiToken = cloudflareApiToken;
+    }
+
+    public String getSendgridApiKey() {
+        return sendgridApiKey;
+    }
+
+    public void setSendgridApiKey(String sendgridApiKey) {
+        this.sendgridApiKey = sendgridApiKey;
+    }
+
+    public String getEmailFrom() {
+        return emailFrom;
+    }
+
+    public void setEmailFrom(String emailFrom) {
+        this.emailFrom = emailFrom;
+    }
+
+    public String getEmailFromName() {
+        return emailFromName;
+    }
+
+    public void setEmailFromName(String emailFromName) {
+        this.emailFromName = emailFromName;
+    }
+
+    public Boolean getEmailEnabled() {
+        return emailEnabled;
+    }
+
+    public void setEmailEnabled(Boolean emailEnabled) {
+        this.emailEnabled = emailEnabled;
     }
 
     public String getPaypalClientId() {

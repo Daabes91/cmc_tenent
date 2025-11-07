@@ -42,6 +42,10 @@ type ClinicSettingsPayload = {
   exchangeRates?: ExchangeRatesMap | null;
   cloudflareAccountId?: string | null;
   cloudflareApiToken?: string | null;
+  sendgridApiKey?: string | null;
+  emailFrom?: string | null;
+  emailFromName?: string | null;
+  emailEnabled?: boolean | null;
 };
 
 type UseClinicSettingsOptions = {
@@ -120,7 +124,7 @@ export function useClinicSettings(options: UseClinicSettingsOptions = {}) {
         dataState.value = payload;
         return payload;
       } catch (err) {
-      errorState.value = err instanceof Error ? err.message : String(err);
+        errorState.value = err instanceof Error ? err.message : String(err);
         throw err;
       } finally {
         pendingState.value = false;
@@ -155,6 +159,10 @@ export function useClinicSettings(options: UseClinicSettingsOptions = {}) {
     const paypalEnvironment = payload.paypalEnvironment?.trim() || null;
     const paypalClientId = payload.paypalClientId?.trim() || null;
     const paypalClientSecret = payload.paypalClientSecret?.trim() || null;
+    const sendgridApiKey = payload.sendgridApiKey?.trim() || null;
+    const emailFrom = payload.emailFrom?.trim() || null;
+    const emailFromName = payload.emailFromName?.trim() || null;
+    const emailEnabled = payload.emailEnabled ?? true;
 
     // Ensure clinic name is properly handled for branding
     const clinicName = payload.clinicName?.trim() || null;
@@ -170,7 +178,11 @@ export function useClinicSettings(options: UseClinicSettingsOptions = {}) {
       exchangeRates,
       paypalEnvironment,
       paypalClientId,
-      paypalClientSecret
+      paypalClientSecret,
+      sendgridApiKey,
+      emailFrom,
+      emailFromName,
+      emailEnabled
     };
   });
 
