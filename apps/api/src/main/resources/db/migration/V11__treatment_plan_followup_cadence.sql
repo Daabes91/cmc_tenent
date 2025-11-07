@@ -1,0 +1,2 @@
+ALTER TABLE treatment_plans
+    ADD COLUMN IF NOT EXISTS followup_cadence VARCHAR(16) NOT NULL DEFAULT 'WEEKLY';

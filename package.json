@@ -1,0 +1,21 @@
+{
+  "name": "clinic-platform",
+  "private": true,
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "dev:web-next": "pnpm --filter web-next dev",
+    "dev:admin-nuxt": "pnpm --filter admin-nuxt dev",
+    "dev:api": "cd apps/api && ./gradlew bootRun",
+    "dev:frontends": "concurrently \"pnpm dev:admin-nuxt\" \"pnpm dev:web-next\" --names \"admin,patient\" --prefix-colors \"magenta,cyan\"",
+    "dev:all": "concurrently \"pnpm dev:api\" \"pnpm dev:admin-nuxt\" \"pnpm dev:web-next\" --names \"api,admin,patient\" --prefix-colors \"yellow,magenta,cyan\"",
+    "lint": "pnpm -r lint",
+    "build": "pnpm -r build"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.14",
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^9.2.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.14"
+  }
+}

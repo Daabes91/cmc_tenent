@@ -1,0 +1,114 @@
+spring:
+  config:
+    import:
+      - optional:file:.env.local
+      - optional:file:.env.cloudflare
+  application:
+    name: clinic-api
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/clinic}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    out-of-order: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+
+
+security:
+  jwt:
+    patient:
+      issuer: ${JWT_PATIENT_ISSUER:https://api.example-clinic.com}
+      audience: ${JWT_PATIENT_AUDIENCE:patient}
+      public-key: ${JWT_PATIENT_PUBLIC_KEY:classpath:keys/patient_public.pem}
+      private-key: ${JWT_PATIENT_PRIVATE_KEY:classpath:keys/patient_private.pem}
+      clock-skew: PT30S
+    staff:
+      issuer: ${JWT_STAFF_ISSUER:https://api.example-clinic.com}
+      audience: ${JWT_STAFF_AUDIENCE:staff}
+      public-key: ${JWT_STAFF_PUBLIC_KEY:classpath:keys/staff_public.pem}
+      private-key: ${JWT_STAFF_PRIVATE_KEY:classpath:keys/staff_private.pem}
+      clock-skew: PT30S
+    refresh:
+      ttl: PT30M
+  cors:
+    public-origins:
+      - ${PUBLIC_APP_ORIGIN:http://localhost:3001}
+    admin-origins:
+      - ${ADMIN_APP_ORIGIN:http://localhost:3000}
+  rate-limiting:
+    public-auth:
+      capacity: ${RATE_LIMIT_PUBLIC_AUTH_CAPACITY:5}
+      refill-period: ${RATE_LIMIT_PUBLIC_AUTH_PERIOD:PT1M}
+    public-booking:
+      capacity: ${RATE_LIMIT_PUBLIC_BOOK_CAPACITY:10}
+      refill-period: ${RATE_LIMIT_PUBLIC_BOOK_PERIOD:PT1M}
+    admin-auth:
+      capacity: ${RATE_LIMIT_ADMIN_AUTH_CAPACITY:5}
+      refill-period: ${RATE_LIMIT_ADMIN_AUTH_PERIOD:PT1M}
+  admin:
+    ip-allowlist: ${ADMIN_IP_ALLOWLIST:127.0.0.1/32,::1/128}
+  email:
+    sendgrid-api-key: ${SENDGRID_API_KEY}
+    from-email: ${EMAIL_FROM:clinic.notifier@gmail.com}
+    from-name: ${EMAIL_FROM_NAME:Clinic}
+    enabled: ${EMAIL_ENABLED:true}
+    google-meet-link: ${GOOGLE_MEET_LINK:https://meet.google.com/abc-defg-hij}
+    clinic-address: ${CLINIC_ADDRESS:123 Medical Center, Amman, Jordan}
+  cloudflare:
+    images:
+      account-id: ${CLOUDFLARE_ACCOUNT_ID}
+      api-token: ${CLOUDFLARE_API_TOKEN}
+      base-url: ${CLOUDFLARE_BASE_URL:https://api.cloudflare.com/client/v4}
+      delivery-url: ${CLOUDFLARE_DELIVERY_URL}
+      max-file-size-mb: ${CLOUDFLARE_MAX_FILE_SIZE_MB:10}
+      image-quality: ${CLOUDFLARE_IMAGE_QUALITY:85}
+      auto-optimize: ${CLOUDFLARE_AUTO_OPTIMIZE:true}
+      allowed-extensions: ${CLOUDFLARE_ALLOWED_EXTENSIONS:jpg,jpeg,png,webp,gif}
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+multitenant:
+  default-tenant-slug: default
+  header-name: X-Tenant-Slug
+  query-parameter: tenant
+
+# Clinic-specific configuration
+clinic:
+  timezone:
+    # IANA timezone identifier for the clinic location
+    # Examples:
+    #   - Asia/Amman (Jordan, UTC+3)
+    #   - Asia/Dubai (UAE, UTC+4)
+    #   - Asia/Riyadh (Saudi Arabia, UTC+3)
+    #   - Europe/London (UK, UTC+0/UTC+1)
+    # Can be overridden via environment variable: CLINIC_TIMEZONE_ZONE_ID
+    zone-id: ${CLINIC_TIMEZONE_ZONE_ID:Asia/Amman}
+
+# PayPal Configuration
+paypal:
+  client-id: ${PAYPAL_CLIENT_ID:}
+  client-secret: ${PAYPAL_CLIENT_SECRET:}
+  webhook-id: ${PAYPAL_WEBHOOK_ID:}
+  environment: ${PAYPAL_ENVIRONMENT:sandbox}
+  base-url: ${PAYPAL_BASE_URL:https://api-m.sandbox.paypal.com}

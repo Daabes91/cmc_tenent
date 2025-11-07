@@ -1,0 +1,3 @@
+ALTER TABLE appointments
+    ADD COLUMN IF NOT EXISTS payment_collected BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS patient_attended BOOLEAN;

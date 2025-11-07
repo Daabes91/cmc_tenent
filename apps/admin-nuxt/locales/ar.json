@@ -1,0 +1,3611 @@
+{
+  "layout": {
+    "brand": {
+      "title": "إدارة العيادة",
+      "subtitle": "مركز العمليات"
+    },
+    "sidebar": {
+      "today": "اليوم",
+      "metrics": {
+        "appointments": "المواعيد",
+        "utilization": "نسبة الإشغال",
+        "nextBreak": "الاستراحة القادمة",
+        "nextBreakValue": "{doctor} {time}",
+        "nextBreakNow": "{doctor} يبدأ الآن",
+        "nextBreakFallback": "لا توجد مواعيد أخرى اليوم",
+        "onCallDoctor": "طبيب المناوبة"
+      },
+      "support": {
+        "title": "هل تحتاج إلى مساعدة؟",
+        "description": "فريقنا متاح دائماً لدعمك في الإعداد أو التشغيل الآلي.",
+        "action": "تحدث مع الدعم"
+      }
+    },
+    "header": {
+      "searchPlaceholder": "ابحث عن المرضى أو تحديثات الجدول أو الإجراءات السريعة...",
+      "newBooking": "حجز جديد",
+      "theme": {
+        "dark": "التبديل إلى الوضع الداكن",
+        "light": "التبديل إلى الوضع الفاتح"
+      },
+      "language": {
+        "label": "اللغة",
+        "english": "English",
+        "arabic": "العربية",
+        "toggle": "التبديل إلى {name}"
+      }
+    },
+    "search": {
+      "navigation": "الصفحات",
+      "appointments": "المواعيد",
+      "patients": "المرضى",
+      "doctors": "الأطباء",
+      "services": "الخدمات",
+      "materials": "المواد",
+      "insurance": "التأمين",
+      "treatmentPlans": "خطط العلاج",
+      "staff": "الفريق",
+      "blogs": "المقالات",
+      "actions": "إجراءات سريعة",
+      "openPage": "فتح الصفحة",
+      "runAction": "تنفيذ الإجراء",
+      "noResults": "لا توجد نتائج لـ \"{query}\"",
+      "loading": "جاري البحث...",
+      "error": "تعذّر إكمال عملية البحث.",
+      "onCallDoctor": "طبيب المناوبة",
+      "unknownPatient": "مريض غير معروف"
+    },
+    "footer": {
+      "copy": "© {year} إدارة العيادة. جميع الحقوق محفوظة.",
+      "privacy": "الخصوصية",
+      "terms": "الشروط",
+      "docs": "التوثيق"
+    },
+    "dropdown": {
+      "quickActions": {
+        "newPatient": "مريض جديد",
+        "newDoctor": "طبيب جديد",
+        "newService": "خدمة جديدة",
+        "newInsurance": "شركة تأمين جديدة",
+        "newBlog": "مقال مدونة جديد"
+      },
+      "userMenu": {
+        "profile": "ملفك الشخصي",
+        "preferences": "التفضيلات",
+        "notifications": "الإشعارات",
+        "documentation": "التوثيق",
+        "support": "الدعم",
+        "signOut": "تسجيل الخروج"
+      }
+    }
+  },
+  "toasts": {
+    "common": {
+      "unexpectedError": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+      "actionCancelled": {
+        "title": "تم إلغاء الإجراء",
+        "description": "لم يتم إجراء أي تغييرات."
+      },
+      "saved": {
+        "title": "تم حفظ التغييرات",
+        "description": "تم تطبيق التعديلات بنجاح."
+      },
+      "comingSoon": {
+        "title": "قريباً",
+        "description": "الميزة {feature} ستكون متاحة في التحديث القادم."
+      }
+    },
+    "operations": {
+      "create": {
+        "success": "تم إنشاء {entity} بنجاح",
+        "error": "فشل في إنشاء {entity}",
+        "description": "تم إضافة {entity} إلى النظام.",
+        "errorDescription": "تعذّر إنشاء {entity}. يرجى المحاولة مرة أخرى."
+      },
+      "update": {
+        "success": "تم تحديث {entity} بنجاح",
+        "error": "فشل في تحديث {entity}",
+        "description": "تم حفظ التغييرات.",
+        "errorDescription": "تعذّر تحديث {entity}. يرجى المحاولة مرة أخرى."
+      },
+      "delete": {
+        "success": "تم حذف {entity} بنجاح",
+        "error": "فشل في حذف {entity}",
+        "description": "تم إزالة {entity} من النظام.",
+        "errorDescription": "تعذّر حذف {entity}. يرجى المحاولة مرة أخرى."
+      }
+    },
+    "batch": {
+      "success": "تم {operation} {count} {entity} بنجاح",
+      "error": "فشل في {operation} بعض {entity}",
+      "errorDescription": "فشلت {count} عملية. يرجى المحاولة مرة أخرى."
+    },
+    "entities": {
+      "patient": "المريض",
+      "doctor": "الطبيب",
+      "appointment": "الموعد",
+      "service": "الخدمة",
+      "staff": "عضو الفريق",
+      "blog": "مقال المدونة",
+      "material": "المادة",
+      "insuranceCompany": "شركة التأمين",
+      "treatmentPlan": "خطة العلاج",
+      "clinicSettings": "إعدادات العيادة",
+      "user": "المستخدم",
+      "permission": "الصلاحية",
+      "notification": "الإشعار",
+      "report": "التقرير",
+      "payment": "الدفع",
+      "transaction": "المعاملة"
+    }
+  },
+  "auth": {
+    "login": {
+      "branding": {
+        "welcome": "مرحباً بك في",
+        "title": "إدارة العيادة",
+        "headlineLine1": "أدر عيادتك",
+        "headlineLine2": "بثقة كاملة",
+        "description": "بسّط إدارة المواعيد وتابع المرضى وطوّر عملك من مكان واحد.",
+        "features": {
+          "scheduling": {
+            "title": "جدولة ذكية",
+            "description": "إدارة تلقائية للمواعيد"
+          },
+          "records": {
+            "title": "سجلات المرضى",
+            "description": "قاعدة بيانات موحدة للمرضى"
+          },
+          "analytics": {
+            "title": "التحليلات",
+            "description": "رؤى فورية حول الأداء"
+          }
+        },
+        "links": {
+          "privacy": "الخصوصية",
+          "terms": "الشروط",
+          "support": "الدعم"
+        }
+      },
+      "mobileHeader": {
+        "title": "إدارة العيادة",
+        "subtitle": "سجّل الدخول إلى حسابك"
+      },
+      "form": {
+        "title": "مرحباً بعودتك",
+        "subtitle": "أدخل بياناتك للوصول إلى لوحة التحكم",
+        "emailLabel": "البريد الإلكتروني",
+        "emailPlaceholder": "you{at}clinic.com",
+        "passwordLabel": "كلمة المرور",
+        "passwordPlaceholder": "أدخل كلمة المرور",
+        "twoFactorLabel": "رمز التحقق",
+        "twoFactorHint": "مطلوب فقط إذا كان حسابك مفعّلاً للتحقق بخطوتين.",
+        "twoFactorPlaceholder": "رمز من 6 أرقام"
+      },
+      "rememberMe": "تذكرني",
+      "forgotPassword": "هل نسيت كلمة المرور؟",
+      "submit": "تسجيل الدخول",
+      "needAccess": {
+        "text": "هل تحتاج إلى صلاحية الوصول؟",
+        "cta": "تواصل مع المسؤول لديك"
+      }
+    }
+  },
+  "dashboard": {
+    "hero": {
+      "title": "الإحاطة الصباحية",
+      "description": "ابق على اطلاع بجدول اليوم والمتابعات ومستهدف الإيرادات من لوحة واحدة.",
+      "actions": {
+        "schedule": "جدولة زيارة",
+        "analytics": "عرض التحليلات"
+      },
+      "loadFactor": {
+        "label": "نسبة الإشغال"
+      },
+      "metrics": {
+        "appointments": {
+          "label": "المواعيد",
+          "description": "جدول اليوم"
+        },
+        "pending": {
+          "label": "قيد التأكيد",
+          "description": "بحاجة إلى تأكيد"
+        },
+        "revenue": {
+          "label": "الإيراد (منذ بداية الشهر)",
+          "description": "منذ بداية الشهر"
+        },
+        "newPatients": {
+          "label": "مرضى جدد",
+          "description": "هذا الأسبوع"
+        },
+        "trend": {
+          "label": "مقارنة بالفترة السابقة"
+        }
+      }
+    },
+    "schedule": {
+      "title": "جدول اليوم",
+      "subtitle": "أقرب خمسة مواعيد على التقويم",
+      "viewAll": "عرض الكل",
+      "operatory": "غرفة {room}",
+      "next": "الزيارة التالية",
+      "appointmentsScheduled": "{count} موعد مجدول",
+      "status": {
+        "scheduled": "مجدول",
+        "confirmed": "مؤكد",
+        "completed": "مكتمل",
+        "cancelled": "ملغى"
+      }
+    },
+    "quickActions": {
+      "title": "إجراءات سريعة",
+      "subtitle": "ابدأ أكثر المهام استخداماً بسرعة",
+      "actions": {
+        "bookAppointment": {
+          "title": "حجز موعد",
+          "description": "احجز كرسيًا لمرضى جدد أو عائدين.",
+          "cta": "فتح لوحة الجدولة"
+        },
+        "registerPatient": {
+          "title": "تسجيل مريض",
+          "description": "اجمع بيانات الاستقبال للزيارات الأولى.",
+          "cta": "إنشاء ملف"
+        },
+        "sendReminders": {
+          "title": "إرسال تذكيرات",
+          "description": "تابع حالات التأكيد المعلّقة والمتخلفين.",
+          "cta": "فتح قائمة الانتظار"
+        },
+        "reviewCollections": {
+          "title": "مراجعة التحصيلات",
+          "description": "راقب الفواتير واستكمل المدفوعات المتأخرة.",
+          "cta": "فتح قسم الفوترة"
+        }
+      }
+    },
+    "team": {
+      "title": "فريق المناوبة",
+      "subtitle": "لقطة مباشرة للتوافر",
+      "nextSlot": "الموعد التالي"
+    },
+    "communication": {
+      "title": "نبض التواصل",
+      "subtitle": "أين يتفاعل المرضى اليوم",
+      "channels": {
+        "whatsapp": {
+          "label": "واتساب",
+          "description": "تم فتح التذكيرات خلال ساعتين",
+          "delta": "هذا الأسبوع"
+        },
+        "email": {
+          "label": "البريد الإلكتروني",
+          "description": "تأكيدات المرضى",
+          "delta": "هذا الأسبوع"
+        },
+        "sms": {
+          "label": "الرسائل القصيرة",
+          "description": "تأكيدات المتابعة",
+          "delta": "هذا الأسبوع"
+        }
+      }
+    },
+    "revenue": {
+      "title": "متابعة الإيرادات",
+      "subtitle": "راقب التحصيلات مقابل الهدف",
+      "monthToDate": "منذ بداية الشهر",
+      "monthDelta": "+12% مقارنة بالشهر الماضي",
+      "target": "الهدف",
+      "collectionsToday": "تحصيلات اليوم",
+      "collectionsDelta": "+3.4% مقارنة بيوم أمس",
+      "averageTicket": "متوسط الفاتورة",
+      "averageTicketSubtitle": "على 8 إجراءات"
+    },
+    "operations": {
+      "title": "قائمة العمليات",
+      "subtitle": "تابع المهام الخلفية",
+      "items": {
+        "invoices": {
+          "label": "فواتير معلّقة",
+          "caption": "بانتظار متابعة التحصيل اليوم"
+        },
+        "treatments": {
+          "label": "تحديثات العلاج",
+          "caption": "ملاحظات الكرسي بانتظار الاعتماد"
+        },
+        "labs": {
+          "label": "حالات المختبر قيد الإرسال",
+          "caption": "وصول مندوب المختبر عند 3:30 م"
+        }
+      }
+    },
+    "metrics": {
+      "todayAppointments": {
+        "label": "مواعيد اليوم",
+        "description": "مجدولة لليوم"
+      },
+      "pendingConfirmations": {
+        "label": "التأكيدات المعلقة",
+        "description": "في انتظار التأكيد"
+      },
+      "monthlyRevenue": {
+        "label": "الإيرادات الشهرية",
+        "description": "إيرادات هذا الشهر"
+      },
+      "newPatients": {
+        "label": "المرضى الجدد",
+        "description": "هذا الشهر"
+      }
+    },
+    "loadFactor": {
+      "subtitle": "استخدام سعة العيادة",
+      "currentLabel": "عامل التحميل الحالي"
+    },
+    "actions": {
+      "refresh": "تحديث"
+    }
+  },
+  "common": {
+    "filters": {
+      "allStatus": "جميع الحالات"
+    },
+    "actions": {
+      "refresh": "تحديث",
+      "export": "تصدير",
+      "cancel": "إلغاء",
+      "delete": "حذف",
+      "close": "إغلاق"
+    },
+    "titles": {
+      "doctorWithName": "د. {name}"
+    },
+    "errors": {
+      "unexpected": "حدث خطأ غير متوقع"
+    },
+    "loading": "جارٍ التحميل"
+  },
+  "appointments": {
+    "list": {
+      "title": "المواعيد",
+      "subtitle": "إدارة وتتبع جميع مواعيد العيادة",
+      "actions": {
+        "new": "موعد جديد",
+        "clearSearch": "إزالة البحث",
+        "approve": "اعتماد",
+        "decline": "رفض",
+        "viewDetails": "عرض التفاصيل",
+        "sync": "مزامنة البيانات"
+      },
+      "stats": {
+        "total": "الإجمالي",
+        "scheduled": "مجدول",
+        "confirmed": "مؤكد",
+        "completed": "مكتمل"
+      },
+      "filters": {
+        "search": "ابحث في المواعيد...",
+        "placeholder": "تصفية حسب الحالة",
+        "upcoming": "القادمة",
+        "all": "جميع المواعيد"
+      },
+      "badges": {
+        "doctorFilter": "تم تفعيل تصفية الأطباء",
+        "patientFilter": "تم تفعيل تصفية المرضى"
+      },
+      "pagination": "عرض الصفحة {page} من {total}",
+      "view": {
+        "label": "عرض",
+        "modes": {
+          "cards": "بطاقات",
+          "table": "جدول"
+        }
+      },
+      "empty": {
+        "title": "لا توجد مواعيد",
+        "default": "ابدأ بإنشاء موعدك الأول.",
+        "search": "لا توجد نتائج مطابقة لمعايير البحث."
+      },
+      "labels": {
+        "unknownPatient": "غير معروف",
+        "unassignedDoctor": "غير مخصص"
+      },
+      "table": {
+        "columns": {
+          "patient": "المريض",
+          "doctor": "الطبيب",
+          "schedule": "الوقت",
+          "mode": "نوع الزيارة",
+          "payment": "المدفوعات",
+          "attendance": "الحضور",
+          "status": "الحالة"
+        },
+        "summary": "{current} من {total} موعداً معروض"
+      },
+      "toasts": {
+        "loadError": {
+          "title": "تعذر تحميل المواعيد",
+          "description": "تحقق من الاتصال وحاول مرة أخرى."
+        },
+        "approveSuccess": "تم اعتماد الموعد",
+        "approveError": {
+          "title": "تعذر اعتماد الموعد"
+        },
+        "declineSuccess": "تم رفض الموعد",
+        "declineError": {
+          "title": "تعذر رفض الموعد"
+        },
+        "refresh": "تم تحديث المواعيد"
+      }
+    },
+    "status": {
+      "scheduled": "مجدول",
+      "confirmed": "مؤكد",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    },
+    "modes": {
+      "virtual": "استشارة افتراضية",
+      "clinic": "زيارة العيادة"
+    },
+    "payment": {
+      "paid": "مدفوع",
+      "unpaid": "غير مدفوع"
+    },
+    "attendance": {
+      "attended": "حضر",
+      "noShow": "لم يحضر",
+      "pending": "قيد الانتظار"
+    },
+    "create": {
+      "meta": {
+        "title": "موعد جديد – إدارة العيادة"
+      },
+      "breadcrumbs": {
+        "current": "موعد جديد"
+      },
+      "badge": "جدولة زيارة",
+      "hero": {
+        "title": "جدولة زيارة جديدة",
+        "description": "اختر المريض والطبيب والخدمة لإضافة الموعد إلى تقويم العيادة. يتم تحديث التوافر مباشرةً بناءً على اختياراتك."
+      },
+      "cards": {
+        "booking": {
+          "title": "تفاصيل الحجز",
+          "subtitle": "طابق المريض مع الخدمة والمقدّم المناسب قبل اختيار التاريخ."
+        },
+        "slots": {
+          "title": "الأوقات المتاحة",
+          "descriptionReady": "الأوقات معروضة بتوقيت العيادة المحلي.",
+          "descriptionPending": "اختر الخدمة والطبيب وطريقة الحجز والتاريخ لعرض الأوقات المتاحة.",
+          "errorTitle": "تعذر جلب التوافر",
+          "emptyTitle": "لا توجد أوقات متاحة",
+          "emptyDescription": "لا تتوفر أوقات لهذا اليوم. جرّب تاريخًا آخر أو غيّر الطبيب/الخدمة."
+        },
+        "notes": {
+          "title": "ملاحظات داخلية",
+          "subtitle": "ملاحظات اختيارية تظهر لموظفي العيادة والمقدّمين.",
+          "placeholder": "أضف سياقًا للزيارة أو تعليمات التحضير أو الطلبات الخاصة..."
+        }
+      },
+      "fields": {
+        "patient": "المريض",
+        "service": "الخدمة",
+        "doctor": "الطبيب",
+        "bookingMode": "طريقة الحجز",
+        "date": "تاريخ الموعد",
+        "slotDuration": "مدة الحجز"
+      },
+      "placeholders": {
+        "selectPatient": "اختر المريض",
+        "selectService": "اختر الخدمة",
+        "selectDoctor": "اختر الطبيب"
+      },
+      "hints": {
+        "clinicDate": "تاريخ العيادة المحلي",
+        "slotDuration": "يمكنك تعديل مدة الحجز إذا كانت مختلفة عن الإعداد الافتراضي للعيادة."
+      },
+      "messages": {
+        "noDoctorForService": "لا يوجد أطباء يقدمون الخدمة المحددة. اختر خدمة أخرى أولاً."
+      },
+      "actions": {
+        "openDatePicker": "اختيار التاريخ",
+        "submit": "إنشاء الموعد"
+      },
+      "toasts": {
+        "missing": {
+          "title": "معلومات ناقصة",
+          "description": "المريض والطبيب والخدمة وطريقة الحجز والتاريخ والوقت مطلوبة."
+        },
+        "createSuccess": "تم إنشاء الموعد",
+        "createError": {
+          "title": "تعذر إنشاء الموعد"
+        }
+      }
+    },
+    "detail": {
+      "meta": {
+        "title": "تفاصيل الموعد – إدارة العيادة"
+      },
+      "errors": {
+        "notFound": "الموعد غير موجود"
+      },
+      "badges": {
+        "status": "الحالة",
+        "bookingMode": "طريقة الحجز",
+        "treatmentVisit": "زيارة خطة العلاج رقم {number}"
+      },
+      "hero": {
+        "description": "راجع وحدّث تفاصيل الحجز لهذه الزيارة. أي تغييرات تُزامَن فورًا مع فريق الرعاية."
+      },
+      "pageTitle": {
+        "withNames": "{patient} مع {doctor}",
+        "default": "تفاصيل الموعد"
+      },
+      "actions": {
+        "back": "العودة إلى المواعيد",
+        "approve": "اعتماد",
+        "approveFull": "اعتماد الموعد",
+        "decline": "رفض",
+        "declineFull": "رفض الموعد",
+        "delete": "حذف",
+        "deleteFull": "حذف الموعد",
+        "save": "حفظ التغييرات"
+      },
+      "alerts": {
+        "loadTitle": "تعذر تحميل الموعد",
+        "loadDescription": "تعذر العثور على هذا الموعد. عُد إلى صفحة المواعيد وحاول مرة أخرى."
+      },
+      "cards": {
+        "assignment": {
+          "title": "تفاصيل التكليف",
+          "subtitle": "حدّث تفاصيل الحجز لهذه الزيارة وتأكّد من ربط المريض والخدمة والطبيب المناسبين."
+        },
+        "tracking": {
+          "title": "متابعة الزيارة",
+          "subtitlePlan": "قم بتسجيل الحضور لهذه الزيارة ضمن خطة العلاج.",
+          "subtitleStandard": "سجّل ما إذا كان المريض قد حضر وما إذا تم تحصيل الدفع لهذا الموعد.",
+          "planNotice": {
+            "title": "موعد ضمن خطة علاج",
+            "description": "سجّل الحضور هنا، ثم دوّن تفاصيل الزيارة كاملة (المدفوعات، المواد، الإجراءات) من صفحة خطة العلاج بعد ضبط الحالة إلى مكتملة."
+          }
+        },
+        "treatment": {
+          "title": "زيارة خطة العلاج",
+          "subtitle": "هذا الموعد جزء من خطة علاج جارية.",
+          "visitNumber": "الزيارة رقم {number}",
+          "linked": {
+            "title": "خطة العلاج المرتبطة",
+            "subtitle": "اطّلع على تفاصيل الخطة والتقدم الكامل",
+            "action": "عرض الخطة"
+          },
+          "guide": {
+            "title": "إجراءات سريعة",
+            "completeRecorded": "عيّن الحالة «حضر» ثم انتقل إلى خطة العلاج لتسجيل تفاصيل الزيارة.",
+            "alreadyRecorded": "تم تسجيل تفاصيل الزيارة لهذا الموعد.",
+            "completeFirst": "أكمل هذا الموعد قبل تسجيل تفاصيل الزيارة.",
+            "paymentNote": "تتم متابعة المدفوعات والمواد داخل خطة العلاج."
+          }
+        },
+        "notes": {
+          "title": "ملاحظات داخلية",
+          "subtitle": "دوّن تعليمات التحضير أو السياق لفريق العيادة والمقدّمين."
+        },
+        "quickInfo": {
+          "title": "معلومات سريعة"
+        },
+        "quickActions": {
+          "title": "إجراءات سريعة"
+        }
+      },
+      "fields": {
+        "patient": "المريض",
+        "service": "الخدمة",
+        "doctor": "الطبيب",
+        "bookingMode": "طريقة الحجز",
+        "scheduledTime": "وقت الموعد",
+        "basicPaymentFlag": "علامة الدفع الأساسية",
+        "paymentCollected": "تم تحصيل الدفع",
+        "paymentAmount": "مبلغ الدفع",
+        "paymentCurrency": "العملة",
+        "paymentMethod": "طريقة الدفع",
+        "paymentDate": "تاريخ الدفع",
+        "paymentReference": "مرجع المعاملة",
+        "paymentNotes": "ملاحظات الدفع",
+        "attendance": "الحضور",
+        "slotDuration": "مدة الحجز"
+      },
+      "placeholders": {
+        "selectPatient": "اختر المريض",
+        "selectService": "اختر الخدمة",
+        "selectDoctor": "اختر الطبيب",
+        "notes": "ملاحظات اختيارية تظهر لموظفي العيادة..."
+      },
+      "messages": {
+        "noDoctorForService": "لا يوجد أطباء يقدمون هذه الخدمة. اختر خدمة أخرى أولاً."
+      },
+      "hints": {
+        "localTime": "توقيت العيادة المحلي",
+        "paymentHandledInPlan": "يتم تتبع تفاصيل الدفع داخل خطة العلاج",
+        "slotDuration": "اضبط مدة هذا الموعد في جدول الطبيب."
+      },
+      "labels": {
+        "markedPaid": "تم تعليمها كمدفوعة",
+        "notPaid": "غير مدفوعة بعد",
+        "patient": "المريض",
+        "doctor": "الطبيب",
+        "service": "الخدمة",
+        "scheduledTime": "وقت الموعد",
+        "status": "الحالة",
+        "payment": "الدفع",
+        "paymentMethod": "طريقة الدفع",
+        "paymentDate": "تاريخ الدفع",
+        "paymentReference": "المرجع",
+        "attendance": "الحضور",
+        "treatmentPlan": "خطة العلاج",
+        "treatmentPlanId": "جزء من خطة العلاج رقم {id}",
+        "notAssigned": "غير مخصص",
+        "tbdDoctor": "غير محدد",
+        "notScheduled": "غير مجدول",
+        "invalidDate": "تاريخ غير صالح",
+        "guestPatient": "حجز ضيف"
+      },
+      "modal": {
+        "title": "حذف الموعد",
+        "subtitle": "لا يمكن التراجع عن هذا الإجراء",
+        "body": "هل أنت متأكد أنك تريد حذف هذا الموعد؟"
+      },
+      "toasts": {
+        "updateSuccess": "تم تحديث الموعد",
+        "updateError": {
+          "title": "تعذر تحديث الموعد"
+        },
+        "approveSuccess": "تم اعتماد الموعد",
+        "approveError": {
+          "title": "تعذر اعتماد الموعد"
+        },
+        "declineSuccess": "تم رفض الموعد",
+        "declineError": {
+          "title": "تعذر رفض الموعد"
+        },
+        "deleteSuccess": "تم حذف الموعد",
+        "deleteError": {
+          "title": "تعذر حذف الموعد"
+        },
+        "validationError": {
+          "title": "وقت الموعد غير صحيح",
+          "invalidTime": "يرجى إدخال وقت موعد صحيح بالتنسيق الصحيح.",
+          "invalidPaymentDate": "يرجى إدخال تاريخ دفع صحيح بالتنسيق الصحيح."
+        }
+      },
+      "timeErrors": {
+        "invalidScheduledTime": "تنسيق الوقت المجدول غير صحيح. يرجى استخدام منتقي التاريخ لاختيار وقت صحيح.",
+        "invalidPaymentDate": "تنسيق تاريخ الدفع غير صحيح. يرجى استخدام منتقي التاريخ لاختيار تاريخ صحيح.",
+        "timeOutOfRange": "الوقت المحدد خارج النطاق المقبول. يرجى اختيار وقت خلال العامين القادمين.",
+        "invalidTimeFormat": "تنسيق الوقت غير معروف. يرجى التأكد من استخدام تنسيق التاريخ والوقت الصحيح."
+      }
+    }
+  },
+  "calendar": {
+    "title": "تقويم المواعيد",
+    "subtitle": "نظرة عامة مرئية للمواعيد المجدولة",
+    "navigation": {
+      "today": "اليوم",
+      "previousMonth": "الشهر السابق",
+      "nextMonth": "الشهر التالي",
+      "previousWeek": "الأسبوع السابق",
+      "nextWeek": "الأسبوع التالي",
+      "previousDay": "اليوم السابق",
+      "nextDay": "اليوم التالي"
+    },
+    "viewModes": {
+      "month": "شهر",
+      "week": "أسبوع",
+      "day": "يوم",
+      "switchTo": "التبديل إلى عرض {mode}"
+    },
+    "event": {
+      "time": "الوقت",
+      "patient": "المريض",
+      "service": "الخدمة",
+      "status": "الحالة"
+    },
+    "moreEvents": "المزيد",
+    "dayModal": {
+      "appointmentsCount": "{count} مواعيد",
+      "newAppointment": "موعد جديد"
+    },
+    "weekView": {
+      "allDay": "طوال اليوم",
+      "timeSlot": "{time}",
+      "noAppointments": "لا توجد مواعيد"
+    },
+    "dayView": {
+      "hourSlot": "{hour}:00",
+      "noAppointments": "لا توجد مواعيد مجدولة",
+      "clickToSchedule": "انقر لجدولة موعد"
+    },
+    "filter": {
+      "doctor": {
+        "label": "تصفية حسب الطبيب",
+        "placeholder": "جميع الأطباء",
+        "all": "جميع الأطباء",
+        "clear": "مسح التصفية",
+        "noResults": "لم يتم العثور على أطباء لـ \"{query}\""
+      },
+      "active": "مُصفى"
+    }
+  },
+  "navigation": {
+    "dashboard": "لوحة التحكم",
+    "appointments": "المواعيد",
+    "calendar": "التقويم",
+    "doctors": "الأطباء",
+    "patients": "المرضى",
+    "treatmentPlans": "خطط العلاج",
+    "materials": "المواد",
+    "services": "الخدمات",
+    "insuranceCompanies": "شركات التأمين",
+    "blogs": "المدونة",
+    "reports": "التقارير",
+    "staff": "الموظفين",
+    "clinicSettings": "إعدادات العيادة",
+    "settings": "الإعدادات"
+  },
+  "doctors": {
+    "list": {
+      "meta": {
+        "title": "الأطباء – إدارة العيادة"
+      },
+      "overview": {
+        "badge": "الفريق الطبي",
+        "title": "الأطباء",
+        "subtitle": "إدارة فريقك الطبي وقدراتهم في تقديم الخدمات"
+      },
+      "actions": {
+        "add": "إضافة طبيب",
+        "refresh": "تحديث",
+        "manage": "إدارة",
+        "edit": "تعديل",
+        "editProfile": "تعديل الملف الشخصي",
+        "viewSchedule": "عرض الجدول",
+        "remove": "إزالة",
+        "delete": "حذف"
+      },
+      "filters": {
+        "title": "البحث والفلاتر",
+        "subtitle": "اعثر على الأطباء والمتخصصين",
+        "searchLabel": "ابحث عن الأطباء",
+        "viewMode": "وضع العرض",
+        "activeCount": "{count} فلتر نشط | {count} فلاتر نشطة",
+        "searchPlaceholder": "ابحث بالاسم أو التخصص أو الخدمة...",
+        "cardsView": "بطاقات",
+        "tableView": "جدول",
+        "specialty": "التخصص",
+        "language": "اللغة",
+        "matchCount": "{count} طبيب مطابق | {count} أطباء مطابقين",
+        "clear": "إزالة الفلاتر"
+      },
+      "metrics": {
+        "totalDoctors": {
+          "label": "إجمالي الأطباء",
+          "caption": "نشط في النظام"
+        },
+        "specialties": {
+          "label": "التخصصات",
+          "caption": "مجالات فريدة"
+        },
+        "services": {
+          "label": "الخدمات",
+          "caption": "العلاجات المقدمة"
+        },
+        "languages": {
+          "label": "اللغات",
+          "caption": "اللغات المتاحة"
+        }
+      },
+      "directory": {
+        "title": "دليل الأطباء",
+        "subtitle": "جميع مقدمي الرعاية الصحية المسجلين",
+        "count": "{count} طبيب | {count} أطباء"
+      },
+      "labels": {
+        "specialtyNotSet": "التخصص غير محدد",
+        "moreServices": "+{count} إضافية",
+        "languagesPending": "غير محددة",
+        "addedOn": "أُضيف {date}",
+        "addedTooltip": "تاريخ الإضافة: {date}",
+        "serviceCount": "{count} خدمة | {count} خدمات",
+        "noEmail": "لا يوجد بريد إلكتروني"
+      },
+      "empty": {
+        "title": "لم يتم العثور على أطباء",
+        "subtitle": "جرّب تعديل الفلاتر أو إضافة طبيب جديد",
+        "searchHint": "جرّب تعديل البحث أو الفلاتر",
+        "reset": "إعادة تعيين الفلاتر",
+        "create": "إضافة طبيب"
+      },
+      "table": {
+        "columns": {
+          "doctor": "الطبيب",
+          "specialty": "التخصص",
+          "services": "الخدمات",
+          "languages": "اللغات",
+          "created": "تاريخ الإضافة",
+          "actions": ""
+        }
+      },
+      "delete": {
+        "title": "إزالة طبيب",
+        "subtitle": "هذا الإجراء دائم",
+        "prompt": "هل أنت متأكد من إزالة {name} من النظام؟",
+        "impact": "سيؤدي هذا إلى إلغاء تعيين الطبيب من جميع المواعيد وخطط العلاج المستقبلية",
+        "confirmAction": "إزالة الطبيب"
+      },
+      "toasts": {
+        "deleteSuccess": "تم إزالة الطبيب بنجاح",
+        "deleteError": {
+          "title": "تعذر إزالة الطبيب"
+        }
+      }
+    },
+    "common": {
+      "languages": {
+        "english": "الإنجليزية",
+        "arabic": "العربية",
+        "russian": "الروسية"
+      }
+    },
+    "create": {
+      "meta": {
+        "title": "إضافة طبيب جديد – إدارة العيادة"
+      },
+      "header": {
+        "title": "إضافة طبيب جديد",
+        "subtitle": "إنشاء ملف طبيب جديد"
+      },
+      "actions": {
+        "back": "العودة إلى الأطباء",
+        "save": "حفظ الطبيب"
+      },
+      "form": {
+        "title": "معلومات الطبيب",
+        "subtitle": "أدخل التفاصيل المهنية ومعلومات الاتصال للطبيب",
+        "fields": {
+          "fullNameEn": "الاسم الكامل (بالإنجليزية)",
+          "fullNameAr": "الاسم الكامل (بالعربية)",
+          "email": "البريد الإلكتروني",
+          "phone": "رقم الهاتف",
+          "specialtyEn": "التخصص (بالإنجليزية)",
+          "specialtyAr": "التخصص (بالعربية)",
+          "profileImage": "صورة الملف الشخصي",
+          "bioEn": "السيرة الذاتية (بالإنجليزية)",
+          "bioAr": "السيرة الذاتية (بالعربية)",
+          "languages": "اللغات المتحدثة",
+          "services": "الخدمات المقدمة",
+          "displayOrder": "ترتيب العرض"
+        },
+        "placeholders": {
+          "fullNameEn": "Dr. Sarah Hassan",
+          "fullNameAr": "د. سارة حسن",
+          "email": "doctor\\u0040example.com",
+          "phone": "+971 50 000 0000",
+          "specialtyEn": "Cosmetic Dentistry",
+          "specialtyAr": "طب الأسنان التجميلي",
+          "imageUrl": "https://example.com/doctor-photo.jpg",
+          "bioEn": "شارك المؤهلات والخبرة وما يمكن للمرضى توقعه أثناء الاستشارات...",
+          "bioAr": "شارك المؤهلات والخبرة وما يمكن للمرضى توقعه أثناء الاستشارات...",
+          "displayOrder": "0"
+        },
+        "hints": {
+          "profileImage": "ارفع أو أدخل رابط صورة الملف الشخصي للطبيب",
+          "bioEn": "مقدمة موجزة تسلط الضوء على الخبرة ونهج الرعاية",
+          "bioAr": "مقدمة موجزة تسلط الضوء على الخبرة ونهج الرعاية",
+          "languages": "اختر جميع اللغات التي يستطيع الطبيب التواصل بها",
+          "services": "اختر جميع الخدمات التي يقدمها هذا الطبيب",
+          "displayOrder": "الأرقام الأقل تظهر أولاً في قائمة الأطباء"
+        },
+        "imageUpload": {
+          "altText": "معاينة صورة الملف الشخصي",
+          "title": "معاينة صورة الملف الشخصي",
+          "description": "ستظهر صورة الطبيب الشخصية هكذا"
+        },
+        "emptyServices": {
+          "title": "لا توجد خدمات متاحة",
+          "description": "يرجى إضافة خدمات إلى النظام أولاً"
+        }
+      },
+      "validation": {
+        "fullNameRequired": "الاسم الكامل (بالإنجليزية) مطلوب",
+        "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
+        "invalidDisplayOrder": "ترتيب العرض يجب أن يكون رقماً موجباً"
+      },
+      "toasts": {
+        "success": "تم إنشاء الطبيب",
+        "successDescription": "تم إنشاء الطبيب بنجاح",
+        "error": "خطأ",
+        "errorDescription": "فشل في إنشاء الطبيب"
+      }
+    },
+    "edit": {
+      "meta": {
+        "title": "تعديل الطبيب – إدارة العيادة"
+      },
+      "header": {
+        "title": "تعديل الطبيب",
+        "subtitle": "تحديث ملف الطبيب",
+        "subtitleWithName": "{name}"
+      },
+      "actions": {
+        "back": "العودة إلى الأطباء",
+        "update": "تحديث الطبيب"
+      },
+      "form": {
+        "title": "معلومات الطبيب",
+        "subtitle": "تحديث التفاصيل المهنية ومعلومات الاتصال للطبيب",
+        "fields": {
+          "fullNameEn": "الاسم الكامل (بالإنجليزية)",
+          "fullNameAr": "الاسم الكامل (بالعربية)",
+          "email": "البريد الإلكتروني",
+          "phone": "رقم الهاتف",
+          "specialtyEn": "التخصص (بالإنجليزية)",
+          "specialtyAr": "التخصص (بالعربية)",
+          "profileImage": "صورة الملف الشخصي",
+          "bioEn": "السيرة الذاتية (بالإنجليزية)",
+          "bioAr": "السيرة الذاتية (بالعربية)",
+          "languages": "اللغات المتحدثة",
+          "services": "الخدمات المقدمة",
+          "displayOrder": "ترتيب العرض",
+          "visibility": "حالة الظهور",
+          "activeProfile": "ملف الطبيب النشط"
+        },
+        "placeholders": {
+          "fullNameEn": "Dr. Sarah Hassan",
+          "fullNameAr": "د. سارة حسن",
+          "email": "doctor\\u0040example.com",
+          "phone": "+971 50 000 0000",
+          "specialtyEn": "Cosmetic Dentistry",
+          "specialtyAr": "طب الأسنان التجميلي",
+          "imageUrl": "https://example.com/doctor-photo.jpg",
+          "bioEn": "شارك المؤهلات والخبرة وما يمكن للمرضى توقعه أثناء الاستشارات...",
+          "bioAr": "شارك المؤهلات والخبرة وما يمكن للمرضى توقعه أثناء الاستشارات...",
+          "displayOrder": "0"
+        },
+        "hints": {
+          "profileImage": "ارفع أو أدخل رابط صورة الملف الشخصي للطبيب",
+          "bioEn": "مقدمة موجزة تسلط الضوء على الخبرة ونهج الرعاية",
+          "bioAr": "مقدمة موجزة تسلط الضوء على الخبرة ونهج الرعاية",
+          "languages": "اختر جميع اللغات التي يستطيع الطبيب التواصل بها",
+          "services": "اختر جميع الخدمات التي يقدمها هذا الطبيب",
+          "displayOrder": "الأرقام الأقل تظهر أولاً في قائمة الأطباء",
+          "visibility": "تحكم في ما إذا كان هذا الطبيب يظهر على الموقع",
+          "activeProfileDescription": "عند التفعيل، سيكون هذا الطبيب مرئياً على الموقع"
+        },
+        "imageUpload": {
+          "altText": "معاينة صورة الملف الشخصي",
+          "title": "معاينة صورة الملف الشخصي",
+          "description": "ستظهر صورة الطبيب الشخصية هكذا"
+        },
+        "emptyServices": {
+          "title": "لا توجد خدمات متاحة",
+          "description": "يرجى إضافة خدمات إلى النظام أولاً"
+        }
+      },
+      "loading": {
+        "title": "جارٍ التحميل..."
+      },
+      "notFound": {
+        "title": "الطبيب غير موجود",
+        "description": "الطبيب الذي تبحث عنه غير موجود.",
+        "action": "العودة إلى الأطباء"
+      },
+      "treatmentPlans": {
+        "title": "خطط العلاج النشطة",
+        "subtitle": "الخطط التي يقودها هذا الطبيب حالياً",
+        "count": "{count} خطة",
+        "planWithPatient": "المريض: {patient}",
+        "created": "تم الإنشاء في {date}",
+        "visitsProgress": "{completed} من {total} زيارات مكتملة",
+        "balance": "الرصيد المتبقي {amount}",
+        "empty": {
+          "title": "لا توجد خطط علاج مرتبطة",
+          "subtitle": "عند تعيين هذا الطبيب في خطة، ستظهر هنا."
+        },
+        "error": {
+          "title": "تعذر تحميل خطط العلاج",
+          "subtitle": "يرجى المحاولة مرة أخرى أو تحديث الصفحة."
+        },
+        "actions": {
+          "view": "عرض الخطة",
+          "retry": "إعادة المحاولة"
+        },
+        "pagination": {
+          "summary": "عرض {start}-{end} من {total} خطة",
+          "previous": "السابق",
+          "next": "التالي"
+        }
+      },
+      "validation": {
+        "fullNameRequired": "الاسم الكامل (بالإنجليزية) مطلوب",
+        "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
+        "invalidPhone": "يرجى إدخال رقم هاتف صالح",
+        "invalidUrl": "يرجى إدخال رابط صالح",
+        "invalidDisplayOrder": "ترتيب العرض يجب أن يكون رقماً موجباً"
+      },
+    "toasts": {
+      "updateSuccess": "تم تحديث الطبيب",
+      "updateSuccessDescription": "تم تحديث ملف الطبيب بنجاح",
+      "updateError": "فشل التحديث",
+      "updateErrorDescription": "فشل في تحديث ملف الطبيب. يرجى المحاولة مرة أخرى.",
+      "notFound": "غير موجود",
+      "notFoundDescription": "الطبيب غير موجود",
+      "availabilityCreated": "تمت إضافة التوفر",
+      "availabilityCreatedDescription": "تم حفظ فترة التوفر الجديدة لهذا الطبيب.",
+      "availabilityDeleted": "تم حذف التوفر",
+      "availabilityDeletedDescription": "تم حذف فترة التوفر بنجاح.",
+      "availabilityError": "خطأ في التوفر"
+    },
+    "availability": {
+      "title": "التوفر والجدول",
+      "subtitle": "إدارة أوقات العمل المتكررة أو لمرة واحدة",
+      "count": "{count} فترات متاحة",
+      "form": {
+        "title": "إضافة فترة توفر",
+        "type": {
+          "label": "نوع التوفر",
+          "hint": "اختر بين توفر أسبوعي متكرر أو فترة لمرة واحدة."
+        },
+        "typeOptions": {
+          "weekly": "أسبوعي (متكرر)",
+          "oneTime": "مرة واحدة"
+        },
+        "dayOfWeek": {
+          "label": "اليوم",
+          "hint": "اختر اليوم الذي ينطبق عليه هذا التوفر."
+        },
+        "date": {
+          "label": "التاريخ",
+          "hint": "اختر التاريخ لهذه الفترة لمرة واحدة."
+        },
+        "startTime": {
+          "label": "وقت البداية",
+          "hint": "وقت بدء استقبال المرضى."
+        },
+        "endTime": {
+          "label": "وقت الانتهاء",
+          "hint": "وقت انتهاء التوفر."
+        },
+        "submit": "إضافة التوفر"
+      },
+      "list": {
+        "title": "فترات التوفر الحالية",
+        "retry": "إعادة تحميل التوفر",
+        "error": "تعذر تحميل التوفر. يرجى المحاولة مرة أخرى.",
+        "empty": {
+          "title": "لا توجد فترات توفر بعد",
+          "description": "أضف توفرًا متكررًا أو لمرة واحدة حتى يتمكن المرضى من حجز هذا الطبيب."
+        },
+        "remove": "إزالة",
+        "updatedAt": "تم التحديث في {date}"
+      },
+      "labels": {
+        "weekly": "أسبوعي",
+        "oneTime": "مرة واحدة"
+      },
+      "validation": {
+        "required": "يرجى إكمال جميع الحقول المطلوبة قبل الحفظ.",
+        "timeOrder": "يجب أن يكون وقت الانتهاء بعد وقت البداية.",
+        "genericError": "تعذر حفظ التوفر. يرجى المحاولة مرة أخرى."
+      }
+    }
+  }
+  },
+  "patients": {
+    "common": {
+      "unexpectedError": "حدث خطأ غير متوقع",
+      "notAssigned": "غير محدد",
+      "notAvailable": "—",
+      "loading": "جاري التحميل…"
+    },
+    "list": {
+      "meta": {
+        "title": "المرضى – إدارة العيادة"
+      },
+      "overview": {
+        "title": "مركز إدارة المرضى",
+        "subtitle": "حافظ على دقة بيانات المرضى لضمان تواصل سلس"
+      },
+      "actions": {
+        "refresh": "مزامنة السجل",
+        "add": "تسجيل مريض",
+        "view": "عرض",
+        "delete": "حذف",
+        "viewDetails": "عرض التفاصيل"
+      },
+      "metrics": {
+        "total": {
+          "label": "إجمالي المرضى",
+          "caption": "ضمن قاعدة بيانات العيادة"
+        },
+        "newThisMonth": {
+          "label": "الجدد هذا الشهر",
+          "caption": "منذ اليوم الأول"
+        },
+        "reachableEmail": {
+          "label": "قابلون للوصول عبر البريد",
+          "caption": "على هذه الصفحة"
+        },
+        "completion": {
+          "label": "اكتمال الملفات",
+          "caption": "{count} ملف مكتمل"
+        }
+      },
+      "filters": {
+        "title": "البحث والفلاتر",
+        "subtitle": "اعثر على المرضى وأدر ملفاتهم",
+        "searchLabel": "ابحث عن المرضى",
+        "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني أو الهاتف أو رقم المريض",
+        "viewMode": "وضع العرض",
+        "cardsView": "بطاقات",
+        "tableView": "جدول",
+        "sortLabel": "الترتيب",
+        "quickLabel": "فلاتر سريعة",
+        "clear": "إعادة تعيين الفلاتر",
+        "matchCount": {
+          "zero": "لا توجد ملفات مطابقة",
+          "one": "ملف واحد مطابق",
+          "two": "ملفان متطابقان",
+          "few": "{count} ملفات مطابقة",
+          "many": "{count} ملفًا مطابقًا",
+          "other": "{count} ملف مطابق"
+        },
+        "quick": {
+          "all": "جميع المرضى",
+          "withEmail": "يمتلك بريدًا",
+          "missingEmail": "بلا بريد",
+          "missingPhone": "بلا هاتف"
+        },
+        "sort": {
+          "newest": "الأحدث",
+          "oldest": "الأقدم",
+          "name": "الاسم"
+        }
+      },
+      "directory": {
+        "title": "دليل المرضى",
+        "count": "تم العثور على {count} مريض"
+      },
+      "labels": {
+        "unnamed": "مريض بدون اسم",
+        "patientId": "المعرف: {id}",
+        "patientIdUnassigned": "المعرف: غير محدد",
+        "emailMissing": "غير متوفر",
+        "phoneMissing": "غير متوفر",
+        "birthdayMissing": "تاريخ الميلاد غير متوفر",
+        "age": "({count} سنة)",
+        "addedOn": "تمت الإضافة {date}",
+        "addedTooltip": "تاريخ الإضافة: {date}",
+        "notAvailable": "—",
+        "emailTooltip": "انقر لإرسال بريد إلكتروني",
+        "phoneTooltip": "انقر للاتصال"
+      },
+      "status": {
+        "completeBadge": "ملف مكتمل",
+        "completeShort": "مكتمل",
+        "fields": {
+          "email": "البريد الإلكتروني",
+          "phone": "رقم الهاتف"
+        },
+        "missing": "ينقصه {fields}"
+      },
+      "table": {
+        "columns": {
+          "patient": "المريض",
+          "contact": "التواصل",
+          "profile": "الملف",
+          "age": "العمر",
+          "actions": ""
+        },
+        "ageValue": "{count}"
+      },
+      "empty": {
+        "title": "لا توجد نتائج مطابقة للفلاتر الحالية",
+        "subtitle": "ابدأ بإضافة أول مريض لديك",
+        "searchHint": "جرّب تعديل البحث أو الفلاتر",
+        "reset": "إعادة تعيين الفلاتر"
+      },
+      "pagination": {
+        "summary": "يظهر {start} إلى {end} من أصل {total} مريض"
+      },
+      "delete": {
+        "title": "حذف مريض",
+        "subtitle": "هذا الإجراء غير قابل للاسترجاع",
+        "prompt": "هل أنت متأكد من حذف {name}؟ ستتم إزالة بيانات التواصل والسجل من لوحة التحكم.",
+        "confirmAction": "حذف المريض"
+      },
+      "toasts": {
+        "refreshError": {
+          "title": "تعذرت مزامنة المرضى"
+        },
+        "loadError": {
+          "title": "تعذر تحميل قائمة المرضى"
+        },
+        "deleteSuccess": "تم حذف المريض",
+        "deleteError": {
+          "title": "تعذر حذف المريض"
+        }
+      }
+    },
+    "details": {
+      "meta": {
+        "pageTitle": "تفاصيل المريض",
+        "headTitle": "تفاصيل المريض – إدارة العيادة"
+      },
+      "header": {
+        "id": "المعرف: {id}",
+        "joined": "انضم في {date}",
+        "age": "{count} سنة"
+      },
+      "actions": {
+        "back": "العودة إلى المرضى",
+        "save": "حفظ التغييرات"
+      },
+      "error": {
+        "title": "المريض غير موجود",
+        "subtitle": "لم نستطع العثور على هذا المريض. يرجى العودة إلى الدليل والمحاولة مرة أخرى.",
+        "notFound": "المريض غير موجود"
+      },
+      "form": {
+        "title": "معلومات المريض",
+        "subtitle": "حدّث بيانات المريض الشخصية وبيانات التواصل",
+        "fields": {
+          "firstName": "الاسم الأول",
+          "lastName": "اسم العائلة",
+          "email": "البريد الإلكتروني",
+          "phone": "رقم الهاتف",
+          "dateOfBirth": "تاريخ الميلاد",
+          "profileImage": "صورة الملف الشخصي"
+        },
+        "placeholders": {
+          "firstName": "أدخل الاسم الأول",
+          "lastName": "أدخل اسم العائلة",
+          "email": "patient\\u0040example.com",
+          "phone": "+971 50 000 0000",
+          "profileImage": "https://example.com/profile.jpg"
+        },
+        "hints": {
+          "dateOfBirth": "اختياري – يساعد على تخصيص تذكيرات المرضى",
+          "profileImage": "قم بتحميل أو إدخال رابط لصورة المريض الشخصية"
+        },
+        "descriptions": {
+          "email": "البريد الإلكتروني ضروري لإرسال التذكيرات."
+        },
+        "image": {
+          "alt": "صورة المريض الشخصية",
+          "title": "معاينة صورة الملف الشخصي",
+          "description": "ستظهر صورة المريض الشخصية بهذا الشكل"
+        }
+      },
+      "sidebar": {
+        "patientId": "معرف المريض: {id}",
+        "contact": {
+          "title": "معلومات التواصل",
+          "emailMissing": "البريد الإلكتروني غير متوفر",
+          "phoneMissing": "رقم الهاتف غير متوفر",
+          "birthdayMissing": "تاريخ الميلاد غير متوفر",
+          "age": "{count} سنة",
+          "joined": "انضم في {date}",
+          "emailTooltip": "انقر لإرسال بريد إلكتروني",
+          "phoneTooltip": "انقر للاتصال"
+        }
+      },
+      "treatmentPlans": {
+        "title": "خطط العلاج",
+        "subtitle": "الخطط المرتبطة بهذا المريض",
+        "count": "{count} خطة",
+        "planWithDoctor": "مع الدكتور {doctor}",
+        "created": "تم الإنشاء في {date}",
+        "visitsProgress": "{completed} من {total} زيارات مكتملة",
+        "balance": {
+          "label": "الرصيد المتبقي",
+          "amount": "الرصيد المتبقي {amount}"
+        },
+        "empty": {
+          "title": "لا توجد خطط علاجية",
+          "subtitle": "أنشئ خطة علاجية لبدء تتبع الزيارات والمدفوعات."
+        },
+        "error": {
+          "title": "تعذر تحميل خطط العلاج",
+          "subtitle": "يرجى المحاولة مرة أخرى أو تحديث الصفحة."
+        },
+        "actions": {
+          "view": "عرض الخطة",
+          "create": "إنشاء خطة علاج",
+          "retry": "إعادة المحاولة"
+        }
+      },
+      "balance": {
+        "title": "رصيد المريض",
+        "subtitle": "المدفوعات المستحقة عبر جميع خطط العلاج",
+        "outstanding": "مستحق",
+        "descriptions": {
+          "noBalance": "جميع المدفوعات محدثة",
+          "singlePlan": "من خطة علاج واحدة",
+          "multiplePlans": "عبر {count} خطط علاج"
+        },
+        "breakdown": {
+          "title": "تفصيل الرصيد",
+          "more": "+{count} خطط أخرى"
+        },
+        "actions": {
+          "viewBreakdown": "عرض التفصيل",
+          "recordPayment": "تسجيل دفعة"
+        },
+        "modal": {
+          "title": "تفصيل الرصيد",
+          "subtitle": "إجمالي المستحق: {total} عبر {count} خطط",
+          "planWithDoctor": "مع الدكتور {doctor}",
+          "planId": "خطة رقم {id}",
+          "itemLabel": "الخطة {index}: {treatment} - {amount} مستحق",
+          "summary": {
+            "title": "إجمالي الرصيد المستحق",
+            "description": "عبر {count} خطط علاج نشطة"
+          },
+          "noBalance": {
+            "title": "تم السداد بالكامل!",
+            "description": "هذا المريض ليس لديه أرصدة مستحقة."
+          },
+          "actions": {
+            "viewPlan": "عرض الخطة",
+            "viewPlanLabel": "عرض تفاصيل خطة علاج {treatment}",
+            "recordPayment": "تسجيل دفعة",
+            "recordPlanPaymentLabel": "تسجيل دفعة لـ {treatment}"
+          },
+          "footer": {
+            "lastUpdated": "يتم تحديث الأرصدة في الوقت الفعلي"
+          }
+        },
+        "payment": {
+          "title": "تسجيل دفعة",
+          "subtitle": "تسجيل دفعة لهذا المريض",
+          "subtitlePlan": "تسجيل دفعة لـ {plan}",
+          "selectPlan": "اختر خطة العلاج",
+          "planWithDoctor": "مع الدكتور {doctor}",
+          "outstandingBalance": "الرصيد المستحق",
+          "amount": "مبلغ الدفعة",
+          "amountPlaceholder": "أدخل مبلغ الدفعة",
+          "method": "طريقة الدفع",
+          "methodPlaceholder": "اختر طريقة الدفع",
+          "notes": "ملاحظات الدفعة",
+          "notesPlaceholder": "ملاحظات اختيارية حول هذه الدفعة",
+          "backToPlanSelection": "العودة لاختيار الخطة",
+          "recordPayment": "تسجيل الدفعة",
+          "methods": {
+            "cash": "نقداً",
+            "card": "بطاقة ائتمان/خصم",
+            "bankTransfer": "تحويل بنكي",
+            "check": "شيك",
+            "other": "أخرى"
+          },
+          "success": {
+            "title": "تم تسجيل الدفعة",
+            "description": "تم تسجيل دفعة بمبلغ {amount} لـ {plan}"
+          },
+          "error": {
+            "title": "فشل في تسجيل الدفعة",
+            "description": "تعذر تسجيل الدفعة. يرجى المحاولة مرة أخرى."
+          }
+        },
+        "categories": {
+          "none": "مدفوع بالكامل",
+          "low": "رصيد منخفض",
+          "medium": "رصيد متوسط",
+          "high": "رصيد مرتفع"
+        },
+        "error": {
+          "title": "تعذر تحميل الرصيد",
+          "description": "يرجى المحاولة مرة أخرى",
+          "retry": "إعادة المحاولة"
+        }
+      },
+      "quickActions": {
+        "title": "إجراءات سريعة",
+        "createPlan": "خطة علاج جديدة",
+        "sendReminder": "إرسال تذكير",
+        "viewHistory": "عرض السجل"
+      },
+      "validation": {
+        "firstNameRequired": "الاسم الأول مطلوب",
+        "lastNameRequired": "اسم العائلة مطلوب",
+        "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
+        "invalidUrl": "يرجى إدخال رابط صالح"
+      },
+      "toasts": {
+        "updateSuccess": {
+          "title": "تم تحديث المريض",
+          "description": "تم تحديث ملف المريض بنجاح"
+        },
+        "updateError": {
+          "title": "فشل التحديث",
+          "description": "تعذر تحديث ملف المريض. يرجى المحاولة مرة أخرى."
+        },
+        "notFound": {
+          "title": "المريض غير موجود",
+          "description": "المريض الذي تحاول تحديثه غير موجود."
+        }
+      }
+    },
+    "create": {
+      "meta": {
+        "title": "إضافة مريض جديد",
+        "headTitle": "إضافة مريض جديد – إدارة العيادة"
+      },
+      "header": {
+        "title": "إضافة مريض جديد",
+        "subtitle": "إنشاء ملف مريض جديد"
+      },
+      "actions": {
+        "back": "العودة إلى المرضى",
+        "save": "حفظ المريض"
+      },
+      "form": {
+        "title": "معلومات المريض",
+        "subtitle": "أدخل البيانات الشخصية وبيانات التواصل للمريض"
+      },
+      "toasts": {
+        "success": {
+          "title": "تم إنشاء المريض",
+          "description": "تم إنشاء المريض بنجاح"
+        },
+        "error": {
+          "title": "تعذر إنشاء المريض",
+          "description": "فشل في إنشاء المريض"
+        }
+      }
+    }
+  },
+  "treatmentPlans": {
+    "list": {
+      "meta": {
+        "headTitle": "خطط العلاج – إدارة العيادة"
+      },
+      "header": {
+        "title": "خطط العلاج",
+        "subtitle": "تابع خطط المرضى، الزيارات اللاحقة، والتقدم المالي"
+      },
+      "actions": {
+        "refresh": "تحديث",
+        "create": "خطة علاج جديدة",
+        "view": "عرض الخطة"
+      },
+      "metrics": {
+        "total": {
+          "label": "إجمالي الخطط",
+          "caption": "بجميع الحالات"
+        },
+        "active": {
+          "label": "الخطط النشطة",
+          "caption": "قيد التخطيط أو التنفيذ حالياً"
+        },
+        "completion": {
+          "label": "معدل الإكمال",
+          "caption": "خطط مكتملة: {completed}"
+        },
+        "revenue": {
+          "label": "الإيرادات المحصلة",
+          "caption": "إجمالي الدفعات المستلمة"
+        }
+      },
+      "filters": {
+        "title": "بحث وتصفية",
+        "subtitle": "اعثر على خطط علاج محددة",
+        "searchLabel": "بحث في الخطط",
+        "searchPlaceholder": "ابحث بحسب المريض، الطبيب، أو رقم الخطة...",
+        "sortLabel": "ترتيب حسب",
+        "statusLabel": "الحالة",
+        "results": "عدد الخطط المطابقة: {count}",
+        "clear": "مسح عوامل التصفية"
+      },
+      "directory": {
+        "title": "دليل الخطط",
+        "count": "عدد الخطط المعروضة: {count}"
+      },
+      "table": {
+        "columns": {
+          "patient": "المريض",
+          "treatment": "العلاج",
+          "doctor": "الطبيب",
+          "status": "الحالة",
+          "progress": "تقدم الدفعات",
+          "total": "القيمة الإجمالية",
+          "remaining": "المتبقي",
+          "visits": "الزيارات",
+          "actions": "إجراءات"
+        },
+        "followUpFrequency": "متابعة: {cadence}",
+        "doctorName": "الطبيب المسؤول: {name}"
+      },
+      "empty": {
+        "title": "لا توجد خطط علاج بعد",
+        "subtitle": "أنشئ أول خطة علاج لبدء متابعة الرعاية.",
+        "searchHint": "لا توجد خطط مطابقة لعوامل التصفية الحالية"
+      },
+      "sort": {
+        "newest": "الأحدث",
+        "value": "الأعلى قيمة",
+        "outstanding": "أكبر رصيد متبق"
+      },
+      "toasts": {
+        "loadError": {
+          "title": "تعذر تحميل خطط العلاج",
+          "description": "يتعذر جلب خطط العلاج حالياً. حاول مرة أخرى لاحقاً."
+        }
+      }
+    },
+    "create": {
+      "modal": {
+        "title": "إنشاء خطة علاج",
+        "subtitle": "حدد جدول الرعاية وتفاصيل الفوترة"
+      },
+      "sections": {
+        "participants": {
+          "title": "الأطراف المشاركة"
+        },
+        "treatment": {
+          "title": "العلاج والتسعير"
+        },
+        "schedule": {
+          "title": "الجدول"
+        },
+        "notes": {
+          "title": "ملاحظات"
+        },
+        "summary": {
+          "title": "ملخص الخطة"
+        }
+      },
+      "form": {
+        "fields": {
+          "patient": "المريض",
+          "doctor": "الطبيب",
+          "treatmentType": "العلاج",
+          "totalPrice": "القيمة الإجمالية للخطة",
+          "followupCount": "زيارات المتابعة",
+          "followupCadence": "وتيرة المتابعة",
+          "notes": "ملاحظات"
+        },
+        "placeholders": {
+          "patient": "اختر المريض",
+          "doctor": "اختر الطبيب",
+          "treatmentType": "اختر العلاج",
+          "totalPrice": "أدخل القيمة الإجمالية",
+          "followupCount": "مثال: 6",
+          "notes": "أضف أي ملاحظات أو تعليمات للفريق الطبي..."
+        },
+        "help": {
+          "addPatient": "أضف مريضاً واحداً على الأقل لإنشاء الخطة.",
+          "noDoctorForTreatment": "لا يوجد طبيب يوفر هذا العلاج حالياً."
+        },
+        "hints": {
+          "followupCount": "عدد زيارات المتابعة المشمولة ضمن هذه الخطة.",
+          "notes": "تظهر لفريق العيادة فقط ولن يراها المريض."
+        },
+        "currency": {
+          "options": {
+            "jod": "دينار أردني (JOD)",
+            "usd": "دولار أمريكي (USD)",
+            "aed": "درهم إماراتي (AED)"
+          }
+        }
+      },
+      "actions": {
+        "submit": "إنشاء الخطة"
+      },
+      "toasts": {
+        "success": {
+          "title": "تم إنشاء خطة العلاج",
+          "description": "تمت إضافة خطة العلاج بنجاح."
+        },
+        "error": {
+          "title": "تعذر إنشاء خطة العلاج",
+          "description": "حدث خطأ غير متوقع أثناء إنشاء الخطة."
+        },
+        "referenceError": {
+          "title": "تعذر تحميل البيانات المرجعية",
+          "description": "تعذر تحميل المرضى أو الأطباء أو العلاجات. حاول مرة أخرى."
+        },
+        "validationError": {
+          "title": "بيانات مطلوبة مفقودة",
+          "description": "يرجى إكمال الحقول المطلوبة قبل الإرسال."
+        }
+      }
+    },
+    "detail": {
+      "meta": {
+        "headTitle": "تفاصيل خطة العلاج – إدارة العيادة"
+      },
+      "loading": "جارٍ تحميل خطة العلاج...",
+      "back": {
+        "list": "العودة إلى الخطط",
+        "cta": "العودة إلى خطط العلاج"
+      },
+      "header": {
+        "subtitle": "{treatment} • {doctor}"
+      },
+      "cards": {
+        "total": {
+          "title": "إجمالي التكلفة",
+          "caption": "قيمة خطة العلاج"
+        },
+        "paid": {
+          "title": "إجمالي المدفوع",
+          "caption": "المدفوعات المستلمة"
+        },
+        "remaining": {
+          "title": "المتبقي",
+          "caption": "الرصيد المتبقي"
+        },
+        "perVisit": {
+          "title": "لكل زيارة",
+          "caption": "الدفع المتوقع"
+        }
+      },
+      "progress": {
+        "title": "تقدم العلاج",
+        "subtitle": "{completed} من {total} زيارات مكتملة",
+        "visits": {
+          "label": "تقدم الزيارات"
+        },
+        "payments": {
+          "label": "تقدم الدفعات",
+          "paid": "{amount} مدفوع",
+          "total": "{amount} إجمالي"
+        }
+      },
+      "actions": {
+        "title": "إجراءات سريعة",
+        "subtitle": "أدر هذه الخطة العلاجية",
+        "recordVisit": "تسجيل زيارة",
+        "applyDiscount": "تطبيق خصم",
+        "markComplete": "تحديد كمكتملة",
+        "cancelPlan": "إلغاء الخطة"
+      },
+      "scheduled": {
+        "title": "زيارات المتابعة المجدولة",
+        "subtitle": "المواعيد المجدولة لهذه الخطة العلاجية",
+        "count": "{count} زيارة مجدولة",
+        "badges": {
+          "visit": "زيارة رقم {number}",
+          "recorded": "تم تسجيل الزيارة"
+        },
+        "buttons": {
+          "record": "تسجيل زيارة",
+          "recorded": "تم التسجيل",
+          "viewEdit": "عرض/تعديل"
+        },
+        "empty": {
+          "title": "لا توجد مواعيد مجدولة",
+          "subtitle": "جدول مواعيد لهذه الخطة العلاجية من صفحة المواعيد."
+        }
+      },
+      "recorded": {
+        "title": "زيارات المتابعة المسجلة",
+        "subtitle": "زيارات مكتملة تتضمن الدفعات والمواد والملاحظات",
+        "notesTitle": "ملاحظات",
+        "paymentsTitle": "المدفوعات",
+        "materialsTitle": "المواد المستخدمة",
+        "materialsTotal": "إجمالي تكلفة المواد",
+        "buttons": {
+          "edit": "تعديل الزيارة"
+        },
+        "empty": {
+          "title": "لا توجد زيارات مسجلة",
+          "subtitle": "سجل الزيارات لتتبع تقدم العلاج والمدفوعات."
+        }
+      },
+      "financial": {
+        "title": "الملخص المالي",
+        "subtitle": "تحليل الإيرادات والتكاليف",
+        "materials": "إجمالي تكلفة المواد (تكلفة البضاعة المباعة)",
+        "revenue": "صافي الإيرادات",
+        "discount": "الخصم المطبق",
+        "reason": "السبب"
+      },
+      "planInfo": {
+        "title": "تفاصيل الخطة",
+        "subtitle": "معلومات خطة العلاج",
+        "created": "تاريخ الإنشاء",
+        "started": "تاريخ البداية",
+        "completed": "تاريخ الإكمال",
+        "cadence": "وتيرة المتابعة",
+        "notes": "ملاحظات"
+      },
+      "emptyState": {
+        "title": "خطة العلاج غير موجودة",
+        "description": "خطة العلاج التي تبحث عنها غير موجودة أو تم حذفها.",
+        "action": "العودة إلى خطط العلاج"
+      },
+      "recordVisitModal": {
+        "title": "تسجيل زيارة متابعة",
+        "subtitle": "تابع العلاجات والمدفوعات والمواد المستخدمة خلال هذه الزيارة.",
+        "editTitle": "تعديل زيارة المتابعة",
+        "editSubtitle": "حدّث تفاصيل الزيارة المسجلة والمدفوعات والمواد.",
+        "form": {
+          "visitDate": "تاريخ الزيارة",
+          "performedProcedures": "الإجراءات المنفذة",
+          "performedProceduresPlaceholder": "مثال: فحص روتيني، تنظيف",
+          "notes": "ملاحظات الزيارة",
+          "notesPlaceholder": "أضف ملاحظات داخلية لفريق الرعاية",
+          "payments": {
+            "title": "المدفوعات المستلمة",
+            "add": "إضافة دفعة",
+            "empty": "لم تتم إضافة دفعات لهذه الزيارة.",
+            "itemTitle": "دفعة {number}",
+            "amount": "المبلغ",
+            "amountPlaceholder": "0.00",
+            "method": "طريقة الدفع",
+            "date": "تاريخ الدفع",
+            "reference": "المرجع",
+            "referencePlaceholder": "رقم الإيصال أو معاملة الدفع",
+            "notes": "ملاحظات الدفع",
+            "notesPlaceholder": "تعليقات اختيارية"
+          },
+          "materials": {
+            "title": "المواد المستخدمة",
+            "add": "إضافة مادة",
+            "empty": "لم يتم تسجيل مواد لهذه الزيارة.",
+            "itemTitle": "مادة {number}",
+            "material": "المادة",
+            "materialPlaceholder": "اختر المادة",
+            "quantity": "الكمية",
+            "quantityPlaceholder": "0",
+            "notes": "ملاحظات",
+            "notesPlaceholder": "تعليقات اختيارية حول الاستخدام",
+            "retry": "إعادة المحاولة"
+          }
+        },
+        "actions": {
+          "cancel": "إلغاء",
+          "submit": "تسجيل الزيارة",
+          "save": "حفظ التغييرات"
+        }
+      },
+      "discountModal": {
+        "title": "تطبيق خصم",
+        "description": "سيتم تنفيذ نموذج الخصم مع حقول المبلغ والسبب.",
+        "cancel": "إلغاء",
+        "confirm": "تطبيق الخصم"
+      },
+      "cancelModal": {
+        "title": "إلغاء خطة العلاج",
+        "description": "سيتم تنفيذ نموذج الإلغاء مع حقل السبب.",
+        "cancel": "إلغاء",
+        "confirm": "تأكيد الإلغاء"
+      },
+      "badges": {
+        "payment": {
+          "paid": "مدفوعة",
+          "unpaid": "غير مدفوعة"
+        }
+      },
+      "appointmentStatus": {
+        "scheduled": "مجدول",
+        "confirmed": "مؤكد",
+        "completed": "مكتمل",
+        "cancelled": "ملغى"
+      },
+      "toasts": {
+        "loadPlanError": "تعذر تحميل خطة العلاج",
+        "completeSuccess": "تم إكمال خطة العلاج بنجاح",
+        "completeError": "تعذر إكمال خطة العلاج",
+        "materialsError": "تعذر تحميل المواد",
+        "recordVisitSuccess": "تم تسجيل الزيارة بنجاح",
+        "recordVisitError": "تعذر تسجيل الزيارة",
+        "updateVisitSuccess": "تم تحديث الزيارة بنجاح",
+        "updateVisitError": "تعذر تحديث الزيارة",
+        "recordVisitIncompleteTitle": "تفاصيل الزيارة غير مكتملة",
+        "recordVisitIncompleteDescription": "يرجى إضافة دفعة أو مادة أو ملاحظة واحدة على الأقل قبل تسجيل الزيارة."
+      }
+    },
+    "common": {
+      "patientLabel": "المريض",
+      "totalCost": "إجمالي التكلفة",
+      "expectedPerVisit": "متوسط لكل زيارة",
+      "remainingVisits": "الزيارات المتبقية: {count}",
+      "notAvailable": "غير متوفر",
+      "discountApplied": "تم تطبيق خصم",
+      "fullyPaid": "مدفوعة بالكامل",
+      "statusAll": "جميع الحالات",
+      "status": {
+        "planned": "مخططة",
+        "inProgress": "قيد التنفيذ",
+        "completed": "مكتملة",
+        "cancelled": "ملغاة"
+      },
+      "cadence": {
+        "weekly": "أسبوعياً",
+        "monthly": "شهرياً"
+      },
+      "doctorPrefix": "د. {name}",
+      "notScheduled": "غير مجدول",
+      "bookingMode": {
+        "clinic": "زيارة في العيادة",
+        "virtual": "استشارة عن بُعد"
+      },
+      "attendance": {
+        "attended": "حضر",
+        "noShow": "لم يحضر",
+        "pending": "قيد الانتظار"
+      },
+      "paymentStatus": {
+        "paid": "مدفوع",
+        "unpaid": "غير مدفوع"
+      },
+      "paymentMethods": {
+        "cash": "نقداً",
+        "pos": "نقطة بيع",
+        "bankTransfer": "حوالة بنكية",
+        "paypal": "باي بال",
+        "other": "أخرى"
+      },
+      "materials": {
+        "loadError": "تعذر تحميل قائمة المواد."
+      }
+    }
+  },
+  "services": {
+    "list": {
+      "meta": {
+        "headTitle": "الخدمات – إدارة العيادة"
+      },
+      "header": {
+        "title": "خدمات العيادة",
+        "subtitle": "أدر العلاجات التي تقدمها، واحتفظ بالملخصات متسقة عبر اللغات، وتابع الأطباء المعينين"
+      },
+      "actions": {
+        "refresh": "تحديث",
+        "addService": "إضافة خدمة"
+      },
+      "metrics": {
+        "total": {
+          "label": "إجمالي الخدمات",
+          "caption": "ظاهرة في كتالوج الحجز"
+        },
+        "linkedDoctors": {
+          "label": "الأطباء المرتبطين",
+          "caption": "مقدمو الخدمات الفريدون"
+        },
+        "recentlyUpdated": {
+          "label": "محدثة مؤخراً",
+          "caption": "محدثة في آخر 30 يوماً"
+        },
+        "active": {
+          "label": "الخدمات النشطة",
+          "caption": "متاحة للحجز"
+        }
+      },
+      "search": {
+        "title": "بحث وعرض",
+        "subtitle": "اعثر على خدمات عيادة محددة",
+        "searchLabel": "بحث في الخدمات",
+        "searchPlaceholder": "ابحث بالاسم أو الملخص أو المعرف...",
+        "viewModeLabel": "وضع العرض",
+        "table": "جدول",
+        "cards": "بطاقات"
+      },
+      "directory": {
+        "title": "خدمات العيادة",
+        "count": "تم العثور على {count} خدمة"
+      },
+      "table": {
+        "columns": {
+          "name": "اسم الخدمة",
+          "summary": "الوصف",
+          "slug": "المعرف",
+          "doctorCount": "مقدمو الخدمة",
+          "createdAt": "تاريخ الإنشاء",
+          "actions": ""
+        }
+      },
+      "cards": {
+        "doctorCount": "{count} طبيب",
+        "addedDate": "أضيفت {date}",
+        "serviceId": "معرف الخدمة: {id}",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "empty": {
+        "title": "لا توجد خدمات",
+        "subtitle": "ابدأ بإنشاء أول خدمة لك",
+        "searchHint": "جرب تعديل مصطلحات البحث"
+      },
+      "deleteModal": {
+        "title": "حذف الخدمة",
+        "subtitle": "لا يمكن التراجع عن هذا الإجراء",
+        "description": "هل أنت متأكد من رغبتك في حذف \"{name}\"؟ سيؤدي هذا إلى إخفائها من تدفقات الحجز فوراً ولا يمكن التراجع عنه.",
+        "cancel": "إلغاء",
+        "confirm": "حذف الخدمة"
+      },
+      "toasts": {
+        "deleteSuccess": "تم حذف الخدمة",
+        "deleteError": {
+          "title": "تعذر حذف الخدمة",
+          "description": "خطأ غير متوقع"
+        }
+      }
+    },
+    "detail": {
+      "meta": {
+        "headTitle": "تعديل الخدمة – إدارة العيادة"
+      },
+      "loading": "جارٍ تحميل الخدمة...",
+      "header": {
+        "title": "تعديل الخدمة",
+        "subtitle": "حدث الأسماء والملخصات المترجمة لتجربة الحجز"
+      },
+      "breadcrumb": {
+        "services": "الخدمات",
+        "details": "تفاصيل الخدمة"
+      },
+      "actions": {
+        "back": "العودة إلى الخدمات",
+        "cancel": "إلغاء",
+        "save": "حفظ التغييرات"
+      },
+      "sections": {
+        "identity": {
+          "title": "هوية الخدمة",
+          "subtitle": "اضبط كيفية ظهور الخدمة للموظفين والمرضى"
+        },
+        "summary": {
+          "title": "ملخص الموقع",
+          "subtitle": "اجعل الأوصاف تركز على النتائج وفوائد المريض"
+        },
+        "metadata": {
+          "title": "الرابط والبيانات الوصفية",
+          "subtitle": "المعرف يحدد روابط الحجز والروابط الصديقة لمحركات البحث"
+        }
+      },
+      "form": {
+        "nameEn": {
+          "label": "الاسم (إنجليزي)",
+          "placeholder": "تبييض الأسنان",
+          "required": true
+        },
+        "nameAr": {
+          "label": "الاسم (عربي)",
+          "placeholder": ""
+        },
+        "summaryEn": {
+          "label": "الملخص (إنجليزي)",
+          "placeholder": "وصف قصير يظهر على الموقع"
+        },
+        "summaryAr": {
+          "label": "الملخص (عربي)",
+          "placeholder": ""
+        },
+        "slug": {
+          "label": "المعرف",
+          "hint": "يُستخدم في الرابط العام",
+          "placeholder": "teeth-whitening",
+          "required": true
+        }
+      },
+      "error": {
+        "title": "تعذر تحميل الخدمة",
+        "description": "لم نتمكن من العثور على تلك الخدمة. ارجع إلى كتالوج الخدمات وحاول مرة أخرى."
+      },
+      "toasts": {
+        "saveSuccess": "تم تحديث الخدمة",
+        "saveError": {
+          "title": "تعذر تحديث الخدمة",
+          "description": "خطأ غير متوقع"
+        }
+      }
+    },
+    "create": {
+      "meta": {
+        "headTitle": "إنشاء خدمة – إدارة العيادة"
+      },
+      "header": {
+        "title": "إنشاء خدمة",
+        "subtitle": "أضف خدمة عيادة جديدة إلى كتالوج الحجز"
+      },
+      "breadcrumb": {
+        "newService": "خدمة جديدة"
+      },
+      "sections": {
+        "title": "خدمة جديدة",
+        "subtitle": "قدم أسماء وأوصاف مترجمة لتجربة الحجز"
+      },
+      "form": {
+        "nameEn": {
+          "label": "الاسم (إنجليزي)",
+          "placeholder": "تبييض الأسنان",
+          "required": true
+        },
+        "nameAr": {
+          "label": "الاسم (عربي)",
+          "placeholder": ""
+        },
+        "summaryEn": {
+          "label": "الملخص (إنجليزي)",
+          "placeholder": "وصف قصير يظهر على الموقع"
+        },
+        "summaryAr": {
+          "label": "الملخص (عربي)",
+          "placeholder": ""
+        },
+        "slug": {
+          "label": "المعرف",
+          "hint": "يُستخدم في الرابط العام",
+          "placeholder": "teeth-whitening",
+          "required": true
+        }
+      },
+      "actions": {
+        "cancel": "إلغاء",
+        "create": "إنشاء الخدمة"
+      },
+      "toasts": {
+        "createSuccess": "تم إنشاء الخدمة",
+        "createError": {
+          "title": "تعذر إنشاء الخدمة",
+          "description": "خطأ غير متوقع"
+        }
+      }
+    }
+  },
+  "insuranceCompanies": {
+    "list": {
+      "meta": {
+        "headTitle": "شركات التأمين – إدارة العيادة"
+      },
+      "header": {
+        "title": "شركات التأمين",
+        "subtitle": "إدارة شركاء التأمين الصحي ومقدمي الخدمات"
+      },
+      "actions": {
+        "refresh": "تحديث",
+        "addCompany": "إضافة شركة",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "metrics": {
+        "total": {
+          "label": "إجمالي الشركات",
+          "caption": "جميع الشركات المسجلة"
+        },
+        "active": {
+          "label": "الشركات النشطة",
+          "caption": "تقبل المرضى حالياً"
+        },
+        "inactive": {
+          "label": "الشركات غير النشطة",
+          "caption": "معطلة مؤقتاً"
+        },
+        "withLogos": {
+          "label": "مع الشعارات",
+          "caption": "شركات لديها علامة تجارية"
+        }
+      },
+      "filters": {
+        "title": "بحث وتصفية",
+        "subtitle": "اعثر على شركات تأمين محددة",
+        "searchLabel": "بحث في الشركات",
+        "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني أو الوصف...",
+        "statusLabel": "تصفية الحالة"
+      },
+      "directory": {
+        "title": "شركات التأمين",
+        "count": "عدد الشركات الموجودة: {count}"
+      },
+      "table": {
+        "columns": {
+          "company": "الشركة",
+          "contact": "التواصل",
+          "status": "الحالة",
+          "order": "الترتيب",
+          "actions": "إجراءات"
+        }
+      },
+      "empty": {
+        "title": "لا توجد شركات تأمين",
+        "subtitle": "ابدأ بإنشاء أول شركة تأمين",
+        "searchHint": "جرب تعديل البحث أو عوامل التصفية"
+      },
+      "status": {
+        "active": "نشطة",
+        "inactive": "غير نشطة"
+      },
+      "delete": {
+        "modal": {
+          "title": "حذف شركة التأمين",
+          "subtitle": "لا يمكن التراجع عن هذا الإجراء",
+          "description": "هل أنت متأكد من حذف \"{name}\"؟ سيؤدي هذا إلى إزالة الشركة وجميع البيانات المرتبطة بها نهائياً.",
+          "cancel": "إلغاء",
+          "confirm": "حذف الشركة"
+        },
+        "success": {
+          "title": "تم حذف الشركة",
+          "description": "تم حذف شركة التأمين بنجاح"
+        },
+        "error": {
+          "title": "خطأ",
+          "description": "فشل في حذف شركة التأمين"
+        }
+      },
+      "toasts": {
+        "loadError": {
+          "title": "خطأ",
+          "description": "فشل في تحميل شركات التأمين"
+        }
+      }
+    },
+    "edit": {
+      "meta": {
+        "headTitle": "تعديل شركة التأمين – إدارة العيادة"
+      },
+      "header": {
+        "title": "تعديل شركة التأمين",
+        "subtitle": "تحديث معلومات شركة التأمين"
+      },
+      "actions": {
+        "back": "العودة إلى الشركات",
+        "update": "تحديث الشركة"
+      },
+      "form": {
+        "title": "معلومات الشركة",
+        "subtitle": "تحديث تفاصيل شركة التأمين",
+        "fields": {
+          "nameEn": {
+            "label": "اسم الشركة (بالإنجليزية)",
+            "placeholder": "أدخل اسم الشركة بالإنجليزية"
+          },
+          "nameAr": {
+            "label": "اسم الشركة (بالعربية)",
+            "placeholder": "أدخل اسم الشركة بالعربية"
+          },
+          "email": {
+            "label": "البريد الإلكتروني",
+            "placeholder": "company\\u0040example.com"
+          },
+          "phone": {
+            "label": "الهاتف",
+            "placeholder": "+966 11 123 4567"
+          },
+          "websiteUrl": {
+            "label": "رابط الموقع الإلكتروني",
+            "placeholder": "https://www.company.com"
+          },
+          "logoUrl": {
+            "label": "شعار الشركة",
+            "hint": "ارفع أو أدخل رابط شعار الشركة",
+            "placeholder": "https://example.com/logo.png",
+            "upload": "رفع",
+            "preview": {
+              "title": "معاينة الشعار",
+              "description": "سيظهر شعار الشركة هكذا"
+            }
+          },
+          "descriptionEn": {
+            "label": "الوصف (بالإنجليزية)",
+            "placeholder": "وصف مختصر لشركة التأمين بالإنجليزية..."
+          },
+          "descriptionAr": {
+            "label": "الوصف (بالعربية)",
+            "placeholder": "وصف مختصر لشركة التأمين بالعربية..."
+          },
+          "displayOrder": {
+            "label": "ترتيب العرض",
+            "hint": "الأرقام الأقل تظهر أولاً",
+            "placeholder": "0"
+          },
+          "status": {
+            "label": "الحالة",
+            "active": "نشطة",
+            "inactive": "غير نشطة",
+            "activeDescription": "الشركة مرئية على الموقع",
+            "inactiveDescription": "الشركة مخفية من الموقع"
+          }
+        },
+        "actions": {
+          "cancel": "إلغاء",
+          "update": "تحديث الشركة"
+        }
+      },
+      "loading": {
+        "title": "جاري التحميل...",
+        "description": "جاري تحميل معلومات الشركة"
+      },
+      "notFound": {
+        "title": "الشركة غير موجودة",
+        "description": "شركة التأمين التي تبحث عنها غير موجودة.",
+        "action": "العودة إلى الشركات"
+      },
+      "success": {
+        "title": "تم تحديث الشركة",
+        "description": "تم تحديث شركة التأمين بنجاح"
+      },
+      "error": {
+        "title": "خطأ",
+        "description": "فشل في تحديث شركة التأمين"
+      }
+    },
+    "create": {
+      "meta": {
+        "headTitle": "إضافة شركة تأمين – إدارة العيادة"
+      },
+      "header": {
+        "title": "إضافة شركة تأمين",
+        "subtitle": "إنشاء شريك تأمين جديد"
+      },
+      "actions": {
+        "back": "العودة إلى الشركات",
+        "save": "حفظ الشركة"
+      },
+      "form": {
+        "title": "معلومات الشركة",
+        "subtitle": "أدخل تفاصيل شركة التأمين",
+        "actions": {
+          "cancel": "إلغاء",
+          "save": "حفظ الشركة"
+        }
+      },
+      "success": {
+        "title": "تم إنشاء الشركة",
+        "description": "تم إنشاء شركة التأمين بنجاح"
+      },
+      "error": {
+        "title": "خطأ",
+        "description": "فشل في إنشاء شركة التأمين"
+      }
+    },
+    "common": {
+      "updated": "تم التحديث {date}",
+      "updatedUnknown": "لم يتم التحديث بعد",
+      "order": "الترتيب: {order}"
+    }
+  },
+  "blogs": {
+    "list": {
+      "meta": {
+        "title": "إدارة المدونة – إدارة العيادة"
+      },
+      "header": {
+        "title": "إدارة المدونة",
+        "subtitle": "راقب الأداء، حسّن المحتوى، وانشر التحديثات"
+      },
+      "actions": {
+        "refresh": "تحديث",
+        "create": "كتابة مقال جديد"
+      },
+      "metrics": {
+        "totalPosts": {
+          "label": "إجمالي المقالات",
+          "caption": "جميع المقالات على الإطلاق"
+        },
+        "published": {
+          "label": "منشور",
+          "caption": "مباشر الآن"
+        },
+        "drafts": {
+          "label": "مسودات",
+          "caption": "في انتظار التحسين"
+        },
+        "totalViews": {
+          "label": "إجمالي المشاهدات",
+          "caption": "عبر جميع المقالات"
+        }
+      },
+      "filters": {
+        "title": "البحث والتصفية",
+        "subtitle": "اعثر على مقالات ومحتوى محدد",
+        "searchLabel": "البحث في المقالات",
+        "searchPlaceholder": "ابحث بالعنوان أو الرابط أو المحتوى...",
+        "viewModeLabel": "وضع العرض",
+        "viewModeCards": "بطاقات",
+        "viewModeTable": "جدول",
+        "statusLabel": "الحالة",
+        "languageLabel": "اللغة",
+        "resultsFound": "تم العثور على نتيجة واحدة | تم العثور على {count} نتائج",
+        "resetFilters": "إعادة تعيين المرشحات"
+      },
+      "display": {
+        "title": "مقالات المدونة",
+        "subtitle": "تم العثور على {count} مقالات",
+        "noCoverImage": "لا توجد صورة غلاف",
+        "unknownAuthor": "مؤلف غير معروف",
+        "views": "مشاهدات",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "table": {
+        "columns": {
+          "title": "العنوان",
+          "status": "الحالة",
+          "language": "اللغة",
+          "views": "المشاهدات",
+          "published": "تاريخ النشر",
+          "actions": "الإجراءات"
+        },
+        "actions": {
+          "publish": "نشر",
+          "unpublish": "إلغاء النشر",
+          "edit": "تعديل",
+          "delete": "حذف"
+        }
+      },
+      "empty": {
+        "title": "لم يتم العثور على مقالات",
+        "searchHint": "جرب تعديل البحث أو المرشحات",
+        "createHint": "ابدأ بإنشاء مقالك الأول",
+        "resetFilters": "إعادة تعيين المرشحات",
+        "createPost": "إنشاء مقال"
+      },
+      "deleteModal": {
+        "title": "حذف مقال المدونة",
+        "subtitle": "لا يمكن التراجع عن هذا الإجراء",
+        "content": "هل أنت متأكد من حذف \"{title}\"؟ سيؤدي هذا إلى إزالة المقال وجميع محتوياته نهائياً.",
+        "cancel": "إلغاء",
+        "confirm": "حذف المقال"
+      },
+      "toasts": {
+        "publishSuccess": "تم نشر المقال بنجاح",
+        "publishError": "فشل في نشر المقال",
+        "unpublishSuccess": "تم إلغاء نشر المقال",
+        "unpublishError": "فشل في إلغاء نشر المقال",
+        "deleteSuccess": "تم حذف المقال بنجاح",
+        "deleteError": "فشل في حذف المقال"
+      }
+    },
+    "create": {
+      "meta": {
+        "title": "إنشاء مقال جديد – إدارة العيادة"
+      },
+      "header": {
+        "title": "إنشاء مقال جديد",
+        "subtitle": "أنشئ محتوى جذاب مع دعم كامل لتحسين محركات البحث والقدرات متعددة اللغات"
+      },
+      "breadcrumb": {
+        "blogs": "المدونة",
+        "newPost": "مقال جديد"
+      },
+      "autoSaving": "حفظ تلقائي...",
+      "actions": {
+        "cancel": "إلغاء",
+        "create": "إنشاء مقال"
+      },
+      "sections": {
+        "main": {
+          "title": "مقال جديد",
+          "subtitle": "أنشئ محتوى جذاب لمدونة عيادتك"
+        },
+        "basicInfo": {
+          "title": "المعلومات الأساسية",
+          "subtitle": "التفاصيل الرئيسية لمقالك"
+        },
+        "seo": {
+          "title": "إعدادات تحسين محركات البحث",
+          "subtitle": "حسّن مقالك لمحركات البحث"
+        },
+        "openGraph": {
+          "title": "وسائل التواصل الاجتماعي (Open Graph)",
+          "subtitle": "كيف يظهر مقالك عند مشاركته على وسائل التواصل الاجتماعي"
+        }
+      },
+      "fields": {
+        "title": {
+          "label": "العنوان",
+          "placeholder": "أدخل عنوان المقال",
+          "required": true
+        },
+        "slug": {
+          "label": "الرابط المختصر",
+          "hint": "يُستخدم في الرابط",
+          "placeholder": "رابط-المقال-المختصر",
+          "required": true
+        },
+        "language": {
+          "label": "اللغة",
+          "required": true
+        },
+        "excerpt": {
+          "label": "المقتطف",
+          "hint": "ملخص قصير للمعاينات",
+          "placeholder": "وصف موجز لهذا المقال..."
+        },
+        "content": {
+          "label": "المحتوى",
+          "required": true
+        },
+        "featuredImage": {
+          "label": "الصورة المميزة",
+          "hint": "ارفع صورة لمقالك. الحجم المُوصى به: 1200x630 بكسل أو أكبر.",
+          "preview": {
+            "title": "تم تعيين الصورة المميزة",
+            "description": "ستظهر هذه الصورة في معاينات المقالات والمشاركات الاجتماعية",
+            "remove": "إزالة"
+          }
+        },
+        "metaTitle": {
+          "label": "عنوان الميتا",
+          "hint": "حد أقصى 70 حرف",
+          "placeholder": "عنوان تحسين محركات البحث"
+        },
+        "metaDescription": {
+          "label": "وصف الميتا",
+          "hint": "حد أقصى 160 حرف",
+          "placeholder": "وصف تحسين محركات البحث"
+        },
+        "metaKeywords": {
+          "label": "كلمات الميتا المفتاحية",
+          "hint": "مفصولة بفواصل",
+          "placeholder": "أسنان، صحة، عيادة"
+        },
+        "ogTitle": {
+          "label": "عنوان OG",
+          "hint": "حد أقصى 95 حرف",
+          "placeholder": "عنوان وسائل التواصل الاجتماعي"
+        },
+        "ogDescription": {
+          "label": "وصف OG",
+          "hint": "حد أقصى 200 حرف",
+          "placeholder": "وصف وسائل التواصل الاجتماعي"
+        },
+        "ogImage": {
+          "label": "صورة OG",
+          "hint": "ارفع صورة لمشاركة وسائل التواصل الاجتماعي. الحجم المُوصى به: 1200x630 بكسل.",
+          "preview": {
+            "title": "تم تعيين صورة وسائل التواصل الاجتماعي",
+            "description": "ستظهر هذه الصورة عند مشاركة المقال على وسائل التواصل الاجتماعي",
+            "remove": "إزالة"
+          }
+        }
+      },
+      "toasts": {
+        "imageUploadSuccess": "تم رفع الصورة المميزة",
+        "imageUploadSuccessDesc": "تم رفع الصورة وحفظ المقال تلقائياً",
+        "imageUploadError": "فشل في الرفع",
+        "ogImageUploadSuccess": "تم رفع صورة OG",
+        "ogImageUploadSuccessDesc": "تم رفع صورة وسائل التواصل الاجتماعي وحفظ المقال تلقائياً",
+        "ogImageUploadError": "فشل في رفع صورة OG",
+        "imageRemoveSuccess": "تم إزالة الصورة المميزة",
+        "imageRemoveSuccessDesc": "تم إزالة الصورة وحفظ المقال تلقائياً",
+        "ogImageRemoveSuccess": "تم إزالة صورة OG",
+        "ogImageRemoveSuccessDesc": "تم إزالة صورة وسائل التواصل الاجتماعي وحفظ المقال تلقائياً",
+        "autoSaveError": "فشل الحفظ التلقائي",
+        "autoSaveErrorDesc": "فشل في حفظ المقال تلقائياً",
+        "createSuccess": "تم إنشاء المقال بنجاح",
+        "createError": "فشل في إنشاء المقال",
+        "titleRequired": "العنوان مطلوب",
+        "contentRequired": "المحتوى مطلوب"
+      }
+    },
+    "edit": {
+      "meta": {
+        "title": "تعديل المقال – إدارة العيادة"
+      },
+      "header": {
+        "title": "تعديل المقال",
+        "subtitle": "حدّث محتوى مقالك وإعدادات تحسين محركات البحث"
+      },
+      "breadcrumb": {
+        "blogs": "المدونة",
+        "edit": "تعديل"
+      },
+      "autoSaving": "حفظ تلقائي...",
+      "actions": {
+        "publish": "نشر",
+        "unpublish": "إلغاء النشر",
+        "backToBlogs": "العودة إلى المدونة",
+        "cancel": "إلغاء",
+        "save": "حفظ التغييرات"
+      },
+      "loading": {
+        "title": "تفاصيل المقال",
+        "subtitle": "جاري تحميل المقال..."
+      },
+      "sections": {
+        "main": {
+          "title": "تفاصيل المقال",
+          "subtitle": "جاري التحميل..."
+        },
+        "basicInfo": {
+          "title": "المعلومات الأساسية",
+          "subtitle": "التفاصيل الرئيسية لمقالك"
+        },
+        "seo": {
+          "title": "إعدادات تحسين محركات البحث",
+          "subtitle": "حسّن مقالك لمحركات البحث"
+        },
+        "openGraph": {
+          "title": "وسائل التواصل الاجتماعي (Open Graph)",
+          "subtitle": "كيف يظهر مقالك عند مشاركته على وسائل التواصل الاجتماعي"
+        },
+        "statistics": {
+          "title": "الإحصائيات",
+          "subtitle": "مقاييس الأداء لهذا المقال"
+        }
+      },
+      "statistics": {
+        "totalViews": "إجمالي المشاهدات",
+        "created": "تاريخ الإنشاء",
+        "lastUpdated": "آخر تحديث"
+      },
+      "toasts": {
+        "updateSuccess": "تم تحديث المقال بنجاح",
+        "updateError": "فشل في تحديث المقال",
+        "publishSuccess": "تم نشر المقال بنجاح",
+        "publishError": "فشل في نشر المقال",
+        "unpublishSuccess": "تم إلغاء نشر المقال",
+        "unpublishError": "فشل في إلغاء نشر المقال"
+      }
+    },
+    "common": {
+      "status": {
+        "draft": "مسودة",
+        "published": "منشور",
+        "archived": "مؤرشف"
+      },
+      "languages": {
+        "english": "الإنجليزية",
+        "arabic": "العربية"
+      }
+    }
+  },
+  "reports": {
+    "meta": {
+      "headTitle": "التقارير – إدارة العيادة"
+    },
+    "header": {
+      "title": "التقارير والتحليلات",
+      "subtitle": "تابع أداء العيادة، راقب المؤشرات الرئيسية، واحصل على رؤى تحليلية",
+      "actions": {
+        "refresh": "تحديث",
+        "export": "تصدير البيانات"
+      }
+    },
+    "messages": {
+      "loading": "جاري التحميل...",
+      "loadError": "فشل في تحميل مؤشرات التقرير",
+      "noData": "لا توجد بيانات متاحة"
+    },
+    "metrics": {
+      "totalAppointments": {
+        "label": "إجمالي المواعيد",
+        "thisMonth": "محجوز هذا الشهر"
+      },
+      "totalPatients": {
+        "label": "إجمالي المرضى",
+        "newThisMonth": "جديد هذا الشهر"
+      },
+      "revenueThisMonth": {
+        "label": "إيرادات هذا الشهر",
+        "vsLastMonth": "مقارنة بالشهر الماضي"
+      },
+      "collectionHealth": {
+        "label": "صحة التحصيل",
+        "outstanding": "دفعات معلقة"
+      }
+    },
+    "snapshots": {
+      "period": {
+        "title": "لقطة الفترة",
+        "today": "اليوم",
+        "thisWeek": "هذا الأسبوع",
+        "thisMonth": "هذا الشهر",
+        "appointments": "مواعيد"
+      },
+      "operational": {
+        "title": "لقطة تشغيلية",
+        "avgDaily": "متوسط المواعيد اليومية",
+        "avgDailySubtitle": "آخر 30 يوماً",
+        "collectionRate": "معدل التحصيل",
+        "collectionRateSubtitle": "مواعيد مدفوعة",
+        "noShowRate": "معدل عدم الحضور",
+        "noShowRateSubtitle": "تأثير على الحضور",
+        "activePlans": "خطط العلاج النشطة",
+        "followUps": "متابعات هذا الشهر"
+      }
+    },
+    "charts": {
+      "appointmentTrend": {
+        "title": "اتجاه المواعيد",
+        "badge": "آخر 30 يوماً",
+        "noData": "لا توجد بيانات كافية للرسم بعد."
+      },
+      "revenueTrend": {
+        "title": "اتجاه الإيرادات",
+        "badge": "آخر 6 أشهر",
+        "noData": "لا توجد بيانات إيرادات متاحة بعد."
+      },
+      "doctorPerformance": {
+        "title": "أداء الأطباء",
+        "noData": "لا توجد بيانات كافية لإظهار أداء الأطباء بعد."
+      },
+      "serviceMix": {
+        "title": "مزيج الخدمات",
+        "noData": "سيظهر مزيج الخدمات بمجرد تسجيل المواعيد."
+      },
+      "paymentMethods": {
+        "title": "طرق الدفع",
+        "noData": "اجمع المدفوعات لرؤية توزيع الطرق."
+      },
+      "statusBreakdown": {
+        "title": "تفصيل حالة المواعيد",
+        "scheduled": "مجدول",
+        "confirmed": "مؤكد",
+        "completed": "مكتمل",
+        "cancelled": "ملغى",
+        "ofTotal": "% من الإجمالي"
+      }
+    },
+    "paypal": {
+      "title": "معاملات PayPal",
+      "viewAll": "عرض جميع المعاملات",
+      "metrics": {
+        "totalRevenue": "إجمالي الإيرادات",
+        "completed": "مكتمل",
+        "successRate": "معدل النجاح",
+        "totalTransactions": "إجمالي المعاملات",
+        "averageValue": "متوسط القيمة",
+        "perTransaction": "لكل معاملة",
+        "netRevenue": "صافي الإيرادات",
+        "afterFees": "بعد رسوم PayPal"
+      },
+      "transactions": {
+        "title": "معاملات PayPal",
+        "total": "الإجمالي",
+        "page": "صفحة",
+        "of": "من",
+        "unknownPatient": "مريض غير معروف",
+        "unknownDoctor": "طبيب غير معروف"
+      },
+      "empty": {
+        "title": "لا توجد معاملات PayPal",
+        "description": "ستظهر معاملات PayPal هنا بمجرد حجز الاستشارات الافتراضية"
+      },
+      "error": {
+        "title": "فشل في تحميل بيانات PayPal",
+        "description": "يرجى المحاولة بتحديث الصفحة"
+      },
+      "modal": {
+        "title": "تفاصيل المعاملة",
+        "orderIdLabel": "رقم طلب PayPal",
+        "sections": {
+          "payment": "معلومات الدفع",
+          "appointment": "تفاصيل الموعد"
+        },
+        "fields": {
+          "amount": "المبلغ",
+          "transactionType": "نوع المعاملة",
+          "captureId": "رقم الالتقاط",
+          "created": "تاريخ الإنشاء",
+          "patient": "المريض",
+          "doctor": "الطبيب",
+          "payerEmail": "بريد الدافع",
+          "payerName": "اسم الدافع"
+        },
+        "actions": {
+          "viewAppointment": "عرض الموعد",
+          "copyOrderId": "نسخ رقم الطلب"
+        },
+        "unknown": "غير معروف"
+      },
+      "toasts": {
+        "copied": "تم النسخ إلى الحافظة",
+        "copiedDescription": "تم نسخ رقم الطلب {orderId} بنجاح",
+        "copyFailed": "فشل النسخ",
+        "copyFailedDescription": "فشل في النسخ إلى الحافظة"
+      }
+    },
+    "dateFilter": {
+      "label": "نطاق التاريخ",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية",
+      "quickSelect": "اختيار سريع",
+      "customRange": "نطاق مخصص",
+      "selectRange": "اختر نطاق التاريخ",
+      "apply": "تطبيق",
+      "presets": {
+        "today": "اليوم",
+        "thisWeek": "هذا الأسبوع",
+        "thisMonth": "هذا الشهر",
+        "lastMonth": "الشهر الماضي",
+        "last3Months": "آخر 3 أشهر",
+        "last6Months": "آخر 6 أشهر",
+        "thisYear": "هذا العام"
+      },
+      "reset": "إعادة تعيين إلى الافتراضي",
+      "active": "مُرشح",
+      "errors": {
+        "invalidRange": "يجب أن يكون تاريخ النهاية بعد تاريخ البداية",
+        "maxRangeExceeded": "لا يمكن أن يتجاوز نطاق التاريخ سنتين",
+        "futureDate": "لا يمكن أن يكون تاريخ النهاية في المستقبل",
+        "requiredFields": "كلا من تاريخ البداية والنهاية مطلوبان"
+      }
+    },
+    "toasts": {
+      "exportSoon": "ميزة التصدير قريباً",
+      "exportDescription": "ستكون وظيفة تصدير البيانات متاحة في التحديث القادم."
+    }
+  },
+  "staff": {
+    "meta": {
+      "listTitle": "الموظفين – إدارة العيادة",
+      "createTitle": "إضافة موظف – إدارة العيادة",
+      "editTitle": "تعديل موظف – إدارة العيادة"
+    },
+    "list": {
+      "header": {
+        "title": "أعضاء الفريق",
+        "subtitle": "إدارة حسابات الموظفين والأدوار والصلاحيات عبر جميع وحدات العيادة"
+      },
+      "actions": {
+        "refresh": "تحديث",
+        "addStaff": "إضافة موظف",
+        "edit": "تعديل",
+        "delete": "حذف",
+        "resendInvitation": "إعادة إرسال الدعوة",
+        "back": "رجوع"
+      },
+      "stats": {
+        "totalStaff": "إجمالي الموظفين",
+        "activeStaff": "الموظفين النشطين",
+        "pendingInvitations": "الدعوات المعلقة",
+        "adminUsers": "المستخدمين الإداريين"
+      },
+      "table": {
+        "title": "دليل الموظفين",
+        "totalMembers": "إجمالي الأعضاء",
+        "columns": {
+          "name": "الاسم",
+          "email": "البريد الإلكتروني",
+          "role": "الدور",
+          "status": "الحالة",
+          "lastLogin": "آخر تسجيل دخول",
+          "actions": "الإجراءات"
+        }
+      },
+      "filters": {
+        "search": "البحث في الموظفين...",
+        "role": "تصفية حسب الدور",
+        "status": "تصفية حسب الحالة",
+        "clear": "مسح عوامل التصفية"
+      },
+      "empty": {
+        "title": "لا يوجد موظفين",
+        "description": "أضف أول موظف للبدء",
+        "searchHint": "لا يوجد موظفين يطابقون معايير البحث"
+      }
+    },
+    "create": {
+      "header": {
+        "title": "إضافة عضو فريق",
+        "breadcrumb": {
+          "staff": "الموظفين",
+          "addNew": "إضافة عضو جديد"
+        }
+      },
+      "actions": {
+        "backToStaff": "العودة إلى الموظفين",
+        "save": "إنشاء موظف وإرسال دعوة",
+        "cancel": "إلغاء"
+      },
+      "form": {
+        "basicInfo": {
+          "title": "المعلومات الأساسية",
+          "subtitle": "أدخل تفاصيل الموظف ودوره"
+        },
+        "accountInfo": {
+          "title": "معلومات الحساب",
+          "subtitle": "إعداد بيانات تسجيل الدخول والصلاحيات"
+        },
+        "permissions": {
+          "title": "الصلاحيات والوصول",
+          "subtitle": "تكوين ما يمكن لهذا الموظف الوصول إليه"
+        },
+        "fields": {
+          "firstName": "الاسم الكامل",
+          "lastName": "اسم العائلة",
+          "email": "عنوان البريد الإلكتروني",
+          "phone": "رقم الهاتف",
+          "role": "الدور",
+          "status": "الحالة",
+          "password": "كلمة المرور",
+          "confirmPassword": "تأكيد كلمة المرور",
+          "doctorLink": "ربط بملف طبيب",
+          "doctorLinkHelp": "اختياري: ربط حساب الموظف بملف طبيب موجود"
+        },
+        "placeholders": {
+          "firstName": "أحمد محمد",
+          "lastName": "أدخل اسم العائلة",
+          "email": "أدخل عنوان البريد الإلكتروني",
+          "phone": "أدخل رقم الهاتف",
+          "password": "أدخل كلمة المرور",
+          "confirmPassword": "أكد كلمة المرور",
+          "doctorSelect": "اختر طبيب (اختياري)"
+        },
+        "hints": {
+          "emailInvitation": "سيتم إرسال دعوة بالبريد الإلكتروني إلى هذا العنوان",
+          "doctorLink": "الربط يسمح لحساب الموظف بالارتباط بمعلومات الطبيب المواجهة للمريض"
+        },
+        "roleDescriptions": {
+          "admin": "وصول كامل لجميع الوحدات والإعدادات",
+          "receptionist": "إدارة المواعيد وسجلات المرضى",
+          "doctor": "التركيز على رعاية المرضى وخطط العلاج"
+        }
+      },
+      "validation": {
+        "fullNameRequired": "الاسم الكامل مطلوب",
+        "emailRequired": "عنوان بريد إلكتروني صحيح مطلوب",
+        "noPermissions": {
+          "title": "لم يتم منح صلاحيات",
+          "description": "يرجى منح صلاحية واحدة على الأقل لهذا الموظف"
+        }
+      },
+      "toasts": {
+        "createSuccess": {
+          "title": "تم إنشاء الموظف بنجاح",
+          "description": "تم إرسال دعوة بالبريد الإلكتروني"
+        },
+        "createError": "فشل في إنشاء الموظف"
+      }
+    },
+    "edit": {
+      "header": {
+        "breadcrumb": {
+          "staff": "الموظفين"
+        }
+      },
+      "actions": {
+        "resendInvitation": "إعادة إرسال الدعوة",
+        "back": "رجوع",
+        "save": "حفظ التغييرات",
+        "cancel": "إلغاء"
+      },
+      "form": {
+        "basicInfo": {
+          "title": "المعلومات الأساسية",
+          "subtitle": "تحديث تفاصيل الموظف"
+        },
+        "accountInfo": {
+          "title": "معلومات الحساب",
+          "subtitle": "إدارة بيانات تسجيل الدخول والحالة"
+        },
+        "permissions": {
+          "title": "الصلاحيات والوصول",
+          "subtitle": "تكوين مستويات الوصول والصلاحيات"
+        }
+      }
+    },
+    "common": {
+      "status": {
+        "active": "نشط",
+        "inactive": "غير نشط",
+        "pending": "معلق",
+        "suspended": "موقوف",
+        "invited": "مدعو"
+      },
+      "roles": {
+        "admin": "مدير",
+        "manager": "مدير قسم",
+        "staff": "موظف",
+        "receptionist": "موظف استقبال",
+        "doctor": "طبيب"
+      },
+      "loading": "جاري التحميل...",
+      "saving": "جاري الحفظ...",
+      "deleting": "جاري الحذف...",
+      "resending": "جاري الإرسال...",
+      "invitationSent": "تم إرسال الدعوة",
+      "permissions": "صلاحيات",
+      "joined": "انضم في"
+    },
+    "toasts": {
+      "createSuccess": "تم إنشاء الموظف بنجاح",
+      "createError": "فشل في إنشاء الموظف",
+      "updateSuccess": "تم تحديث الموظف بنجاح",
+      "updateError": "فشل في تحديث الموظف",
+      "deleteSuccess": "تم حذف الموظف بنجاح",
+      "deleteError": "فشل في حذف الموظف",
+      "invitationSent": "تم إرسال الدعوة بنجاح",
+      "invitationError": "فشل في إرسال الدعوة"
+    },
+    "detail": {
+      "meta": {
+        "headTitle": "تفاصيل الموظف – إدارة العيادة"
+      },
+      "loading": "جاري تحميل بيانات الموظف...",
+      "header": {
+        "breadcrumb": {
+          "staff": "الموظفين"
+        }
+      },
+      "actions": {
+        "resendInvitation": "إعادة إرسال الدعوة",
+        "back": "رجوع",
+        "save": "حفظ التغييرات",
+        "cancel": "إلغاء"
+      },
+      "sections": {
+        "basicInfo": {
+          "title": "المعلومات الأساسية",
+          "subtitle": "تحديث تفاصيل الموظف"
+        },
+        "permissions": {
+          "title": "الصلاحيات والوصول",
+          "subtitle": "تكوين مستويات الوصول والصلاحيات"
+        },
+        "accountInfo": {
+          "title": "معلومات الحساب",
+          "subtitle": "تفاصيل الموظف والإحصائيات"
+        }
+      },
+      "form": {
+        "fields": {
+          "fullName": "الاسم الكامل",
+          "email": "عنوان البريد الإلكتروني",
+          "role": "الدور",
+          "status": "الحالة",
+          "doctorLink": "ربط بملف طبيب",
+          "doctorLinkHelp": "اختياري: ربط حساب الموظف بملف طبيب موجود",
+          "doctorLinkHint": "مرتبط حالياً بـ: {name}",
+          "doctorLinkNotLinked": "غير مرتبط بأي ملف طبيب"
+        },
+        "placeholders": {
+          "fullName": "أحمد محمد",
+          "email": "أدخل البريد الإلكتروني",
+          "doctorSelect": "اختر طبيب (اختياري)"
+        }
+      },
+      "stats": {
+        "accountStatus": "حالة الحساب",
+        "memberSince": "عضو منذ",
+        "totalPermissions": "إجمالي الصلاحيات"
+      },
+      "toasts": {
+        "updateSuccess": "تم تحديث الموظف بنجاح",
+        "updateError": "فشل في تحديث الموظف",
+        "invitationSuccess": "تم إرسال الدعوة بنجاح",
+        "invitationError": "فشل في إرسال الدعوة",
+        "loadError": "فشل في تحميل بيانات الموظف",
+        "validationError": {
+          "fullName": "الاسم الكامل مطلوب",
+          "email": "عنوان بريد إلكتروني صحيح مطلوب",
+          "noPermissions": {
+            "title": "لم يتم منح صلاحيات",
+            "description": "يرجى منح صلاحية واحدة على الأقل لهذا الموظف"
+          }
+        }
+      }
+    },
+    "permissions": {
+      "title": "صلاحيات الوحدات",
+      "subtitle": "اختر الإجراءات التي يمكن لهذا الموظف تنفيذها في كل وحدة",
+      "clearAll": "مسح الكل",
+      "actions": {
+        "view": "عرض",
+        "create": "إنشاء",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "modules": {
+        "appointments": {
+          "label": "المواعيد",
+          "description": "جدولة وإدارة مواعيد المرضى"
+        },
+        "patients": {
+          "label": "المرضى",
+          "description": "سجلات ومعلومات المرضى"
+        },
+        "doctors": {
+          "label": "الأطباء",
+          "description": "ملفات الأطباء وجداولهم"
+        },
+        "services": {
+          "label": "الخدمات",
+          "description": "خدمات العيادة والتسعير"
+        },
+        "treatmentPlans": {
+          "label": "خطط العلاج",
+          "description": "خطط علاج المرضى"
+        },
+        "reports": {
+          "label": "التقارير",
+          "description": "التحليلات والتقارير"
+        },
+        "settings": {
+          "label": "الإعدادات",
+          "description": "تكوين العيادة"
+        },
+        "staff": {
+          "label": "إدارة الموظفين",
+          "description": "إدارة الموظفين والصلاحيات"
+        },
+        "blogs": {
+          "label": "مقالات المدونة",
+          "description": "إنشاء وإدارة محتوى المدونة"
+        }
+      },
+      "guidelines": {
+        "title": "إرشادات الصلاحيات",
+        "view": "يمكن رؤية الوحدة وعرض البيانات",
+        "create": "يمكن إضافة سجلات جديدة",
+        "edit": "يمكن تعديل السجلات الموجودة",
+        "delete": "يمكن حذف السجلات",
+        "note": "ملاحظة: صلاحيات الإنشاء والتعديل والحذف تتطلب صلاحية العرض للعمل بشكل صحيح."
+      }
+    },
+    "validation": {
+      "required": "هذا الحقل مطلوب",
+      "email": "يرجى إدخال عنوان بريد إلكتروني صحيح",
+      "phone": "يرجى إدخال رقم هاتف صحيح",
+      "passwordMatch": "كلمات المرور غير متطابقة",
+      "passwordLength": "يجب أن تكون كلمة المرور 8 أحرف على الأقل"
+    }
+  },
+  "clinicSettings": {
+    "meta": {
+      "title": "إعدادات العيادة – لوحة الإدارة"
+    },
+    "header": {
+      "title": "إعدادات العيادة",
+      "subtitle": "تكوين معلومات العيادة والتفضيلات"
+    },
+    "sections": {
+      "identity": {
+        "title": "هوية العيادة",
+        "subtitle": "المعلومات الأساسية حول عيادتك"
+      },
+      "contact": {
+        "title": "معلومات الاتصال",
+        "subtitle": "كيف يمكن للمرضى الوصول إليك"
+      },
+      "social": {
+        "title": "وسائل التواصل الاجتماعي",
+        "subtitle": "ربط ملفاتك الشخصية على وسائل التواصل الاجتماعي"
+      },
+      "payment": {
+        "title": "إعدادات الدفع",
+        "subtitle": "تكوين خيارات معالجة المدفوعات"
+      },
+      "hours": {
+        "title": "ساعات التشغيل",
+        "subtitle": "تحديد جدول عمل العيادة"
+      },
+      "cloudflare": {
+        "title": "صور Cloudflare",
+        "subtitle": "تسليم الوسائط عبر شبكة Cloudflare العالمية"
+      }
+    },
+    "form": {
+      "clinicName": {
+        "label": "اسم العيادة",
+        "placeholder": "أدخل اسم عيادتك"
+      },
+      "virtualFee": {
+        "label": "رسوم الاستشارة الافتراضية",
+        "placeholder": "0.00",
+        "hint": "الرسوم المفروضة على الاستشارات الافتراضية"
+      },
+      "logo": {
+        "label": "شعار العيادة",
+        "hint": "رفع شعار عيادتك للعلامة التجارية",
+        "altText": "شعار العيادة"
+      },
+      "address": {
+        "label": "العنوان",
+        "placeholder": "أدخل عنوان الشارع"
+      },
+      "city": {
+        "label": "المدينة",
+        "placeholder": "أدخل المدينة"
+      },
+      "state": {
+        "label": "الولاية/المحافظة",
+        "placeholder": "أدخل الولاية أو المحافظة"
+      },
+      "zipCode": {
+        "label": "الرمز البريدي",
+        "placeholder": "أدخل الرمز البريدي"
+      },
+      "country": {
+        "label": "البلد",
+        "placeholder": "أدخل البلد"
+      },
+      "currency": {
+        "label": "العملة",
+        "hint": "العملة الافتراضية للتسعير والمدفوعات"
+      },
+      "locale": {
+        "label": "الإعدادات المحلية",
+        "hint": "التنسيق الإقليمي للتواريخ والأرقام والعملة"
+      },
+      "phone": {
+        "label": "رقم الهاتف",
+        "placeholder": "أدخل رقم الهاتف"
+      },
+      "email": {
+        "label": "عنوان البريد الإلكتروني",
+        "placeholder": "أدخل عنوان البريد الإلكتروني"
+      },
+      "social": {
+        "facebook": "فيسبوك",
+        "facebookPlaceholder": "https://facebook.com/yourclinic",
+        "instagram": "إنستغرام",
+        "instagramPlaceholder": "https://instagram.com/yourclinic",
+        "twitter": "إكس (تويتر)",
+        "twitterPlaceholder": "https://twitter.com/yourclinic",
+        "linkedin": "لينكد إن",
+        "linkedinPlaceholder": "https://linkedin.com/company/yourclinic"
+      },
+      "hours": {
+        "placeholder": "مثال: 9:00 صباحاً - 5:00 مساءً أو مغلق"
+      },
+      "slotDuration": {
+        "label": "المدة الافتراضية للحجز",
+        "hint": "تحدد المدة الافتراضية للمواعيد الجديدة (بين 5 و240 دقيقة)."
+      },
+      "virtualMeetingLink": {
+        "label": "رابط الاجتماع الافتراضي",
+        "hint": "الرابط الذي يتم تضمينه في رسائل التأكيد للزيارات الافتراضية.",
+        "placeholder": "https://meet.google.com/your-meeting"
+      },
+      "cloudflare": {
+        "accountId": {
+          "label": "معرّف حساب Cloudflare",
+          "placeholder": "أدخل معرّف حساب Cloudflare",
+          "hint": "متوفر في رابط لوحة معلومات Cloudflare Images."
+        },
+        "apiToken": {
+          "label": "رمز واجهة برمجة التطبيقات لـ Cloudflare",
+          "placeholder": "أدخل رمز Cloudflare Images",
+          "hint": "أنشئ رمزاً بصلاحيات Images:Read وImages:Write."
+        }
+      },
+      "paypal": {
+        "environment": {
+          "label": "بيئة PayPal",
+          "hint": "اختر Sandbox للاختبار أو Live للمعاملات الفعلية."
+        },
+        "clientId": {
+          "label": "معرّف عميل PayPal",
+          "placeholder": "أدخل معرّف عميل PayPal",
+          "hint": "انسخه من لوحة مطوري PayPal لتطبيق REST الخاص بك."
+        },
+        "clientSecret": {
+          "label": "الرمز السري لـ PayPal",
+          "placeholder": "أدخل الرمز السري لـ PayPal",
+          "hint": "احتفظ بهذا الرمز بسرية؛ فهو مطلوب للمصادقة مع PayPal."
+        }
+      }
+    },
+    "weekDays": {
+      "monday": "الاثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة",
+      "saturday": "السبت",
+      "sunday": "الأحد"
+    },
+    "actions": {
+      "refresh": "تحديث",
+      "save": "حفظ",
+      "reset": "إعادة تعيين",
+      "saveSettings": "حفظ الإعدادات"
+    },
+    "preview": {
+      "title": "معاينة",
+      "subtitle": "كيف تظهر معلومات عيادتك",
+      "logoLabel": "شعار العيادة",
+      "virtualConsultation": "الاستشارة الافتراضية",
+      "addressNotProvided": "لم يتم توفير العنوان",
+      "virtualMeetingLink": "رابط الاجتماع الافتراضي"
+    },
+    "schedule": {
+      "title": "الجدول",
+      "subtitle": "ساعات التشغيل الحالية",
+      "closed": "مغلق"
+    },
+    "socialLinks": {
+      "title": "وسائل التواصل الاجتماعي",
+      "connected": "منصة واحدة متصلة | {count} منصة متصلة | {count} منصات متصلة"
+    },
+    "paypal": {
+      "title": "تكامل PayPal",
+      "description": "قم بربط بيانات اعتماد PayPal REST لتمكين المدفوعات عبر الإنترنت.",
+      "hintPrimary": "أنشئ تطبيق REST في PayPal للحصول على معرّف العميل والرمز السري.",
+      "hintSecondary": "استخدم بيئة Sandbox للاختبار ثم انتقل إلى Live بعد الموافقة على حسابك.",
+      "currentEnvironment": "البيئة الحالية",
+      "notConfigured": "غير مكون",
+      "configured": "تم حفظ بيانات اعتماد PayPal."
+    },
+    "cloudflare": {
+      "title": "الاتصال بخدمة Cloudflare Images",
+      "description": "خزّن عمليات الرفع في Cloudflare Images للحصول على تسليم أسرع وأكثر أماناً عبر المنصة.",
+      "hint": "أدخل معرّف الحساب ورمز واجهة برمجة التطبيقات بصلاحيات Images من لوحة تحكم Cloudflare.",
+      "configured": "تم حفظ بيانات اعتماد Cloudflare Images."
+    },
+    "metrics": {
+      "identity": {
+        "label": "الهوية",
+        "configured": "مكون",
+        "notSet": "غير محدد",
+        "description": "تعيين اسم العيادة والعلامة التجارية"
+      },
+      "contact": {
+        "label": "الاتصال",
+        "available": "متاح",
+        "missing": "مفقود",
+        "description": "إضافة معلومات الاتصال بالهاتف أو البريد الإلكتروني"
+      },
+      "hours": {
+        "label": "الساعات",
+        "value": "{open}/{total} أيام",
+        "description": "لم يتم تعيين ساعات التشغيل | يوم واحد مكون | {count} أيام مكونة"
+      },
+      "social": {
+        "label": "اجتماعي",
+        "linked": "{count} مرتبط",
+        "none": "لا يوجد",
+        "connectedDescription": "منصة واحدة متصلة | {count} منصة متصلة | {count} منصات متصلة",
+        "noLinksDescription": "ربط ملفاتك الشخصية على وسائل التواصل الاجتماعي"
+      },
+      "slot": {
+        "label": "مدة الحجز",
+        "value": "حجوزات لمدة {minutes} دقيقة",
+        "description": "المدة الافتراضية للمواعيد الجديدة"
+      }
+    },
+    "errors": {
+      "loadTitle": "فشل في تحميل الإعدادات"
+    },
+    "toasts": {
+      "saveSuccess": {
+        "title": "تم حفظ الإعدادات",
+        "description": "تم تحديث إعدادات عيادتك بنجاح"
+      },
+      "saveError": {
+        "title": "فشل الحفظ",
+        "description": "غير قادر على حفظ إعدادات العيادة. يرجى المحاولة مرة أخرى."
+      },
+      "logoSuccess": {
+        "title": "تم رفع الشعار",
+        "description": "تم رفع شعار عيادتك بنجاح"
+      },
+      "logoError": {
+        "title": "فشل الرفع",
+        "description": "غير قادر على رفع الشعار. يرجى المحاولة مرة أخرى."
+      }
+    }
+  },
+  "settings": {
+    "meta": {
+      "title": "إعدادات الملف الشخصي – إدارة العيادة"
+    },
+    "header": {
+      "title": "إعدادات الحساب",
+      "subtitle": "إدارة ملفك الشخصي والأمان وتفضيلات الإشعارات"
+    },
+    "errors": {
+      "loadTitle": "خطأ في تحميل الإعدادات",
+      "loadSubtitle": "غير قادر على جلب معلومات ملفك الشخصي",
+      "profile": {
+        "updateRequired": "يرجى تحديث اسمك أو بريدك الإلكتروني قبل الحفظ.",
+        "updateFailed": "غير قادر على تحديث ملفك الشخصي الآن."
+      },
+      "password": {
+        "completeAllFields": "يرجى إكمال جميع حقول كلمة المرور.",
+        "minimumLength": "يجب أن تكون كلمة المرور الجديدة 8 أحرف على الأقل.",
+        "passwordsDoNotMatch": "كلمة المرور الجديدة والتأكيد غير متطابقين.",
+        "mustBeDifferent": "يجب أن تكون كلمة المرور الجديدة مختلفة عن كلمة المرور الحالية.",
+        "updateFailed": "غير قادر على تحديث كلمة المرور الآن."
+      }
+    },
+    "sections": {
+      "profile": {
+        "title": "تفاصيل الملف الشخصي",
+        "subtitle": "المعلومات المستخدمة عبر أدوات الإدارة"
+      },
+      "security": {
+        "title": "الأمان",
+        "subtitle": "حافظ على أمان حسابك"
+      },
+      "notifications": {
+        "title": "تفضيلات الإشعارات",
+        "subtitle": "تحكم في كيفية إبقائك على اطلاع"
+      },
+      "timezone": {
+        "title": "إعدادات المنطقة الزمنية",
+        "subtitle": "تكوين المنطقة الزمنية للعيادة للمواعيد والتقارير"
+      }
+    },
+    "form": {
+      "profile": {
+        "fullName": "الاسم الكامل",
+        "fullNamePlaceholder": "أدخل اسمك الكامل",
+        "email": "عنوان البريد الإلكتروني",
+        "emailPlaceholder": "you\\u0040clinic.com"
+      }
+    },
+    "profile": {
+      "fullName": "الاسم الكامل",
+      "email": "عنوان البريد الإلكتروني",
+      "role": "الدور",
+      "accountId": "معرف الحساب"
+    },
+    "security": {
+      "password": {
+        "title": "كلمة المرور",
+        "description": "استخدم كلمة مرور قوية تحتوي على ثمانية أحرف على الأقل.",
+        "currentPassword": "كلمة المرور الحالية",
+        "currentPasswordPlaceholder": "كلمة المرور الحالية",
+        "newPassword": "كلمة المرور الجديدة",
+        "newPasswordPlaceholder": "كلمة المرور الجديدة",
+        "confirmPassword": "تأكيد كلمة المرور الجديدة",
+        "confirmPasswordPlaceholder": "كرر كلمة المرور الجديدة",
+        "requirements": "8 أحرف كحد أدنى. يجب أن تكون مختلفة عن كلمة المرور الحالية.",
+        "passwordsDoNotMatch": "كلمات المرور غير متطابقة."
+      },
+      "twoFactor": {
+        "title": "المصادقة الثنائية",
+        "description": "أضف عامل ثاني لحماية البيانات السريرية الحساسة.",
+        "enable": "تفعيل"
+      }
+    },
+    "notifications": {
+      "sound": {
+        "title": "إشعارات صوتية",
+        "description": "تشغيل الصوت الافتراضي للمتصفح عند وصول مواعيد جديدة."
+      },
+      "browser": {
+        "title": "إشعارات المتصفح",
+        "description": "إظهار إشعارات النظام للمواعيد الجديدة.",
+        "notEnabled": "إشعارات المتصفح غير مفعلة.",
+        "enableButton": "تفعيل إشعارات المتصفح"
+      },
+      "appointments": {
+        "title": "إشعارات المواعيد",
+        "description": "احصل على إشعار عند حجز مواعيد جديدة."
+      },
+      "interval": {
+        "title": "فترة التحقق",
+        "description": "كم مرة للتحقق من المواعيد الجديدة (بالثواني).",
+        "options": {
+          "10s": "كل 10 ثوان",
+          "20s": "كل 20 ثانية",
+          "30s": "كل 30 ثانية",
+          "60s": "كل 60 ثانية",
+          "2m": "كل دقيقتين"
+        }
+      }
+    },
+    "sidebar": {
+      "snapshot": {
+        "title": "لمحة سريعة",
+        "subtitle": "نظرة عامة على الحساب",
+        "emailNotAvailable": "البريد الإلكتروني غير متاح",
+        "role": "الدور",
+        "staffId": "معرف الموظف"
+      },
+      "activity": {
+        "title": "النشاط الأخير",
+        "subtitle": "تاريخ نشاط الحساب",
+        "lastLogin": "آخر تسجيل دخول",
+        "passwordUpdated": "آخر تحديث لكلمة المرور",
+        "notAvailable": "غير متاح"
+      }
+    },
+    "metrics": {
+      "email": {
+        "label": "بريد الحساب الإلكتروني",
+        "notSet": "غير محدد",
+        "description": "العنوان الأساسي المستخدم للتنبيهات"
+      },
+      "role": {
+        "label": "الدور",
+        "description": "يتحكم في الوصول عبر الإدارة"
+      },
+      "staffId": {
+        "label": "معرف الموظف",
+        "description": "مرجع داخلي للمراجعة"
+      }
+    },
+    "roles": {
+      "admin": "مدير",
+      "receptionist": "موظف استقبال",
+      "doctor": "طبيب",
+      "staff": "موظف"
+    },
+    "actions": {
+      "reset": "إعادة تعيين",
+      "saveChanges": "حفظ التغييرات",
+      "updatePassword": "تحديث كلمة المرور"
+    },
+    "toasts": {
+      "preferenceUpdated": {
+        "title": "تم تحديث التفضيل",
+        "description": "تم حفظ تفضيل الإشعار الخاص بك."
+      },
+      "notificationsEnabled": {
+        "title": "تم تفعيل الإشعارات",
+        "description": "إشعارات المتصفح مفعلة الآن."
+      },
+      "permissionDenied": {
+        "title": "تم رفض الإذن",
+        "description": "يرجى تفعيل الإشعارات في إعدادات المتصفح."
+      },
+      "passwordUpdated": {
+        "title": "تم تحديث كلمة المرور",
+        "description": "تم تغيير كلمة المرور بنجاح."
+      },
+      "profileUpdated": {
+        "title": "تم تحديث الملف الشخصي"
+      }
+    },
+    "timezone": {
+      "label": "المنطقة الزمنية للعيادة",
+      "placeholder": "اختر المنطقة الزمنية",
+      "preview": {
+        "title": "معاينة المنطقة الزمنية",
+        "current": "الوقت الحالي",
+        "offset": "إزاحة التوقيت العالمي"
+      },
+      "info": {
+        "title": "ملاحظة مهمة",
+        "description": "سيتم عرض جميع أوقات المواعيد والتقارير في المنطقة الزمنية المحددة لجميع مستخدمي الإدارة."
+      }
+    }
+  },
+  "imageUpload": {
+    "dropOrClick": "اسحب الصورة هنا أو انقر للتصفح",
+    "formatSize": "{accept} حتى {maxSize} ميجابايت",
+    "remove": "إزالة",
+    "dropHere": "اسحب الصورة هنا",
+    "dragAndDrop": "اسحب وأفلت صورة هنا",
+    "chooseFile": "اختر ملف",
+    "supportedFormats": "PNG، JPG، GIF حتى 10 ميجابايت",
+    "uploading": "جاري الرفع...",
+    "errors": {
+      "invalidType": "يرجى اختيار ملف صورة صالح",
+      "fileTooLarge": "يجب أن يكون حجم الملف أقل من 10 ميجابايت",
+      "uploadFailed": "فشل الرفع. يرجى المحاولة مرة أخرى."
+    }
+  },
+  "materials": {
+    "meta": {
+      "title": "مواد العلاج – إدارة العيادة"
+    },
+    "header": {
+      "title": "مواد العلاج",
+      "subtitle": "حافظ على تحديث تكاليف الوحدة والتوافر للحصول على استخدام دقيق للكرسي والفوترة"
+    },
+    "actions": {
+      "refresh": "تحديث",
+      "add": "إضافة مادة",
+      "edit": "تعديل",
+      "activate": "تفعيل",
+      "deactivate": "إلغاء التفعيل"
+    },
+    "metrics": {
+      "total": {
+        "label": "إجمالي المواد",
+        "description": "العناصر في الكتالوج"
+      },
+      "active": {
+        "label": "المواد النشطة",
+        "description": "متاحة للعلاجات"
+      },
+      "inactive": {
+        "label": "المواد غير النشطة",
+        "description": "غير متاحة للاستخدام"
+      },
+      "averageCost": {
+        "label": "متوسط التكلفة",
+        "description": "عبر المواد النشطة"
+      }
+    },
+    "search": {
+      "title": "البحث والتصفية",
+      "subtitle": "العثور على مواد علاج محددة",
+      "placeholder": "البحث بالاسم أو الوصف أو الوحدة...",
+      "label": "البحث في المواد",
+      "statusFilter": "تصفية الحالة"
+    },
+    "list": {
+      "title": "مواد العلاج",
+      "count": "تم العثور على {count} مادة"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "all": "جميع الحالات"
+    },
+    "card": {
+      "per": "لكل {unit}",
+      "unit": "الوحدة: {unit}",
+      "updated": "تم التحديث {date}",
+      "defaultUnit": "قطعة",
+      "clinicPriceLabel": "سعر العيادة ({currency})",
+      "originalPriceLabel": "السعر الأصلي"
+    },
+    "empty": {
+      "title": "لم يتم العثور على مواد",
+      "searchHint": "جرب تعديل البحث أو المرشحات",
+      "createHint": "ابدأ بإنشاء مادتك الأولى",
+      "action": "إضافة مادة"
+    },
+    "modal": {
+      "create": {
+        "title": "إضافة مادة",
+        "subtitle": "الاسم وتكلفة الوحدة والقياس يحافظان على اتساق المخزون عبر العلاجات"
+      },
+      "edit": {
+        "title": "تعديل المادة",
+        "subtitle": "الاسم وتكلفة الوحدة والقياس يحافظان على اتساق المخزون عبر العلاجات"
+      },
+      "form": {
+        "name": {
+          "label": "اسم المادة",
+          "placeholder": "مثال: أقواس الأسنان (معدنية)",
+          "required": true
+        },
+        "description": {
+          "label": "الوصف",
+          "placeholder": "وصف اختياري"
+        },
+        "unitCost": {
+          "label": "تكلفة الوحدة",
+          "placeholder": "0.00",
+          "required": true
+        },
+        "unitOfMeasure": {
+          "label": "وحدة القياس",
+          "placeholder": "مثال: قطعة، مل، صندوق"
+        },
+        "currency": {
+          "label": "العملة",
+          "placeholder": "اختر العملة",
+          "required": true
+        },
+        "active": {
+          "label": "المادة نشطة ويمكن استخدامها في خطط العلاج."
+        }
+      },
+      "actions": {
+        "cancel": "إلغاء",
+        "create": "إنشاء مادة",
+        "update": "تحديث المادة"
+      }
+    },
+    "toasts": {
+      "loadError": "فشل في تحميل المواد",
+      "createSuccess": "تم إنشاء المادة",
+      "createError": "تعذر إنشاء المادة",
+      "updateSuccess": "تم تحديث المادة",
+      "updateError": "تعذر تحديث المادة",
+      "activateSuccess": "تم تفعيل المادة",
+      "activateError": "فشل في تفعيل المادة",
+      "deactivateSuccess": "تم إلغاء تفعيل المادة",
+      "deactivateError": "فشل في إلغاء تفعيل المادة",
+      "validation": {
+        "nameRequired": "اسم المادة مطلوب",
+        "costPositive": "يجب أن تكون تكلفة الوحدة صفر أو أعلى"
+      }
+    }
+  },
+  "error": {
+    "403": {
+      "title": "تم رفض الوصول",
+      "description": "ليس لديك إذن للوصول إلى هذا المورد. يرجى الاتصال بالمسؤول إذا كنت تعتقد أن هذا خطأ.",
+      "backToHome": "العودة إلى الصفحة الرئيسية",
+      "contactSupport": "اتصل بالدعم"
+    }
+  },
+  "currency": {
+    "clinic": "عملة العيادة",
+    "original": "الأصلي"
+  }
+}

@@ -1,0 +1,64 @@
+name: Staging Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  staging_web_next:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter web-next build
+      - name: Deploy to Vercel (staging)
+        run: |
+          pnpm dlx vercel deploy \
+            --cwd apps/web-next \
+            --token ${{ secrets.VERCEL_TOKEN }} \
+            --scope ${{ secrets.VERCEL_ORG_ID }} \
+            --project ${{ secrets.VERCEL_WEB_PROJECT_ID }} \
+            --env=STAGING=true
+
+  staging_admin_nuxt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter admin-nuxt build
+      - name: Deploy to Vercel (staging)
+        run: |
+          pnpm dlx vercel deploy \
+            --cwd apps/admin-nuxt \
+            --token ${{ secrets.VERCEL_TOKEN }} \
+            --scope ${{ secrets.VERCEL_ORG_ID }} \
+            --project ${{ secrets.VERCEL_ADMIN_PROJECT_ID }} \
+            --env=STAGING=true
+
+  staging_api:
+    runs-on: ubuntu-latest
+    needs:
+      - staging_web_next
+      - staging_admin_nuxt
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@v1
+      - name: Deploy staging API
+        run: |
+          flyctl deploy \
+            --config apps/api/fly.staging.toml \
+            --app ${{ secrets.FLY_STAGING_APP_NAME }} \
+            --dockerfile apps/api/Dockerfile \
+            --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

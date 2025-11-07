@@ -1,0 +1,31 @@
+# Ignore packages directory - not for deployment
+packages/
+
+# Ignore monorepo workspace config
+pnpm-workspace.yaml
+
+# Ignore other workspace files
+nuxt-app/
+
+# Ignore development files
+*.md
+!README.md
+!apps/*/README.md
+
+# Ignore build artifacts
+.nuxt/
+.next/
+dist/
+build/
+node_modules/
+
+# Ignore IDE files
+.vscode/
+.idea/
+
+# Ignore macOS files
+.DS_Store
+
+# Ignore git files
+.git/
+.gitignore

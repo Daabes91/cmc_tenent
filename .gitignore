@@ -1,0 +1,66 @@
+# Node / PNPM
+node_modules
+.pnpm-store
+
+# Next.js
+.next
+out
+
+# Build artifacts
+dist
+build
+
+# Env files
+.env
+.env.*
+!.env.production.template
+
+# Security - JWT Keys and Secrets
+*.pem
+# Allow bundled development keys for fallback
+!apps/api/src/main/resources/keys/*.pem
+DEPLOYMENT-VALUES.md
+
+# DigitalOcean
+.do/deploy.log
+
+# Local deployment guides (not needed in GitHub)
+START-HERE.md
+DEPLOYMENT-READY.md
+DEPLOYMENT-CHECKLIST.md
+INTEGRATIONS-SETUP-GUIDE.md
+QUICK-START-DEPLOYMENT.md
+SECURITY-WARNING.md
+CLEANUP-SUMMARY.md
+GIT-CLEANUP-COMPLETE.md
+
+# Development/test documentation (local only)
+TEST_EXECUTION_SUMMARY.md
+DYNAMIC_BRANDING_REACTIVITY_TESTS.md
+INTL_CONTEXT_FIX.md
+PAYMENT_FEATURE_ANALYSIS.md
+TREATMENT_PLAN_SYSTEM.md
+PRODUCT_REQUIREMENTS_DOCUMENT.md
+paypal-arabic-support.md
+paypal-theme-customization.md
+setup-paypal.md
+test-paypal-integration.md
+
+# Kiro specs (local only)
+.kiro/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Nuxt (anywhere in project)
+**/.nuxt/
+**/.output/
+**/--port/
+**/--clear/

@@ -1,0 +1,743 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --surface-card: rgba(255, 255, 255, 0.96);
+    --surface-card-muted: rgba(248, 250, 252, 0.9);
+    --surface-border: rgba(148, 163, 184, 0.45);
+    --surface-text-primary: #0f172a;
+    --surface-text-muted: #475569;
+  }
+
+  .dark {
+    --surface-card: rgba(15, 23, 42, 0.8);
+    --surface-card-muted: rgba(30, 41, 59, 0.7);
+    --surface-border: rgba(148, 163, 184, 0.22);
+    --surface-text-primary: #e2e8f0;
+    --surface-text-muted: #cbd5f5;
+  }
+
+  body {
+    color: var(--surface-text-primary);
+    background-color: #f8fafc;
+  }
+
+  .dark body {
+    background-color: #020617;
+    color: var(--surface-text-primary);
+  }
+
+  input,
+  textarea,
+  select,
+  input.form-input,
+  textarea.form-textarea,
+  select.form-select {
+    color: inherit !important;
+    background-color: inherit;
+    /* Prevent zoom on iOS Safari */
+    font-size: 16px;
+  }
+
+  /* Prevent zoom on iOS Safari by ensuring input fields have minimum 16px font size */
+  @media screen and (max-width: 768px) {
+    input,
+    textarea,
+    select,
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="number"],
+    .form-input,
+    .form-textarea,
+    .form-select {
+      font-size: 16px !important;
+    }
+    
+    /* Ensure search inputs specifically have 16px font size */
+    input[data-search-input],
+    input[placeholder*="search" i],
+    input[placeholder*="Search" i] {
+      font-size: 16px !important;
+    }
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(100, 116, 139, 0.8) !important;
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: rgba(148, 163, 184, 0.7) !important;
+  }
+
+  input:-webkit-autofill,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-text-fill-color: inherit !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
+
+@layer components {
+  .page-content {
+    color: var(--surface-text-primary);
+  }
+
+  .page-content .muted-text {
+    color: var(--surface-text-muted);
+  }
+}
+
+@layer utilities {
+  .page-surface {
+    background: var(--surface-card);
+    border-color: var(--surface-border);
+  }
+
+  .page-surface-muted {
+    background: var(--surface-card-muted);
+    border-color: var(--surface-border);
+  }
+
+  .page-content .surface-card {
+    background: var(--surface-card);
+    border-color: var(--surface-border);
+  }
+
+  .page-content .surface-muted {
+    background: var(--surface-card-muted);
+    border-color: var(--surface-border);
+  }
+
+  .dark .page-content .text-slate-900,
+  .dark .page-content .text-gray-900,
+  .dark .page-content .text-zinc-900 {
+    color: #f8fafc !important;
+  }
+
+  .dark .page-content .text-slate-800,
+  .dark .page-content .text-gray-800 {
+    color: #e2e8f0 !important;
+  }
+
+  .dark .page-content .text-slate-700,
+  .dark .page-content .text-gray-700 {
+    color: #dbeafe !important;
+  }
+
+  .dark .page-content .text-slate-600,
+  .dark .page-content .text-gray-600 {
+    color: #cbd5f5 !important;
+  }
+
+  .dark .page-content .text-slate-500,
+  .dark .page-content .text-gray-500,
+  .dark .page-content .text-muted {
+    color: #a5b4fc !important;
+  }
+
+  .dark .page-content .bg-white {
+    background-color: rgba(15, 23, 42, 0.78) !important;
+  }
+
+  .dark .page-content .bg-white\/95 {
+    background-color: rgba(15, 23, 42, 0.85) !important;
+  }
+
+  .dark .page-content .bg-white\/80 {
+    background-color: rgba(30, 41, 59, 0.65) !important;
+  }
+
+  .dark .page-content .bg-white\/60 {
+    background-color: rgba(30, 41, 59, 0.5) !important;
+  }
+
+  .dark .page-content .bg-slate-50,
+  .dark .page-content .bg-slate-100,
+  .dark .page-content .bg-blue-50,
+  .dark .page-content .bg-emerald-50,
+  .dark .page-content .bg-purple-50,
+  .dark .page-content .bg-amber-50 {
+    background-color: rgba(30, 41, 59, 0.55) !important;
+  }
+  .dark .page-content .bg-blue-100 {
+    background-color: rgba(59, 130, 246, 0.22) !important;
+  }
+  .dark .page-content .bg-amber-100 {
+    background-color: rgba(251, 191, 36, 0.25) !important;
+  }
+  .dark .page-content .bg-green-100,
+  .dark .page-content .bg-emerald-100 {
+    background-color: rgba(16, 185, 129, 0.22) !important;
+  }
+  .dark .page-content .bg-purple-100 {
+    background-color: rgba(168, 85, 247, 0.25) !important;
+  }
+
+  .bg-primary-gradient {
+    background-image: linear-gradient(135deg, #13b0a9, #0d7377);
+  }
+  .dark .bg-primary-gradient {
+    background-image: linear-gradient(135deg, #13b0a9, #0d7377);
+  }
+
+  .bg-primary-gradient-soft {
+    background-image: linear-gradient(
+      135deg,
+      rgba(19, 176, 169, 0.14),
+      rgba(13, 115, 119, 0.14)
+    );
+  }
+  .dark .bg-primary-gradient-soft {
+    background-image: linear-gradient(
+      135deg,
+      rgba(19, 176, 169, 0.22),
+      rgba(13, 115, 119, 0.22)
+    );
+  }
+
+  .dark .page-content .border-slate-200,
+  .dark .page-content .border-slate-200\/60,
+  .dark .page-content .border-slate-200\/80,
+  .dark .page-content .border-gray-200 {
+    border-color: rgba(148, 163, 184, 0.25) !important;
+  }
+  .dark .page-content .border-sky-100 {
+    border-color: rgba(56, 189, 248, 0.3) !important;
+  }
+  .dark .page-content .border-emerald-100 {
+    border-color: rgba(52, 211, 153, 0.28) !important;
+  }
+  .dark .page-content .border-purple-100 {
+    border-color: rgba(192, 132, 252, 0.32) !important;
+  }
+
+  .dark .page-content .shadow-slate-200\/50,
+  .dark .page-content .shadow-slate-200\/60 {
+    --tw-shadow-color: rgba(15, 23, 42, 0.6) !important;
+    --tw-shadow: var(--tw-shadow-colored);
+  }
+
+  .dark .page-content .from-white {
+    --tw-gradient-from: rgba(25, 87, 101, 0.85) !important;
+    --tw-gradient-to: rgba(13, 129, 152, 0) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+
+  .dark .page-content .via-white {
+    --tw-gradient-stops: var(--tw-gradient-from), rgba(35, 80, 90, 0.65), var(--tw-gradient-to) !important;
+  }
+
+  .dark .page-content .to-white {
+    --tw-gradient-to: rgba(15, 36, 42, 0.7) !important;
+  }
+
+  .dark .page-content .from-slate-50,
+  .dark .page-content .from-slate-100 {
+    --tw-gradient-from: rgba(38, 70, 84, 0.7) !important;
+    --tw-gradient-to: rgba(30, 51, 59, 0) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+
+  .dark .page-content .via-slate-50,
+  .dark .page-content .via-slate-100 {
+    --tw-gradient-stops: var(--tw-gradient-from), rgba(30, 50, 59, 0.55), var(--tw-gradient-to) !important;
+  }
+
+  .dark .page-content .to-slate-50,
+  .dark .page-content .to-slate-100 {
+    --tw-gradient-to: rgba(15, 34, 42, 0.6) !important;
+  }
+
+  .dark .page-content [class*="from-sky-"] {
+    --tw-gradient-from: rgba(8, 145, 178, 0.35) !important;
+    --tw-gradient-to: rgba(8, 145, 178, 0) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+
+  .dark .page-content [class*="via-sky-"] {
+    --tw-gradient-stops: var(--tw-gradient-from), rgba(14, 165, 233, 0.25), var(--tw-gradient-to) !important;
+  }
+
+  .dark .page-content [class*="to-sky-"] {
+    --tw-gradient-to: rgba(8, 145, 178, 0.22) !important;
+  }
+
+  .dark .page-content [class*="from-emerald-"] {
+    --tw-gradient-from: rgba(16, 185, 129, 0.28) !important;
+    --tw-gradient-to: rgba(16, 185, 182, 0) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+
+  .dark .page-content [class*="via-emerald-"] {
+    --tw-gradient-stops: var(--tw-gradient-from), rgba(16, 185, 129, 0.22), var(--tw-gradient-to) !important;
+  }
+
+  .dark .page-content [class*="to-emerald-"] {
+    --tw-gradient-to: rgba(16, 185, 129, 0.2) !important;
+  }
+
+  .dark .page-content [class*="from-purple-"] {
+    --tw-gradient-from: rgba(85, 231, 247, 0.3) !important;
+    --tw-gradient-to: rgba(85, 225, 247, 0) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+
+  .dark .page-content [class*="via-purple-"] {
+    --tw-gradient-stops: var(--tw-gradient-from), rgba(85, 215, 247, 0.22), var(--tw-gradient-to) !important;
+  }
+
+  .dark .page-content [class*="to-purple-"] {
+    --tw-gradient-to: rgba(34, 174, 206, 0.22) !important;
+  }
+
+  .dark .page-content [class*="from-blue-"] {
+    --tw-gradient-from: rgba(59, 218, 246, 0.32) !important;
+    --tw-gradient-to: rgba(59, 193, 246, 0) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+
+  .dark .page-content [class*="via-blue-"] {
+    --tw-gradient-stops: var(--tw-gradient-from), rgba(37, 222, 235, 0.24), var(--tw-gradient-to) !important;
+  }
+
+  .dark .page-content [class*="to-blue-"] {
+    --tw-gradient-to: rgba(37, 205, 235, 0.22) !important;
+  }
+}
+
+/* Enhanced Notification Animations */
+@keyframes notification-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes notification-slide-out {
+  from {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(120%) scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes notification-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+/* Notification wrapper enhancements */
+.notification-wrapper {
+  animation: notification-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notification-wrapper.notification-exit {
+  animation: notification-slide-out 0.3s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Hover effects for notifications */
+.notification-wrapper:hover {
+  transform: scale(1.02);
+  transition: transform 0.2s ease-out;
+}
+
+/* Progress bar animation */
+@keyframes progress-bar {
+  from {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  to {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+/* Notification icon pulse for important messages */
+@keyframes icon-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+.notification-icon-pulse {
+  animation: icon-pulse 2s ease-in-out infinite;
+}
+
+/* Color-specific border accents */
+.notification-success {
+  border-left: 4px solid #16a34a;
+}
+
+.notification-error {
+  border-left: 4px solid #dc2626;
+}
+
+.notification-warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.notification-info {
+  border-left: 4px solid #3b82f6;
+}
+
+/* Enhanced shadow on hover */
+.notification-wrapper:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  transition: box-shadow 0.3s ease-out, transform 0.2s ease-out;
+}
+
+/* Stacking effect for multiple notifications */
+.notification-wrapper + .notification-wrapper {
+  margin-top: 1rem;
+}
+
+/* Smooth scrollbar for notification container */
+.notifications-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notifications-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notifications-container::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+}
+
+.notifications-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* RTL Support for Notifications */
+.notification-wrapper.rtl {
+  direction: rtl;
+  text-align: left;
+}
+
+.notification-wrapper.ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+/* RTL-specific animations */
+@keyframes notification-slide-in-rtl {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes notification-slide-out-rtl {
+  from {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-120%) scale(0.95);
+    opacity: 0;
+  }
+}
+
+/* Tailwind animate-in override for left slide */
+@keyframes slide-in-from-left-full {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-from-left-full {
+  animation: slide-in-from-left-full 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notification-wrapper.rtl {
+  animation: notification-slide-in-rtl 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notification-wrapper.rtl.notification-exit {
+  animation: notification-slide-out-rtl 0.3s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* RTL container positioning */
+.rtl-container {
+  direction: rtl;
+  text-align: right;
+}
+
+.ltr-container {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Tailwind animation overrides for RTL */
+.slide-in-from-left-full {
+  animation: notification-slide-in-rtl 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide-in-from-right-full {
+  animation: notification-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Ensure proper stacking for RTL notifications */
+[dir="rtl"] .notification-wrapper {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+[dir="ltr"] .notification-wrapper {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* Dynamic positioning based on HTML dir attribute */
+[dir="rtl"] .notifications-container,
+[dir="rtl"] [data-notifications-container] {
+  left: 0 !important;
+  right: auto !important;
+}
+
+[dir="ltr"] .notifications-container,
+[dir="ltr"] [data-notifications-container] {
+  right: 0 !important;
+  left: auto !important;
+}
+
+/* Override Nuxt UI notification positioning for RTL */
+html[dir="rtl"] .fixed.inset-0.flex.flex-col.items-end {
+  align-items: flex-start !important;
+}
+
+html[dir="rtl"] .fixed.inset-0.flex.flex-col.items-end.justify-start {
+  align-items: flex-start !important;
+}
+
+/* More specific selectors for Nuxt UI notifications container */
+html[dir="rtl"] [data-headlessui-portal] > div:has(.fixed.inset-0.flex.flex-col) .fixed.inset-0.flex.flex-col {
+  align-items: flex-start !important;
+}
+
+html[dir="ltr"] [data-headlessui-portal] > div:has(.fixed.inset-0.flex.flex-col) .fixed.inset-0.flex.flex-col {
+  align-items: flex-end !important;
+}
+
+/* Target the notification container more specifically */
+html[dir="rtl"] .fixed.z-\\[100\\].pointer-events-none {
+  align-items: flex-start !important;
+}
+
+html[dir="ltr"] .fixed.z-\\[100\\].pointer-events-none {
+  align-items: flex-end !important;
+}
+
+/* Force positioning for notification wrapper based on direction */
+html[dir="rtl"] .fixed.inset-0.flex.flex-col.justify-start.z-\\[100\\].pointer-events-none {
+  align-items: flex-start !important;
+}
+
+html[dir="ltr"] .fixed.inset-0.flex.flex-col.justify-start.z-\\[100\\].pointer-events-none {
+  align-items: flex-end !important;
+}
+
+/* Body class-based targeting for more reliable positioning */
+.rtl-mode .fixed.inset-0.flex.flex-col {
+  align-items: flex-start !important;
+}
+
+.ltr-mode .fixed.inset-0.flex.flex-col {
+  align-items: flex-end !important;
+}
+
+/* Additional targeting for notification containers */
+.rtl-mode .fixed.inset-0.flex.flex-col.items-end {
+  align-items: flex-start !important;
+}
+
+.ltr-mode .fixed.inset-0.flex.flex-col.items-start {
+  align-items: flex-end !important;
+}
+
+/* Ensure proper slide animations based on body class */
+.rtl-mode .slide-in-from-right-full {
+  animation: notification-slide-in-rtl 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.ltr-mode .slide-in-from-right-full {
+  animation: notification-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* More aggressive positioning overrides */
+.rtl-mode div[data-headlessui-portal] > div > .fixed.inset-0.flex.flex-col,
+.rtl-mode .fixed.inset-0.flex.flex-col.justify-start.z-\\[100\\],
+.rtl-mode .fixed.inset-0.flex.flex-col[style*="z-index: 100"] {
+  align-items: flex-start !important;
+  left: 0 !important;
+  right: auto !important;
+}
+
+.ltr-mode div[data-headlessui-portal] > div > .fixed.inset-0.flex.flex-col,
+.ltr-mode .fixed.inset-0.flex.flex-col.justify-start.z-\\[100\\],
+.ltr-mode .fixed.inset-0.flex.flex-col[style*="z-index: 100"] {
+  align-items: flex-end !important;
+  right: 0 !important;
+  left: auto !important;
+}
+
+/* Target any notification container with high specificity */
+body.rtl-mode .fixed.inset-0.flex.flex-col.items-end.justify-start.pointer-events-none {
+  align-items: flex-start !important;
+}
+
+body.ltr-mode .fixed.inset-0.flex.flex-col.items-start.justify-start.pointer-events-none {
+  align-items: flex-end !important;
+}
+
+/* Override inline styles if present */
+body.rtl-mode [style*="align-items: flex-end"] {
+  align-items: flex-start !important;
+}
+
+body.ltr-mode [style*="align-items: flex-start"] {
+  align-items: flex-end !important;
+}
+
+/* RTL-specific border accents */
+.notification-wrapper.rtl.notification-success {
+  border-left: none;
+  border-right: 4px solid #16a34a;
+}
+
+.notification-wrapper.rtl.notification-error {
+  border-left: none;
+  border-right: 4px solid #dc2626;
+}
+
+.notification-wrapper.rtl.notification-warning {
+  border-left: none;
+  border-right: 4px solid #f59e0b;
+}
+
+.notification-wrapper.rtl.notification-info {
+  border-left: none;
+  border-right: 4px solid #3b82f6;
+}
+
+/* RTL icon positioning */
+.notification-wrapper.rtl .notification-icon {
+  margin-left: 0.75rem;
+  margin-right: 0;
+}
+
+.notification-wrapper.ltr .notification-icon {
+  margin-right: 0.75rem;
+  margin-left: 0;
+}
+
+/* RTL close button positioning */
+.notification-wrapper.rtl .notification-close {
+  left: 0.5rem;
+  right: auto;
+}
+
+.notification-wrapper.ltr .notification-close {
+  right: 0.5rem;
+  left: auto;
+}
+
+/* Toast notification positioning based on document direction */
+html[dir="rtl"] .fixed.flex.flex-col,
+html[dir="rtl"] div[class*="end-0"] {
+  align-items: flex-start !important;
+  left: 0 !important;
+  right: auto !important;
+}
+
+html[dir="ltr"] .fixed.flex.flex-col,
+html[dir="ltr"] div[class*="end-0"] {
+  align-items: flex-end !important;
+  right: 0 !important;
+  left: auto !important;
+}
+
+/* Override notification slide animation based on direction */
+html[dir="rtl"] .slide-in-from-right-full {
+  animation: slide-in-from-left-full 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+html[dir="ltr"] .slide-in-from-left-full {
+  animation: notification-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Page Transitions */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Mobile Touch Optimization */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent text selection on touch devices for UI elements */
+@media (hover: none) and (pointer: coarse) {
+  .touch-manipulation {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Smooth scrolling for mobile */
+@media screen and (max-width: 768px) {
+  html {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent horizontal scroll on mobile */
+  body {
+    overflow-x: hidden;
+  }
+}

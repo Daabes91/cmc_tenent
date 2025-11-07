@@ -1,0 +1,84 @@
+name: Release Deploy
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  deploy_web_next:
+    name: Deploy Public Web (web-next)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build web
+        run: pnpm --filter web-next build
+      - name: Deploy to Vercel
+        run: |
+          pnpm dlx vercel deploy --prod \
+            --cwd apps/web-next \
+            --token ${{ secrets.VERCEL_TOKEN }} \
+            --scope ${{ secrets.VERCEL_ORG_ID }} \
+            --project ${{ secrets.VERCEL_WEB_PROJECT_ID }}
+
+  deploy_admin_nuxt:
+    name: Deploy Admin App (admin-nuxt)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build admin
+        run: pnpm --filter admin-nuxt build
+      - name: Deploy to Vercel
+        run: |
+          pnpm dlx vercel deploy --prod \
+            --cwd apps/admin-nuxt \
+            --token ${{ secrets.VERCEL_TOKEN }} \
+            --scope ${{ secrets.VERCEL_ORG_ID }} \
+            --project ${{ secrets.VERCEL_ADMIN_PROJECT_ID }}
+
+  deploy_api:
+    name: Deploy API
+    runs-on: ubuntu-latest
+    needs:
+      - deploy_web_next
+      - deploy_admin_nuxt
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@v1
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Build API image
+        run: ./gradlew bootBuildImage --imageName=registry.fly.io/${{ secrets.FLY_APP_NAME }}
+        working-directory: apps/api
+      - name: Push image and deploy
+        run: |
+          flyctl deploy \
+            --build-arg JDK_VERSION=21 \
+            --image registry.fly.io/${{ secrets.FLY_APP_NAME }} \
+            --config apps/api/fly.toml \
+            --app ${{ secrets.FLY_APP_NAME }} \
+            --dockerfile apps/api/Dockerfile \
+            --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      - name: Run migrations
+        run: |
+          flyctl ssh console --app ${{ secrets.FLY_APP_NAME }} -C "cd /app && ./gradlew flywayMigrate"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

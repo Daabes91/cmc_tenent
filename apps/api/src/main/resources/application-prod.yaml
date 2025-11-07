@@ -1,0 +1,17 @@
+# Production environment configuration
+# This file requires environment variables to be set - no defaults provided
+# If any required variable is missing, the application will fail to start
+security:
+  jwt:
+    patient:
+      issuer: ${JWT_PATIENT_ISSUER}
+      audience: ${JWT_PATIENT_AUDIENCE}
+      public-key: ${JWT_PATIENT_PUBLIC_KEY}
+      private-key: ${JWT_PATIENT_PRIVATE_KEY}
+      clock-skew: PT30S
+    staff:
+      issuer: ${JWT_STAFF_ISSUER}
+      audience: ${JWT_STAFF_AUDIENCE}
+      public-key: ${JWT_STAFF_PUBLIC_KEY}
+      private-key: ${JWT_STAFF_PRIVATE_KEY}
+      clock-skew: PT30S

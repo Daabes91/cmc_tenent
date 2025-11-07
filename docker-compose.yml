@@ -1,0 +1,96 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: clinic-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: clinic_multi_tenant
+      POSTGRES_USER: clinic
+      POSTGRES_PASSWORD: clinic_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8"
+    ports:
+      - "5442:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - clinic-net
+
+  api:
+    build:
+      context: apps/api
+      dockerfile: Dockerfile
+    container_name: clinic-api
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/clinic_multi_tenant
+      SPRING_DATASOURCE_USERNAME: clinic
+      SPRING_DATASOURCE_PASSWORD: clinic_password
+      SPRING_PROFILES_ACTIVE: prod
+      PUBLIC_APP_ORIGIN: http://web:3001
+      ADMIN_APP_ORIGIN: http://admin:3000
+      ADMIN_IP_ALLOWLIST: 0.0.0.0/0,::/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+      - "8080:8080"
+    networks:
+      - clinic-net
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web-next/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080/public
+        NEXT_SERVER_API_URL: http://api:8080/public
+    container_name: clinic-web
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080/public
+      NEXT_SERVER_API_URL: http://api:8080/public
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    networks:
+      - clinic-net
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin-nuxt/Dockerfile
+      args:
+        NUXT_PUBLIC_API_BASE: http://localhost:8080/admin
+        NUXT_PRIVATE_API_BASE: http://api:8080/admin
+    container_name: clinic-admin
+    restart: unless-stopped
+    environment:
+      NUXT_PUBLIC_API_BASE: http://localhost:8080/admin
+      NUXT_PRIVATE_API_BASE: http://api:8080/admin
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    networks:
+      - clinic-net
+
+volumes:
+  postgres_data:
+
+networks:
+  clinic-net:
+    driver: bridge

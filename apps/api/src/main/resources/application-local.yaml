@@ -1,0 +1,27 @@
+# Local development overrides
+security:
+  admin:
+    ip-allowlist:
+      - 0.0.0.0/0
+      - ::/0
+  jwt:
+    staff:
+      private-key: classpath:keys/staff_private.pem
+      public-key: classpath:keys/staff_public.pem
+    patient:
+      private-key: classpath:keys/patient_private.pem
+      public-key: classpath:keys/patient_public.pem
+  cloudflare:
+    images:
+      account-id: c91a793d345e6332dfb35f8292e699ab
+      api-token: EpveA6nXt-JnIbk-gBczQr7ZSA5d3o2wjsK2DGQ4
+      base-url: https://api.cloudflare.com/client/v4
+      delivery-url: https://imagedelivery.net/K88oXEK4nwOFUDLZaSq1vg
+      max-file-size-mb: 10
+      image-quality: 85
+      auto-optimize: true
+      allowed-extensions: jpg,jpeg,png,webp,gif
+
+server:
+  servlet:
+    context-path: /api
