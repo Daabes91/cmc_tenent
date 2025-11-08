@@ -12,18 +12,31 @@ import java.util.Optional;
 @Repository
 public interface MaterialCatalogRepository extends JpaRepository<MaterialCatalogEntity, Long> {
 
-    Optional<MaterialCatalogEntity> findByName(String name);
+    /**
+     * Find all materials for a specific tenant
+     */
+    List<MaterialCatalogEntity> findAllByTenantId(Long tenantId);
 
-    List<MaterialCatalogEntity> findByActiveTrue();
+    /**
+     * Find material by ID and tenant ID
+     */
+    Optional<MaterialCatalogEntity> findByIdAndTenantId(Long id, Long tenantId);
 
-    List<MaterialCatalogEntity> findByActiveFalse();
+    /**
+     * Find material by name and tenant ID
+     */
+    Optional<MaterialCatalogEntity> findByTenantIdAndName(Long tenantId, String name);
 
+    /**
+     * Search materials by tenant ID and search term
+     */
     @Query("""
             select m from MaterialCatalogEntity m
-            where lower(m.name) like lower(concat('%', :term, '%'))
+            where m.tenant.id = :tenantId
+              and (lower(m.name) like lower(concat('%', :term, '%'))
                or lower(coalesce(m.description, '')) like lower(concat('%', :term, '%'))
-               or lower(coalesce(m.unitOfMeasure, '')) like lower(concat('%', :term, '%'))
+               or lower(coalesce(m.unitOfMeasure, '')) like lower(concat('%', :term, '%')))
             order by m.createdAt desc
             """)
-    List<MaterialCatalogEntity> searchMaterials(@Param("term") String term, Pageable pageable);
+    List<MaterialCatalogEntity> searchMaterialsByTenantId(@Param("tenantId") Long tenantId, @Param("term") String term, Pageable pageable);
 }

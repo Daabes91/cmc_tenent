@@ -1,5 +1,6 @@
 package com.clinic.modules.core.insurance;
 
+import com.clinic.modules.core.tenant.TenantEntity;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.Objects;
@@ -11,6 +12,10 @@ public class InsuranceCompanyEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private TenantEntity tenant;
 
     @Column(name = "name_en", nullable = false, length = 160)
     private String nameEn;
@@ -126,6 +131,14 @@ public class InsuranceCompanyEntity {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public TenantEntity getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(TenantEntity tenant) {
+        this.tenant = tenant;
     }
 
     // Update method

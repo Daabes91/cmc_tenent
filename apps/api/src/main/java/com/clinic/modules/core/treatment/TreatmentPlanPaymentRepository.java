@@ -22,6 +22,18 @@ public interface TreatmentPlanPaymentRepository extends JpaRepository<TreatmentP
     List<TreatmentPlanPaymentEntity> findByPaymentDateBetween(Instant start, Instant end);
 
     /**
+     * Find payments by tenant and date range.
+     */
+    @Query("""
+            select p from TreatmentPlanPaymentEntity p
+            where p.treatmentPlan.tenant.id = :tenantId
+              and p.paymentDate between :start and :end
+            """)
+    List<TreatmentPlanPaymentEntity> findByTenantIdAndPaymentDateBetween(@Param("tenantId") Long tenantId,
+                                                                          @Param("start") Instant start,
+                                                                          @Param("end") Instant end);
+
+    /**
      * Find payments by patient (through treatment plan).
      */
     @Query("SELECT p FROM TreatmentPlanPaymentEntity p WHERE p.treatmentPlan.patient.id = :patientId ORDER BY p.paymentDate DESC")

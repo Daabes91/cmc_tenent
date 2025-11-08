@@ -18,6 +18,8 @@ import com.clinic.modules.core.service.ClinicServiceRepository;
 import com.clinic.modules.core.settings.ClinicSettingsEntity;
 import com.clinic.modules.core.settings.ClinicSettingsRepository;
 import com.clinic.modules.core.tenant.TenantContextHolder;
+import com.clinic.modules.core.tenant.TenantEntity;
+import com.clinic.modules.core.tenant.TenantService;
 import com.clinic.modules.core.treatment.PaymentMethod;
 import com.clinic.modules.core.treatment.TreatmentPlanEntity;
 import com.clinic.modules.core.treatment.TreatmentPlanRepository;
@@ -53,6 +55,7 @@ public class AppointmentService {
     private final ClinicSettingsRepository clinicSettingsRepository;
     private final ClinicTimezoneConfig clinicTimezoneConfig;
     private final TenantContextHolder tenantContextHolder;
+    private final TenantService tenantService;
 
     private static final int DEFAULT_SLOT_DURATION_MINUTES = 30;
 
@@ -65,7 +68,8 @@ public class AppointmentService {
                               NotificationService notificationService,
                               ClinicSettingsRepository clinicSettingsRepository,
                               ClinicTimezoneConfig clinicTimezoneConfig,
-                              TenantContextHolder tenantContextHolder) {
+                              TenantContextHolder tenantContextHolder,
+                              TenantService tenantService) {
         this.appointmentRepository = appointmentRepository;
         this.doctorRepository = doctorRepository;
         this.patientRepository = patientRepository;
@@ -76,6 +80,7 @@ public class AppointmentService {
         this.clinicSettingsRepository = clinicSettingsRepository;
         this.clinicTimezoneConfig = clinicTimezoneConfig;
         this.tenantContextHolder = tenantContextHolder;
+        this.tenantService = tenantService;
     }
 
     @Transactional(readOnly = true)
@@ -91,6 +96,8 @@ public class AppointmentService {
             String filter, String status, Long doctorId, Long patientId, Long serviceId, 
             String bookingMode, Boolean paymentCollected, Boolean patientAttended, 
             String fromDate, String toDate, String search, ZoneId zoneId, Pageable pageable) {
+        
+        Long tenantId = tenantContextHolder.requireTenantId();
         
         // For now, use simple filtering until repository-level queries are introduced.
         List<AppointmentEntity> allAppointments;
@@ -111,23 +118,23 @@ public class AppointmentService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "toDate must be after fromDate.");
             }
 
-            allAppointments = appointmentRepository.findByScheduledBetween(rangeStart, rangeEnd);
+            allAppointments = appointmentRepository.findByTenantIdAndScheduledAtBetween(tenantId, rangeStart, rangeEnd);
         } else if ("upcoming".equalsIgnoreCase(filter)) {
             Instant now = Instant.now();
-            allAppointments = appointmentRepository.findUpcomingAfter(now);
+            allAppointments = appointmentRepository.findByTenantIdAndScheduledAtAfter(tenantId, now);
         } else if ("today".equalsIgnoreCase(filter)) {
             Instant startOfDay = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.DAYS);
             Instant endOfDay = startOfDay.plus(1, java.time.temporal.ChronoUnit.DAYS);
-            allAppointments = appointmentRepository.findByScheduledBetween(startOfDay, endOfDay);
+            allAppointments = appointmentRepository.findByTenantIdAndScheduledAtBetween(tenantId, startOfDay, endOfDay);
         } else if ("week".equalsIgnoreCase(filter)) {
             Instant now = Instant.now();
             Instant weekFromNow = now.plus(7, java.time.temporal.ChronoUnit.DAYS);
-            allAppointments = appointmentRepository.findByScheduledBetween(now, weekFromNow);
+            allAppointments = appointmentRepository.findByTenantIdAndScheduledAtBetween(tenantId, now, weekFromNow);
         } else {
             // Default: get recent appointments
             Instant start = Instant.now().minus(30, java.time.temporal.ChronoUnit.DAYS);
             Instant end = Instant.now().plus(30, java.time.temporal.ChronoUnit.DAYS);
-            allAppointments = appointmentRepository.findByScheduledBetween(start, end);
+            allAppointments = appointmentRepository.findByTenantIdAndScheduledAtBetween(tenantId, start, end);
         }
 
         // Apply filters
@@ -286,20 +293,29 @@ public class AppointmentService {
 
     @Transactional(readOnly = true)
     public AppointmentAdminDetailResponse getAppointment(Long id) {
-        AppointmentEntity appointment = getAppointmentOrThrow(id);
+        Long tenantId = tenantContextHolder.requireTenantId();
+        AppointmentEntity appointment = appointmentRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
         return toDetailResponse(appointment);
     }
 
     @Transactional
     public AppointmentAdminDetailResponse createAppointment(AppointmentAdminUpsertRequest request) {
-        PatientEntity patient = getPatient(request.patientId());
-        DoctorEntity doctor = getDoctor(request.doctorId());
-        ClinicServiceEntity service = getService(request.serviceId());
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
+        // Validate all entities belong to current tenant
+        PatientEntity patient = patientRepository.findByIdAndTenantId(request.patientId(), tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
+        DoctorEntity doctor = doctorRepository.findByIdAndTenantId(request.doctorId(), tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
+        ClinicServiceEntity service = serviceRepository.findByIdAndTenantId(request.serviceId(), tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
+        
         ensureDoctorProvidesService(doctor, service);
 
         Instant scheduledAt = parseScheduledAt(request.scheduledAt());
         int slotDurationMinutes = resolveSlotDurationMinutes(request.slotDurationMinutes());
-        ensureSlotAvailable(doctor.getId(), scheduledAt, slotDurationMinutes, null);
+        ensureSlotAvailable(tenantId, doctor.getId(), scheduledAt, slotDurationMinutes, null);
 
         AppointmentMode bookingMode = parseBookingMode(request.bookingMode());
 
@@ -323,6 +339,11 @@ public class AppointmentService {
                 bookingMode,
                 normalize(request.notes())
         );
+        
+        // Assign current tenant
+        TenantEntity tenant = tenantService.requireTenant(tenantId);
+        appointment.setTenant(tenant);
+        
         boolean paymentCollected = Boolean.TRUE.equals(request.paymentCollected());
         appointment.setTreatmentPlan(treatmentPlan);
         appointment.setFollowUpVisitNumber(followUpVisitNumber);
@@ -345,16 +366,25 @@ public class AppointmentService {
 
     @Transactional
     public AppointmentAdminDetailResponse updateAppointment(Long id, AppointmentAdminUpsertRequest request) {
-        AppointmentEntity appointment = getAppointmentOrThrow(id);
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
+        // Verify appointment belongs to current tenant
+        AppointmentEntity appointment = appointmentRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
 
-        PatientEntity patient = getPatient(request.patientId());
-        DoctorEntity doctor = getDoctor(request.doctorId());
-        ClinicServiceEntity service = getService(request.serviceId());
+        // Validate all entities belong to current tenant
+        PatientEntity patient = patientRepository.findByIdAndTenantId(request.patientId(), tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
+        DoctorEntity doctor = doctorRepository.findByIdAndTenantId(request.doctorId(), tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
+        ClinicServiceEntity service = serviceRepository.findByIdAndTenantId(request.serviceId(), tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
+        
         ensureDoctorProvidesService(doctor, service);
 
         Instant scheduledAt = parseScheduledAt(request.scheduledAt());
         int slotDurationMinutes = resolveSlotDurationMinutes(request.slotDurationMinutes(), appointment.getSlotDurationMinutes());
-        ensureSlotAvailable(doctor.getId(), scheduledAt, slotDurationMinutes, appointment.getId());
+        ensureSlotAvailable(tenantId, doctor.getId(), scheduledAt, slotDurationMinutes, appointment.getId());
 
         AppointmentMode bookingMode = parseBookingMode(request.bookingMode());
 
@@ -402,13 +432,17 @@ public class AppointmentService {
 
     @Transactional
     public void deleteAppointment(Long id) {
-        AppointmentEntity appointment = getAppointmentOrThrow(id);
+        Long tenantId = tenantContextHolder.requireTenantId();
+        AppointmentEntity appointment = appointmentRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
         appointmentRepository.delete(appointment);
     }
 
     @Transactional
     public AppointmentAdminDetailResponse approveAppointment(Long id, String notes) {
-        AppointmentEntity appointment = getAppointmentOrThrow(id);
+        Long tenantId = tenantContextHolder.requireTenantId();
+        AppointmentEntity appointment = appointmentRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
         if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cancelled appointments cannot be approved");
         }
@@ -435,7 +469,9 @@ public class AppointmentService {
 
     @Transactional
     public AppointmentAdminDetailResponse declineAppointment(Long id, String notes) {
-        AppointmentEntity appointment = getAppointmentOrThrow(id);
+        Long tenantId = tenantContextHolder.requireTenantId();
+        AppointmentEntity appointment = appointmentRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
         if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Completed appointments cannot be cancelled");
         }
@@ -457,25 +493,7 @@ public class AppointmentService {
         return toDetailResponse(appointment);
     }
 
-    private AppointmentEntity getAppointmentOrThrow(Long id) {
-        return appointmentRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
-    }
 
-    private PatientEntity getPatient(Long id) {
-        return patientRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
-    }
-
-    private DoctorEntity getDoctor(Long id) {
-        return doctorRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
-    }
-
-    private ClinicServiceEntity getService(Long id) {
-        return serviceRepository.findByIdAndTenantId(id, tenantContextHolder.requireTenantId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
-    }
 
     private void ensureDoctorProvidesService(DoctorEntity doctor, ClinicServiceEntity service) {
         Set<ClinicServiceEntity> services = doctor.getServices();
@@ -499,11 +517,11 @@ public class AppointmentService {
         }
     }
 
-    private void ensureSlotAvailable(Long doctorId, Instant scheduledAt, int slotDurationMinutes, Long excludeAppointmentId) {
+    private void ensureSlotAvailable(Long tenantId, Long doctorId, Instant scheduledAt, int slotDurationMinutes, Long excludeAppointmentId) {
         Instant slotEnd = scheduledAt.plus(Duration.ofMinutes(slotDurationMinutes));
         boolean conflict = excludeAppointmentId == null
-                ? appointmentRepository.existsActiveByDoctorAndTimeRange(doctorId, scheduledAt, slotEnd, DEFAULT_SLOT_DURATION_MINUTES)
-                : appointmentRepository.existsActiveByDoctorAndTimeRangeExcluding(doctorId, scheduledAt, slotEnd, excludeAppointmentId, DEFAULT_SLOT_DURATION_MINUTES);
+                ? appointmentRepository.existsActiveByDoctorAndTimeRange(tenantId, doctorId, scheduledAt, slotEnd, DEFAULT_SLOT_DURATION_MINUTES)
+                : appointmentRepository.existsActiveByDoctorAndTimeRangeExcluding(tenantId, doctorId, scheduledAt, slotEnd, excludeAppointmentId, DEFAULT_SLOT_DURATION_MINUTES);
         if (conflict) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Doctor already has an appointment during this time");
         }
@@ -793,9 +811,11 @@ public class AppointmentService {
 
     @Transactional(readOnly = true)
     public long getPendingAppointmentsCount() {
+        Long tenantId = tenantContextHolder.requireTenantId();
         Instant now = Instant.now();
         Instant futureLimit = now.plus(30, java.time.temporal.ChronoUnit.DAYS);
-        return appointmentRepository.countByStatusAndScheduledAtBetween(
+        return appointmentRepository.countByTenantIdAndStatusAndScheduledAtBetween(
+                tenantId,
                 AppointmentStatus.SCHEDULED,
                 now,
                 futureLimit
@@ -804,6 +824,7 @@ public class AppointmentService {
 
     @Transactional(readOnly = true)
     public List<AppointmentResponse> getRecentAppointments(String since, int limit, ZoneId zoneId) {
+        Long tenantId = tenantContextHolder.requireTenantId();
         Instant sinceInstant;
         if (since != null && !since.isEmpty()) {
             try {
@@ -817,7 +838,8 @@ public class AppointmentService {
             sinceInstant = Instant.now().minus(5, java.time.temporal.ChronoUnit.MINUTES);
         }
 
-        List<AppointmentEntity> recentAppointments = appointmentRepository.findRecentByCreatedAtAfter(
+        List<AppointmentEntity> recentAppointments = appointmentRepository.findByTenantIdAndCreatedAtAfter(
+                tenantId,
                 sinceInstant,
                 limit
         );

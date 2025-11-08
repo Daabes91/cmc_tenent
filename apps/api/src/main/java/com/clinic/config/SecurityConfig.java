@@ -4,6 +4,7 @@ import com.clinic.security.AdminIpFilter;
 import com.clinic.security.CustomAccessDeniedHandler;
 import com.clinic.security.PatientJwtAuthenticationFilter;
 import com.clinic.security.RateLimitingFilter;
+import com.clinic.security.SaasManagerJwtAuthenticationFilter;
 import com.clinic.security.StaffJwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,7 @@ public class SecurityConfig {
 
     private final StaffJwtAuthenticationFilter staffJwtAuthenticationFilter;
     private final PatientJwtAuthenticationFilter patientJwtAuthenticationFilter;
+    private final SaasManagerJwtAuthenticationFilter saasManagerJwtAuthenticationFilter;
     private final CorsConfigurationSource corsConfigurationSource;
     private final RateLimitingFilter rateLimitingFilter;
     private final AdminIpFilter adminIpFilter;
@@ -35,6 +37,7 @@ public class SecurityConfig {
     public SecurityConfig(
             StaffJwtAuthenticationFilter staffJwtAuthenticationFilter,
             PatientJwtAuthenticationFilter patientJwtAuthenticationFilter,
+            SaasManagerJwtAuthenticationFilter saasManagerJwtAuthenticationFilter,
             CorsConfigurationSource corsConfigurationSource,
             RateLimitingFilter rateLimitingFilter,
             AdminIpFilter adminIpFilter,
@@ -42,10 +45,33 @@ public class SecurityConfig {
     ) {
         this.staffJwtAuthenticationFilter = staffJwtAuthenticationFilter;
         this.patientJwtAuthenticationFilter = patientJwtAuthenticationFilter;
+        this.saasManagerJwtAuthenticationFilter = saasManagerJwtAuthenticationFilter;
         this.corsConfigurationSource = corsConfigurationSource;
         this.rateLimitingFilter = rateLimitingFilter;
         this.adminIpFilter = adminIpFilter;
         this.customAccessDeniedHandler = customAccessDeniedHandler;
+    }
+
+    @Bean
+    @Order(0)
+    public SecurityFilterChain saasApiSecurity(HttpSecurity http) throws Exception {
+        http.securityMatcher("/saas/**")
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'"))
+                        .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
+                        .xssProtection(Customizer.withDefaults())
+                        .frameOptions(frame -> frame.deny())
+                        .permissionsPolicy(policy -> policy.policy("camera=(), microphone=(), geolocation=()")))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, "/saas/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/saas/auth/refresh").permitAll()
+                        .anyRequest().hasRole("SAAS_MANAGER"))
+                .addFilterBefore(saasManagerJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 
     @Bean

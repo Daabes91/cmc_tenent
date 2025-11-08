@@ -54,6 +54,7 @@ public class TreatmentPlanService {
     private final ClinicSettingsRepository clinicSettingsRepository;
     private final CurrencyConversionService currencyConversionService;
     private final TenantContextHolder tenantContextHolder;
+    private final com.clinic.modules.core.tenant.TenantService tenantService;
 
     private static final int DEFAULT_SLOT_DURATION_MINUTES = 30;
     private static final ZoneId CLINIC_ZONE = ZoneId.of("Asia/Amman");
@@ -71,7 +72,8 @@ public class TreatmentPlanService {
             AppointmentRepository appointmentRepository,
             ClinicSettingsRepository clinicSettingsRepository,
             CurrencyConversionService currencyConversionService,
-            TenantContextHolder tenantContextHolder
+            TenantContextHolder tenantContextHolder,
+            com.clinic.modules.core.tenant.TenantService tenantService
     ) {
         this.treatmentPlanRepository = treatmentPlanRepository;
         this.treatmentPlanPaymentRepository = treatmentPlanPaymentRepository;
@@ -84,6 +86,7 @@ public class TreatmentPlanService {
         this.clinicSettingsRepository = clinicSettingsRepository;
         this.currencyConversionService = currencyConversionService;
         this.tenantContextHolder = tenantContextHolder;
+        this.tenantService = tenantService;
     }
 
     /**
@@ -91,14 +94,19 @@ public class TreatmentPlanService {
      */
     @Transactional
     public TreatmentPlanResponse createTreatmentPlan(TreatmentPlanRequest request, Long staffId, String staffName) {
-        PatientEntity patient = patientRepository.findById(request.patientId())
-                .orElseThrow(() -> new IllegalArgumentException("Patient not found with ID: " + request.patientId()));
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
+        // Validate patient belongs to current tenant
+        PatientEntity patient = patientRepository.findByIdAndTenantId(request.patientId(), tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
 
-        DoctorEntity doctor = doctorRepository.findById(request.doctorId())
-                .orElseThrow(() -> new IllegalArgumentException("Doctor not found with ID: " + request.doctorId()));
+        // Validate doctor belongs to current tenant
+        DoctorEntity doctor = doctorRepository.findByIdAndTenantId(request.doctorId(), tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
 
-        ClinicServiceEntity treatmentType = clinicServiceRepository.findById(request.treatmentTypeId())
-                .orElseThrow(() -> new IllegalArgumentException("Treatment type not found with ID: " + request.treatmentTypeId()));
+        // Validate treatment type belongs to current tenant
+        ClinicServiceEntity treatmentType = clinicServiceRepository.findByIdAndTenantId(request.treatmentTypeId(), tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Treatment type not found"));
 
         TreatmentPlanEntity plan = new TreatmentPlanEntity(
                 patient,
@@ -110,6 +118,9 @@ public class TreatmentPlanService {
                 request.followUpCadence(),
                 request.notes()
         );
+        
+        // Assign current tenant
+        plan.setTenant(tenantService.requireTenant(tenantId));
 
         TreatmentPlanEntity saved = treatmentPlanRepository.save(plan);
 
@@ -135,8 +146,9 @@ public class TreatmentPlanService {
      */
     @Transactional(readOnly = true)
     public TreatmentPlanResponse getTreatmentPlan(Long id) {
-        TreatmentPlanEntity plan = treatmentPlanRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Treatment plan not found with ID: " + id));
+        Long tenantId = tenantContextHolder.requireTenantId();
+        TreatmentPlanEntity plan = treatmentPlanRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Treatment plan not found"));
         return toResponse(plan);
     }
 
@@ -145,7 +157,8 @@ public class TreatmentPlanService {
      */
     @Transactional(readOnly = true)
     public List<TreatmentPlanResponse> getTreatmentPlansByPatient(Long patientId) {
-        return treatmentPlanRepository.findByPatientId(patientId).stream()
+        Long tenantId = tenantContextHolder.requireTenantId();
+        return treatmentPlanRepository.findByTenantIdAndPatientId(tenantId, patientId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -155,7 +168,8 @@ public class TreatmentPlanService {
      */
     @Transactional(readOnly = true)
     public List<TreatmentPlanResponse> getTreatmentPlansByDoctor(Long doctorId) {
-        return treatmentPlanRepository.findByDoctorId(doctorId).stream()
+        Long tenantId = tenantContextHolder.requireTenantId();
+        return treatmentPlanRepository.findByTenantIdAndDoctorId(tenantId, doctorId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -165,7 +179,8 @@ public class TreatmentPlanService {
      */
     @Transactional(readOnly = true)
     public List<TreatmentPlanResponse> getTreatmentPlansByStatus(TreatmentPlanStatus status) {
-        return treatmentPlanRepository.findByStatus(status).stream()
+        Long tenantId = tenantContextHolder.requireTenantId();
+        return treatmentPlanRepository.findByTenantIdAndStatus(tenantId, status).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -175,7 +190,8 @@ public class TreatmentPlanService {
      */
     @Transactional(readOnly = true)
     public List<TreatmentPlanResponse> getAllTreatmentPlans() {
-        return treatmentPlanRepository.findAll().stream()
+        Long tenantId = tenantContextHolder.requireTenantId();
+        return treatmentPlanRepository.findAllByTenantId(tenantId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -185,8 +201,9 @@ public class TreatmentPlanService {
      */
     @Transactional
     public TreatmentPlanResponse updateTreatmentPlan(Long id, TreatmentPlanUpdateRequest request, Long staffId, String staffName) {
-        TreatmentPlanEntity plan = treatmentPlanRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Treatment plan not found with ID: " + id));
+        Long tenantId = tenantContextHolder.requireTenantId();
+        TreatmentPlanEntity plan = treatmentPlanRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Treatment plan not found"));
 
         // Create audit logs for changes
         String oldValue = "Total: " + plan.getTotalPrice() + ", Follow-ups: " + plan.getPlannedFollowups() + ", Cadence: " + plan.getFollowUpCadence();
@@ -221,8 +238,9 @@ public class TreatmentPlanService {
      */
     @Transactional
     public TreatmentPlanResponse applyDiscount(Long id, DiscountRequest request, Long staffId, String staffName) {
-        TreatmentPlanEntity plan = treatmentPlanRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Treatment plan not found with ID: " + id));
+        Long tenantId = tenantContextHolder.requireTenantId();
+        TreatmentPlanEntity plan = treatmentPlanRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Treatment plan not found"));
 
         String oldValue = plan.getDiscountAmount() != null ? plan.getDiscountAmount().toString() : "None";
         String newValue = request.discountAmount().toString();
@@ -248,8 +266,9 @@ public class TreatmentPlanService {
      */
     @Transactional
     public TreatmentPlanResponse recordFollowUpVisit(Long planId, FollowUpVisitRequest request, Long staffId, String staffName) {
-        TreatmentPlanEntity plan = treatmentPlanRepository.findById(planId)
-                .orElseThrow(() -> new IllegalArgumentException("Treatment plan not found with ID: " + planId));
+        Long tenantId = tenantContextHolder.requireTenantId();
+        TreatmentPlanEntity plan = treatmentPlanRepository.findByIdAndTenantId(planId, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Treatment plan not found"));
 
         AppointmentEntity linkedAppointment = null;
         Integer visitNumber;
@@ -307,7 +326,7 @@ public class TreatmentPlanService {
         // Add materials
         if (request.materials() != null) {
             for (MaterialUsageRequest materialReq : request.materials()) {
-                MaterialCatalogEntity material = materialCatalogRepository.findById(materialReq.materialId())
+                MaterialCatalogEntity material = materialCatalogRepository.findByIdAndTenantId(materialReq.materialId(), tenantId)
                         .orElseThrow(() -> new IllegalArgumentException("Material not found with ID: " + materialReq.materialId()));
 
                 MaterialUsageEntity usage = new MaterialUsageEntity(
@@ -348,8 +367,9 @@ public class TreatmentPlanService {
      */
     @Transactional
     public TreatmentPlanResponse updateFollowUpVisit(Long planId, Long visitId, FollowUpVisitRequest request, Long staffId, String staffName) {
-        TreatmentPlanEntity plan = treatmentPlanRepository.findById(planId)
-                .orElseThrow(() -> new IllegalArgumentException("Treatment plan not found with ID: " + planId));
+        Long tenantId = tenantContextHolder.requireTenantId();
+        TreatmentPlanEntity plan = treatmentPlanRepository.findByIdAndTenantId(planId, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Treatment plan not found"));
 
         FollowUpVisitEntity visit = followUpVisitRepository.findById(visitId)
                 .orElseThrow(() -> new IllegalArgumentException("Follow-up visit not found with ID: " + visitId));
@@ -406,7 +426,7 @@ public class TreatmentPlanService {
         visit.getMaterialUsages().clear();
         if (request.materials() != null) {
             for (MaterialUsageRequest materialReq : request.materials()) {
-                MaterialCatalogEntity material = materialCatalogRepository.findById(materialReq.materialId())
+                MaterialCatalogEntity material = materialCatalogRepository.findByIdAndTenantId(materialReq.materialId(), tenantId)
                         .orElseThrow(() -> new IllegalArgumentException("Material not found with ID: " + materialReq.materialId()));
 
                 MaterialUsageEntity usage = new MaterialUsageEntity(
@@ -444,8 +464,9 @@ public class TreatmentPlanService {
      */
     @Transactional
     public TreatmentPlanResponse completeTreatmentPlan(Long id, Long staffId, String staffName) {
-        TreatmentPlanEntity plan = treatmentPlanRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Treatment plan not found with ID: " + id));
+        Long tenantId = tenantContextHolder.requireTenantId();
+        TreatmentPlanEntity plan = treatmentPlanRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Treatment plan not found"));
 
         TreatmentPlanAuditLogEntity auditLog = new TreatmentPlanAuditLogEntity(
                 plan,
@@ -469,8 +490,9 @@ public class TreatmentPlanService {
      */
     @Transactional
     public TreatmentPlanResponse cancelTreatmentPlan(Long id, String reason, Long staffId, String staffName) {
-        TreatmentPlanEntity plan = treatmentPlanRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Treatment plan not found with ID: " + id));
+        Long tenantId = tenantContextHolder.requireTenantId();
+        TreatmentPlanEntity plan = treatmentPlanRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Treatment plan not found"));
 
         TreatmentPlanAuditLogEntity auditLog = new TreatmentPlanAuditLogEntity(
                 plan,
@@ -792,7 +814,9 @@ public class TreatmentPlanService {
         Instant candidate = ensureFutureInstant(preferredStart, slotDuration);
         int adjustments = 0;
 
+        Long tenantId = tenantContextHolder.requireTenantId();
         while (appointmentRepository.existsActiveByDoctorAndTimeRange(
+                tenantId,
                 doctorId,
                 candidate,
                 candidate.plus(slotDuration),
@@ -892,8 +916,9 @@ public class TreatmentPlanService {
             Long staffId,
             String staffName
     ) {
-        TreatmentPlanEntity treatmentPlan = treatmentPlanRepository.findById(treatmentPlanId)
-                .orElseThrow(() -> new RuntimeException("Treatment plan not found"));
+        Long tenantId = tenantContextHolder.requireTenantId();
+        TreatmentPlanEntity treatmentPlan = treatmentPlanRepository.findByIdAndTenantId(treatmentPlanId, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Treatment plan not found"));
         
         // Force loading of direct payments within transaction to ensure accurate balance calculation
         treatmentPlan.getDirectPayments().size();

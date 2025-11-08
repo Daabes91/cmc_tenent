@@ -32,7 +32,7 @@ public class StaffJwtTokenService implements JwtTokenService {
         try {
             var config = securityProperties.jwt().staff();
             JwtPrincipal principal = jwtVerifier.verify(token, config);
-            return Optional.of(new JwtPrincipal(principal.subject(), JwtAudience.STAFF, principal.roles()));
+            return Optional.of(principal);
         } catch (InvalidJwtException ex) {
             log.debug("Staff JWT rejected: {}", ex.getMessage());
             return Optional.empty();

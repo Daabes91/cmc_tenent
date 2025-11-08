@@ -3,18 +3,19 @@ package com.clinic.modules.admin.service;
 import com.clinic.modules.admin.dto.PatientAdminResponse;
 import com.clinic.modules.admin.dto.PatientUpsertRequest;
 import com.clinic.modules.core.appointment.AppointmentRepository;
+import com.clinic.modules.core.patient.GlobalPatientEntity;
+import com.clinic.modules.core.patient.GlobalPatientService;
 import com.clinic.modules.core.patient.PatientEntity;
 import com.clinic.modules.core.patient.PatientRepository;
+import com.clinic.modules.core.tenant.TenantContextHolder;
+import com.clinic.modules.core.tenant.TenantService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -23,22 +24,33 @@ public class PatientAdminService {
 
     private final PatientRepository patientRepository;
     private final AppointmentRepository appointmentRepository;
+    private final GlobalPatientService globalPatientService;
+    private final TenantService tenantService;
+    private final TenantContextHolder tenantContextHolder;
 
     public PatientAdminService(PatientRepository patientRepository,
-                               AppointmentRepository appointmentRepository) {
+                               AppointmentRepository appointmentRepository,
+                               GlobalPatientService globalPatientService,
+                               TenantService tenantService,
+                               TenantContextHolder tenantContextHolder) {
         this.patientRepository = patientRepository;
         this.appointmentRepository = appointmentRepository;
+        this.globalPatientService = globalPatientService;
+        this.tenantService = tenantService;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @Transactional(readOnly = true)
     public Page<PatientAdminResponse> listPatients(Pageable pageable) {
-        return patientRepository.findAll(pageable)
+        Long tenantId = tenantContextHolder.requireTenantId();
+        return patientRepository.findAllByTenantId(tenantId, pageable)
                 .map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
     public PatientAdminResponse getPatient(Long id) {
-        PatientEntity patient = patientRepository.findById(id)
+        Long tenantId = tenantContextHolder.requireTenantId();
+        PatientEntity patient = patientRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
         return toResponse(patient);
     }
@@ -49,14 +61,34 @@ public class PatientAdminService {
         String lastName = requireValue(request.lastName(), "Last name is required");
 
         String email = normalize(request.email());
-        ensureEmailAvailable(email, null);
+        String phone = normalize(request.phone());
+        
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
+        // Check if patient already exists in this tenant
+        ensureEmailAvailable(email, null, tenantId);
 
+        // Find or create global patient (using a default password for admin-created patients)
+        // Admin-created patients will need to set their password via password reset flow
+        String defaultPassword = "ADMIN_CREATED_" + System.currentTimeMillis();
+        GlobalPatientEntity globalPatient = globalPatientService.findOrCreateGlobalPatient(
+                email,
+                phone,
+                request.dateOfBirth(),
+                defaultPassword
+        );
+
+        // Create tenant profile linked to global patient
         PatientEntity entity = new PatientEntity(
                 firstName,
                 lastName,
                 email,
-                normalize(request.phone())
+                phone
         );
+        
+        // Assign current tenant to patient profile
+        entity.setTenant(tenantService.requireTenant(tenantId));
+        entity.setGlobalPatient(globalPatient);
 
         // Set profile image URL if provided
         if (request.profileImageUrl() != null) {
@@ -73,14 +105,15 @@ public class PatientAdminService {
 
     @Transactional
     public PatientAdminResponse updatePatient(Long id, PatientUpsertRequest request) {
-        PatientEntity patient = patientRepository.findById(id)
+        Long tenantId = tenantContextHolder.requireTenantId();
+        PatientEntity patient = patientRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
 
         String firstName = requireValue(request.firstName(), "First name is required");
         String lastName = requireValue(request.lastName(), "Last name is required");
         String email = normalize(request.email());
 
-        ensureEmailAvailable(email, id);
+        ensureEmailAvailable(email, id, tenantId);
 
         patient.updateDetails(
                 firstName,
@@ -100,7 +133,8 @@ public class PatientAdminService {
 
     @Transactional
     public void deletePatient(Long id) {
-        PatientEntity patient = patientRepository.findById(id)
+        Long tenantId = tenantContextHolder.requireTenantId();
+        PatientEntity patient = patientRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
 
         if (appointmentRepository.existsByPatientId(patient.getId())) {
@@ -110,13 +144,14 @@ public class PatientAdminService {
         patientRepository.delete(patient);
     }
 
-    private void ensureEmailAvailable(String email, Long currentId) {
+    private void ensureEmailAvailable(String email, Long currentId, Long tenantId) {
         if (email == null) {
             return;
         }
-        Optional<PatientEntity> existing = patientRepository.findByEmailIgnoreCase(email);
+        // Check if email is already used by another patient in this tenant
+        Optional<PatientEntity> existing = patientRepository.findByTenantIdAndGlobalPatient_Email(tenantId, email);
         if (existing.isPresent() && !Objects.equals(existing.get().getId(), currentId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered to another patient");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered to another patient in this clinic");
         }
     }
 

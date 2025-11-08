@@ -13,6 +13,16 @@ import java.util.Optional;
 @Repository
 public interface BlogRepository extends JpaRepository<BlogEntity, Long> {
 
+    // Tenant-scoped methods
+    List<BlogEntity> findAllByTenantId(Long tenantId);
+
+    Optional<BlogEntity> findByIdAndTenantId(Long id, Long tenantId);
+
+    Optional<BlogEntity> findByTenantIdAndSlug(Long tenantId, String slug);
+
+    List<BlogEntity> findAllByTenantIdAndStatus(Long tenantId, BlogStatus status);
+
+    // Legacy methods (to be deprecated or updated to use tenant filtering)
     Optional<BlogEntity> findBySlug(String slug);
 
     Optional<BlogEntity> findBySlugAndStatus(String slug, BlogStatus status);

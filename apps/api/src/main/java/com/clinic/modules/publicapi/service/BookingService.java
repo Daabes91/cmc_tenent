@@ -23,6 +23,8 @@ import com.clinic.modules.publicapi.dto.BookingRequest;
 import com.clinic.modules.publicapi.dto.BookingResponse;
 import com.clinic.modules.publicapi.dto.GuestBookingRequest;
 import com.clinic.modules.core.tenant.TenantContextHolder;
+import com.clinic.modules.core.tenant.TenantEntity;
+import com.clinic.modules.core.tenant.TenantService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,7 @@ public class BookingService {
     private final ClinicSettingsRepository clinicSettingsRepository;
     private final ClinicTimezoneConfig clinicTimezoneConfig;
     private final TenantContextHolder tenantContextHolder;
+    private final TenantService tenantService;
     private static final int DEFAULT_SLOT_DURATION_MINUTES = 30;
 
     public BookingService(ClinicServiceRepository serviceRepository,
@@ -57,7 +60,8 @@ public class BookingService {
                           NotificationService notificationService,
                           ClinicSettingsRepository clinicSettingsRepository,
                           ClinicTimezoneConfig clinicTimezoneConfig,
-                          TenantContextHolder tenantContextHolder) {
+                          TenantContextHolder tenantContextHolder,
+                          TenantService tenantService) {
         this.serviceRepository = serviceRepository;
         this.doctorRepository = doctorRepository;
         this.patientRepository = patientRepository;
@@ -68,6 +72,7 @@ public class BookingService {
         this.clinicSettingsRepository = clinicSettingsRepository;
         this.clinicTimezoneConfig = clinicTimezoneConfig;
         this.tenantContextHolder = tenantContextHolder;
+        this.tenantService = tenantService;
     }
 
     @Transactional
@@ -76,9 +81,13 @@ public class BookingService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required to book appointments");
         }
 
-        ClinicServiceEntity service = serviceRepository.findBySlugAndTenantId(request.serviceSlug(), tenantContextHolder.requireTenantId())
+        Long tenantId = tenantContextHolder.requireTenantId();
+
+        // Validate service belongs to current tenant
+        ClinicServiceEntity service = serviceRepository.findBySlugAndTenantId(request.serviceSlug(), tenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
 
+        // Validate doctor belongs to current tenant
         DoctorEntity doctor = resolveDoctor(request, service);
 
         Instant slotStart;
@@ -93,12 +102,13 @@ public class BookingService {
 
         ensureSlotWithinAvailability(doctor, slotStart, slotEnd);
 
-        boolean slotTaken = appointmentRepository.existsActiveByDoctorAndTimeRange(doctor.getId(), slotStart, slotEnd, DEFAULT_SLOT_DURATION_MINUTES);
+        boolean slotTaken = appointmentRepository.existsActiveByDoctorAndTimeRange(tenantId, doctor.getId(), slotStart, slotEnd, DEFAULT_SLOT_DURATION_MINUTES);
         if (slotTaken) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Selected slot is no longer available");
         }
 
-        PatientEntity patient = patientRepository.findById(authenticatedPatientId)
+        // Validate patient belongs to current tenant
+        PatientEntity patient = patientRepository.findByIdAndTenantId(authenticatedPatientId, tenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient account not found"));
 
         AppointmentMode bookingMode = parseBookingMode(request.bookingMode());
@@ -112,6 +122,11 @@ public class BookingService {
                 bookingMode,
                 request.notes()
         );
+        
+        // Assign current tenant
+        TenantEntity tenant = tenantService.requireTenant(tenantId);
+        appointment.setTenant(tenant);
+        
         appointment.setSlotDurationMinutes(slotDurationMinutes);
         AppointmentEntity saved = appointmentRepository.save(appointment);
 
@@ -130,15 +145,17 @@ public class BookingService {
      */
     @Transactional
     public BookingResponse createGuestBooking(GuestBookingRequest request) {
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
         // Validate and normalize phone number
         String normalizedPhone = normalizePhoneOrThrow(request.phoneNumber());
         String normalizedEmail = normalizeOptionalEmail(request.guestEmail());
 
-        // Find service
-        ClinicServiceEntity service = serviceRepository.findBySlugAndTenantId(request.serviceSlug(), tenantContextHolder.requireTenantId())
+        // Validate service belongs to current tenant
+        ClinicServiceEntity service = serviceRepository.findBySlugAndTenantId(request.serviceSlug(), tenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
 
-        // Resolve doctor (auto-assign if not provided)
+        // Validate doctor belongs to current tenant (auto-assign if not provided)
         DoctorEntity doctor = resolveDoctorForGuest(request.doctorId(), service);
 
         // Parse and validate slot
@@ -156,7 +173,7 @@ public class BookingService {
         ensureSlotWithinAvailability(doctor, slotStart, slotEnd);
 
         // Check if slot is already taken
-        boolean slotTaken = appointmentRepository.existsActiveByDoctorAndTimeRange(doctor.getId(), slotStart, slotEnd, DEFAULT_SLOT_DURATION_MINUTES);
+        boolean slotTaken = appointmentRepository.existsActiveByDoctorAndTimeRange(tenantId, doctor.getId(), slotStart, slotEnd, DEFAULT_SLOT_DURATION_MINUTES);
         if (slotTaken) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Selected slot is no longer available");
         }
@@ -177,6 +194,11 @@ public class BookingService {
                 consultationType,
                 request.notes()
         );
+        
+        // Assign current tenant
+        TenantEntity tenant = tenantService.requireTenant(tenantId);
+        appointment.setTenant(tenant);
+        
         appointment.setSlotDurationMinutes(slotDurationMinutes);
         AppointmentEntity saved = appointmentRepository.save(appointment);
 
@@ -190,14 +212,15 @@ public class BookingService {
     }
 
     private DoctorEntity resolveDoctorForGuest(Long doctorId, ClinicServiceEntity service) {
+        Long tenantId = tenantContextHolder.requireTenantId();
         if (doctorId == null) {
             // Auto-assign first available doctor for the service
-            return doctorRepository.findAllByServiceSlug(service.getSlug(), tenantContextHolder.requireTenantId()).stream()
+            return doctorRepository.findAllByServiceSlug(service.getSlug(), tenantId).stream()
                     .findFirst()
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No doctor available for service"));
         }
 
-        DoctorEntity doctor = doctorRepository.findById(doctorId)
+        DoctorEntity doctor = doctorRepository.findByIdAndTenantId(doctorId, tenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
 
         if (!doctor.getServices().contains(service)) {
@@ -320,13 +343,14 @@ public class BookingService {
     }
 
     private DoctorEntity resolveDoctor(BookingRequest request, ClinicServiceEntity service) {
+        Long tenantId = tenantContextHolder.requireTenantId();
         if (request.doctorId() == null) {
-            return doctorRepository.findAllByServiceSlug(service.getSlug(), tenantContextHolder.requireTenantId()).stream()
+            return doctorRepository.findAllByServiceSlug(service.getSlug(), tenantId).stream()
                     .findFirst()
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No doctor available for service"));
         }
 
-        DoctorEntity doctor = doctorRepository.findById(request.doctorId())
+        DoctorEntity doctor = doctorRepository.findByIdAndTenantId(request.doctorId(), tenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
 
         if (!doctor.getServices().contains(service)) {

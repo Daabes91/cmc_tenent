@@ -6,6 +6,7 @@ import com.clinic.modules.core.doctor.DoctorAvailabilityEntity;
 import com.clinic.modules.core.doctor.DoctorAvailabilityRepository;
 import com.clinic.modules.core.doctor.DoctorEntity;
 import com.clinic.modules.core.doctor.DoctorRepository;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,16 +26,23 @@ public class DoctorAvailabilityAdminService {
 
     private final DoctorRepository doctorRepository;
     private final DoctorAvailabilityRepository availabilityRepository;
+    private final TenantContextHolder tenantContextHolder;
 
     public DoctorAvailabilityAdminService(DoctorRepository doctorRepository,
-                                          DoctorAvailabilityRepository availabilityRepository) {
+                                          DoctorAvailabilityRepository availabilityRepository,
+                                          TenantContextHolder tenantContextHolder) {
         this.doctorRepository = doctorRepository;
         this.availabilityRepository = availabilityRepository;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @Transactional(readOnly = true)
     public List<DoctorAvailabilityResponse> listAvailabilities(Long doctorId) {
-        ensureDoctorExists(doctorId);
+        // Verify doctor belongs to current tenant
+        Long tenantId = tenantContextHolder.requireTenantId();
+        doctorRepository.findByIdAndTenantId(doctorId, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
+        
         return availabilityRepository.findByDoctorId(doctorId).stream()
                 .sorted(Comparator.comparing((DoctorAvailabilityEntity a) -> a.getSpecificDate() != null ? a.getSpecificDate() : LocalDate.now())
                         .thenComparing(DoctorAvailabilityEntity::getDayOfWeek, Comparator.nullsLast(Comparator.naturalOrder()))
@@ -45,7 +53,11 @@ public class DoctorAvailabilityAdminService {
 
     @Transactional
     public DoctorAvailabilityResponse createAvailability(Long doctorId, DoctorAvailabilityRequest request) {
-        DoctorEntity doctor = ensureDoctorExists(doctorId);
+        // Verify doctor belongs to current tenant
+        Long tenantId = tenantContextHolder.requireTenantId();
+        DoctorEntity doctor = doctorRepository.findByIdAndTenantId(doctorId, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
+        
         AvailabilityDescriptor descriptor = parseRequest(request);
         validateNoOverlap(doctorId, null, descriptor);
 
@@ -64,7 +76,11 @@ public class DoctorAvailabilityAdminService {
 
     @Transactional
     public DoctorAvailabilityResponse updateAvailability(Long doctorId, Long availabilityId, DoctorAvailabilityRequest request) {
-        ensureDoctorExists(doctorId);
+        // Verify doctor belongs to current tenant before allowing update
+        Long tenantId = tenantContextHolder.requireTenantId();
+        DoctorEntity doctor = doctorRepository.findByIdAndTenantId(doctorId, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
+        
         DoctorAvailabilityEntity entity = availabilityRepository.findByIdAndDoctorId(availabilityId, doctorId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Availability not found"));
 
@@ -84,7 +100,11 @@ public class DoctorAvailabilityAdminService {
 
     @Transactional
     public void deleteAvailability(Long doctorId, Long availabilityId) {
-        ensureDoctorExists(doctorId);
+        // Verify doctor belongs to current tenant before allowing delete
+        Long tenantId = tenantContextHolder.requireTenantId();
+        DoctorEntity doctor = doctorRepository.findByIdAndTenantId(doctorId, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
+        
         DoctorAvailabilityEntity entity = availabilityRepository.findByIdAndDoctorId(availabilityId, doctorId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Availability not found"));
         availabilityRepository.delete(entity);
@@ -102,11 +122,6 @@ public class DoctorAvailabilityAdminService {
                 entity.getCreatedAt().toString(),
                 entity.getUpdatedAt().toString()
         );
-    }
-
-    private DoctorEntity ensureDoctorExists(Long doctorId) {
-        return doctorRepository.findById(doctorId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
     }
 
     private AvailabilityDescriptor parseRequest(DoctorAvailabilityRequest request) {

@@ -27,9 +27,10 @@ public class DoctorDirectoryService {
 
     @Transactional(readOnly = true)
     public List<DoctorResponse> listDoctors(String locale, String serviceSlug) {
+        Long tenantId = tenantContextHolder.requireTenantId();
         List<DoctorEntity> doctors = serviceSlug != null && !serviceSlug.isBlank()
-                ? doctorRepository.findAllByServiceSlug(serviceSlug, tenantContextHolder.requireTenantId())
-                : doctorRepository.findAllWithServices();
+                ? doctorRepository.findAllByServiceSlug(serviceSlug, tenantId)
+                : doctorRepository.findAllWithServices(tenantId);
 
         Locale resolved = locale != null ? Locale.forLanguageTag(locale) : Locale.ENGLISH;
 
@@ -48,7 +49,8 @@ public class DoctorDirectoryService {
 
     @Transactional(readOnly = true)
     public DoctorResponse getDoctorById(Long doctorId, String locale) {
-        DoctorEntity doctor = doctorRepository.findById(doctorId)
+        Long tenantId = tenantContextHolder.requireTenantId();
+        DoctorEntity doctor = doctorRepository.findByIdAndTenantId(doctorId, tenantId)
                 .orElseThrow(() -> new com.clinic.modules.publicapi.exception.DoctorNotFoundException(doctorId));
 
         Locale resolved = locale != null ? Locale.forLanguageTag(locale) : Locale.ENGLISH;

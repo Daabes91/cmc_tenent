@@ -17,6 +17,7 @@ import com.clinic.modules.core.treatment.TreatmentPlanPaymentEntity;
 import com.clinic.modules.core.treatment.TreatmentPlanPaymentRepository;
 import com.clinic.modules.core.treatment.TreatmentPlanRepository;
 import com.clinic.modules.core.treatment.TreatmentPlanStatus;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +48,7 @@ public class ReportService {
     private final FollowUpVisitRepository followUpVisitRepository;
     private final PaymentRepository paymentRepository;
     private final TreatmentPlanPaymentRepository treatmentPlanPaymentRepository;
+    private final TenantContextHolder tenantContextHolder;
 
     public ReportService(AppointmentRepository appointmentRepository,
                          PatientRepository patientRepository,
@@ -54,7 +56,8 @@ public class ReportService {
                          TreatmentPlanRepository treatmentPlanRepository,
                          FollowUpVisitRepository followUpVisitRepository,
                          PaymentRepository paymentRepository,
-                         TreatmentPlanPaymentRepository treatmentPlanPaymentRepository) {
+                         TreatmentPlanPaymentRepository treatmentPlanPaymentRepository,
+                         TenantContextHolder tenantContextHolder) {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.doctorRepository = doctorRepository;
@@ -62,6 +65,7 @@ public class ReportService {
         this.followUpVisitRepository = followUpVisitRepository;
         this.paymentRepository = paymentRepository;
         this.treatmentPlanPaymentRepository = treatmentPlanPaymentRepository;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @Transactional(readOnly = true)
@@ -72,6 +76,8 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public ReportMetrics getOverallMetrics(DateRange dateRange, ZoneId zoneId) {
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
         Instant now = Instant.now();
         ZonedDateTime zonedNow = now.atZone(zoneId);
 
@@ -93,12 +99,12 @@ public class ReportService {
         LocalDate today = zonedNow.toLocalDate();
         LocalDate trendStartDate = today.minusDays(29);
 
-        // Use optimized database query to filter appointments by date range
-        List<AppointmentEntity> allAppointments = appointmentRepository.findByDateRange(rangeStart, rangeEnd);
+        // Use optimized database query to filter appointments by date range and tenant
+        List<AppointmentEntity> allAppointments = appointmentRepository.findByTenantIdAndDateRange(tenantId, rangeStart, rangeEnd);
 
         long totalAppointments = allAppointments.size();
-        long totalPatients = patientRepository.count();
-        long totalDoctors = doctorRepository.count();
+        long totalPatients = patientRepository.countByTenantId(tenantId);
+        long totalDoctors = doctorRepository.countByTenantId(tenantId);
 
         long todayAppointments = allAppointments.stream()
                 .filter(a -> a.getCreatedAt().isAfter(startOfToday))
@@ -163,13 +169,14 @@ public class ReportService {
                 .toList();
 
         // Use optimized database queries for payment counts
-        long paymentsCollectedCount = appointmentRepository.countPaymentCollectedByDateRange(rangeStart, rangeEnd);
-        long paymentsOutstandingCount = appointmentRepository.countPaymentOutstandingByDateRange(rangeStart, rangeEnd);
+        long paymentsCollectedCount = appointmentRepository.countByTenantIdAndPaymentCollectedByDateRange(tenantId, rangeStart, rangeEnd);
+        long paymentsOutstandingCount = appointmentRepository.countByTenantIdAndPaymentOutstandingByDateRange(tenantId, rangeStart, rangeEnd);
 
         // Use optimized query for new patients within the date range
-        long newPatientsThisMonth = patientRepository.countByCreatedAtBetween(rangeStart, rangeEnd);
+        long newPatientsThisMonth = patientRepository.countByTenantIdAndCreatedAtBetween(tenantId, rangeStart, rangeEnd);
 
-        List<PaymentEntity> recentPayments = paymentRepository.findByPaymentDateBetween(
+        List<PaymentEntity> recentPayments = paymentRepository.findByTenantIdAndPaymentDateBetween(
+                tenantId,
                 startOfSixMonthsWindow,
                 endOfToday
         );
@@ -183,7 +190,8 @@ public class ReportService {
                 .toList();
 
         // Fetch direct treatment plan payments (remaining balance payments)
-        List<TreatmentPlanPaymentEntity> directPayments = treatmentPlanPaymentRepository.findByPaymentDateBetween(
+        List<TreatmentPlanPaymentEntity> directPayments = treatmentPlanPaymentRepository.findByTenantIdAndPaymentDateBetween(
+                tenantId,
                 startOfSixMonthsWindow,
                 endOfToday
         );
@@ -351,8 +359,8 @@ public class ReportService {
         double noShowRate = attendanceRecords == 0 ? 0d : percentage(noShows, attendanceRecords);
         double collectionRate = percentage(paymentsCollectedCount, totalAppointments);
 
-        long followUpVisitsThisMonth = followUpVisitRepository.countByVisitDateBetween(startOfMonth, startOfNextMonth);
-        long activeTreatmentPlans = treatmentPlanRepository.countByStatus(TreatmentPlanStatus.IN_PROGRESS);
+        long followUpVisitsThisMonth = followUpVisitRepository.countByTenantIdAndVisitDateBetween(tenantId, startOfMonth, startOfNextMonth);
+        long activeTreatmentPlans = treatmentPlanRepository.countByTenantIdAndStatus(tenantId, TreatmentPlanStatus.IN_PROGRESS);
 
         return new ReportMetrics(
                 totalAppointments,

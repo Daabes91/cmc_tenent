@@ -3,6 +3,7 @@ package com.clinic.modules.publicapi.service;
 import com.clinic.modules.core.patient.PatientContactUtils;
 import com.clinic.modules.core.patient.PatientEntity;
 import com.clinic.modules.core.patient.PatientRepository;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 import com.clinic.modules.publicapi.dto.PatientProfileResponse;
 import com.clinic.modules.publicapi.dto.PatientProfileUpdateRequest;
 import org.springframework.http.HttpStatus;
@@ -15,14 +16,18 @@ import org.springframework.web.server.ResponseStatusException;
 public class PatientProfileService {
 
     private final PatientRepository patientRepository;
+    private final TenantContextHolder tenantContextHolder;
 
-    public PatientProfileService(PatientRepository patientRepository) {
+    public PatientProfileService(PatientRepository patientRepository,
+                                 TenantContextHolder tenantContextHolder) {
         this.patientRepository = patientRepository;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @Transactional(readOnly = true)
     public PatientProfileResponse getPatientProfile(Long patientId) {
-        PatientEntity patient = patientRepository.findById(patientId)
+        Long tenantId = tenantContextHolder.requireTenantId();
+        PatientEntity patient = patientRepository.findByIdAndTenantId(patientId, tenantId)
                 .orElseThrow(() -> notFound("Patient account not found."));
 
         return toResponse(patient);
@@ -30,7 +35,8 @@ public class PatientProfileService {
 
     @Transactional
     public PatientProfileResponse updatePatientProfile(Long patientId, PatientProfileUpdateRequest request) {
-        PatientEntity patient = patientRepository.findById(patientId)
+        Long tenantId = tenantContextHolder.requireTenantId();
+        PatientEntity patient = patientRepository.findByIdAndTenantId(patientId, tenantId)
                 .orElseThrow(() -> notFound("Patient account not found."));
 
         String firstName = request.firstName().trim();
@@ -43,10 +49,11 @@ public class PatientProfileService {
         String email = normalizeEmailOrThrow(request.email());
         String phone = normalizePhoneOrThrow(request.phone());
 
-        patientRepository.findByEmailIgnoreCase(email)
+        // Check if email is already used by another patient in this tenant
+        patientRepository.findByTenantIdAndGlobalPatient_Email(tenantId, email)
                 .filter(existing -> !existing.getId().equals(patientId))
                 .ifPresent(existing -> {
-                    throw conflict("Another account already uses this email address.");
+                    throw conflict("Another account already uses this email address in this clinic.");
                 });
 
         patient.updateDetails(firstName, lastName, email, phone, request.dateOfBirth());

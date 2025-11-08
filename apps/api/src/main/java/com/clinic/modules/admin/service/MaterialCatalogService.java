@@ -4,6 +4,8 @@ import com.clinic.modules.admin.dto.MaterialCatalogRequest;
 import com.clinic.modules.admin.dto.MaterialCatalogResponse;
 import com.clinic.modules.core.service.CurrencyConversionService;
 import com.clinic.modules.core.settings.ClinicSettingsRepository;
+import com.clinic.modules.core.tenant.TenantContextHolder;
+import com.clinic.modules.core.tenant.TenantService;
 import com.clinic.modules.core.treatment.MaterialCatalogEntity;
 import com.clinic.modules.core.treatment.MaterialCatalogRepository;
 import org.springframework.stereotype.Service;
@@ -22,15 +24,21 @@ public class MaterialCatalogService {
     private final MaterialCatalogRepository materialCatalogRepository;
     private final ClinicSettingsRepository clinicSettingsRepository;
     private final CurrencyConversionService currencyConversionService;
+    private final TenantContextHolder tenantContextHolder;
+    private final TenantService tenantService;
 
     public MaterialCatalogService(
             MaterialCatalogRepository materialCatalogRepository,
             ClinicSettingsRepository clinicSettingsRepository,
-            CurrencyConversionService currencyConversionService
+            CurrencyConversionService currencyConversionService,
+            TenantContextHolder tenantContextHolder,
+            TenantService tenantService
     ) {
         this.materialCatalogRepository = materialCatalogRepository;
         this.clinicSettingsRepository = clinicSettingsRepository;
         this.currencyConversionService = currencyConversionService;
+        this.tenantContextHolder = tenantContextHolder;
+        this.tenantService = tenantService;
     }
 
     /**
@@ -38,8 +46,10 @@ public class MaterialCatalogService {
      */
     @Transactional
     public MaterialCatalogResponse createMaterial(MaterialCatalogRequest request) {
-        // Check for duplicate name
-        materialCatalogRepository.findByName(request.name())
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
+        // Check for duplicate name within tenant
+        materialCatalogRepository.findByTenantIdAndName(tenantId, request.name())
                 .ifPresent(existing -> {
                     throw new IllegalArgumentException("Material with name '" + request.name() + "' already exists");
                 });
@@ -60,6 +70,9 @@ public class MaterialCatalogService {
         if (!request.active()) {
             material.deactivate();
         }
+        
+        // Assign current tenant
+        material.setTenant(tenantService.requireTenant(tenantId));
 
         MaterialCatalogEntity saved = materialCatalogRepository.save(material);
         return toResponse(saved);
@@ -70,7 +83,9 @@ public class MaterialCatalogService {
      */
     @Transactional(readOnly = true)
     public MaterialCatalogResponse getMaterial(Long id) {
-        MaterialCatalogEntity material = materialCatalogRepository.findById(id)
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
+        MaterialCatalogEntity material = materialCatalogRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("Material not found with ID: " + id));
         return toResponse(material);
     }
@@ -80,7 +95,10 @@ public class MaterialCatalogService {
      */
     @Transactional(readOnly = true)
     public List<MaterialCatalogResponse> getActiveMaterials() {
-        return materialCatalogRepository.findByActiveTrue().stream()
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
+        return materialCatalogRepository.findAllByTenantId(tenantId).stream()
+                .filter(MaterialCatalogEntity::getActive)
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -90,7 +108,9 @@ public class MaterialCatalogService {
      */
     @Transactional(readOnly = true)
     public List<MaterialCatalogResponse> getAllMaterials() {
-        return materialCatalogRepository.findAll().stream()
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
+        return materialCatalogRepository.findAllByTenantId(tenantId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -100,12 +120,14 @@ public class MaterialCatalogService {
      */
     @Transactional
     public MaterialCatalogResponse updateMaterial(Long id, MaterialCatalogRequest request) {
-        MaterialCatalogEntity material = materialCatalogRepository.findById(id)
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
+        MaterialCatalogEntity material = materialCatalogRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("Material not found with ID: " + id));
 
-        // Check for duplicate name if name is being changed
+        // Check for duplicate name within tenant if name is being changed
         if (!material.getName().equals(request.name())) {
-            materialCatalogRepository.findByName(request.name())
+            materialCatalogRepository.findByTenantIdAndName(tenantId, request.name())
                     .ifPresent(existing -> {
                         throw new IllegalArgumentException("Material with name '" + request.name() + "' already exists");
                     });
@@ -138,7 +160,9 @@ public class MaterialCatalogService {
      */
     @Transactional
     public MaterialCatalogResponse deactivateMaterial(Long id) {
-        MaterialCatalogEntity material = materialCatalogRepository.findById(id)
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
+        MaterialCatalogEntity material = materialCatalogRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("Material not found with ID: " + id));
 
         material.deactivate();
@@ -151,7 +175,9 @@ public class MaterialCatalogService {
      */
     @Transactional
     public MaterialCatalogResponse activateMaterial(Long id) {
-        MaterialCatalogEntity material = materialCatalogRepository.findById(id)
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
+        MaterialCatalogEntity material = materialCatalogRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("Material not found with ID: " + id));
 
         material.activate();

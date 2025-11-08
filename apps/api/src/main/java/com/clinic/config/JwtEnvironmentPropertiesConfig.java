@@ -43,6 +43,12 @@ public class JwtEnvironmentPropertiesConfig {
         String patientPublicKey = environment.getProperty("JWT_PATIENT_PUBLIC_KEY");
         String patientPrivateKey = environment.getProperty("JWT_PATIENT_PRIVATE_KEY");
 
+        // SAAS Manager JWT configuration from environment
+        String saasManagerIssuer = environment.getProperty("JWT_SAAS_MANAGER_ISSUER");
+        String saasManagerAudience = environment.getProperty("JWT_SAAS_MANAGER_AUDIENCE");
+        String saasManagerPublicKey = environment.getProperty("JWT_SAAS_MANAGER_PUBLIC_KEY");
+        String saasManagerPrivateKey = environment.getProperty("JWT_SAAS_MANAGER_PRIVATE_KEY");
+
         if (staffIssuer != null || staffAudience != null || staffPublicKey != null) {
             log.info("Applying JWT configuration from environment");
 
@@ -64,8 +70,17 @@ public class JwtEnvironmentPropertiesConfig {
                 Duration.ofSeconds(30)
             );
 
+            SecurityProperties.Token saasManagerToken = new SecurityProperties.Token(
+                saasManagerIssuer != null ? saasManagerIssuer : "",
+                saasManagerAudience != null ? saasManagerAudience : "",
+                saasManagerPublicKey != null ? saasManagerPublicKey : "",
+                saasManagerPrivateKey != null ? saasManagerPrivateKey : "",
+                Duration.ofDays(30),
+                Duration.ofSeconds(30)
+            );
+
             SecurityProperties.Refresh refresh = new SecurityProperties.Refresh(Duration.ofMinutes(30));
-            SecurityProperties.Jwt jwt = new SecurityProperties.Jwt(patientToken, staffToken, refresh);
+            SecurityProperties.Jwt jwt = new SecurityProperties.Jwt(patientToken, staffToken, saasManagerToken, refresh);
             properties.setJwt(jwt);
 
             log.info("JWT configuration applied successfully");

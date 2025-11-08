@@ -1,5 +1,6 @@
 package com.clinic.modules.core.treatment;
 
+import com.clinic.modules.core.tenant.TenantEntity;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -11,14 +12,26 @@ import java.util.Objects;
  * Stores the name and unit cost for tracking COGS.
  */
 @Entity
-@Table(name = "material_catalog")
+@Table(
+        name = "material_catalog",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_material_catalog_tenant_name",
+                        columnNames = {"tenant_id", "name"}
+                )
+        }
+)
 public class MaterialCatalogEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 200)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private TenantEntity tenant;
+
+    @Column(nullable = false, length = 200)
     private String name;
 
     @Column(columnDefinition = "TEXT")
@@ -116,6 +129,14 @@ public class MaterialCatalogEntity {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public TenantEntity getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(TenantEntity tenant) {
+        this.tenant = tenant;
     }
 
     @Override

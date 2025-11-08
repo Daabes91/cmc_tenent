@@ -40,6 +40,7 @@ public class RsaJwtVerifier implements JwtVerifier {
             String rawKey = tokenConfig.publicKey();
             boolean isStaffConfig = tokenConfig == securityProperties.jwt().staff();
             boolean isPatientConfig = tokenConfig == securityProperties.jwt().patient();
+            boolean isSaasManagerConfig = tokenConfig == securityProperties.jwt().saasManager();
             if (log.isDebugEnabled()) {
                 log.debug("Token config audience: '{}' (staff config: {})", tokenConfig.audience(), isStaffConfig);
             }
@@ -49,6 +50,9 @@ public class RsaJwtVerifier implements JwtVerifier {
             } else if (!StringUtils.hasText(rawKey) && isPatientConfig) {
                 log.debug("Patient public key missing from configuration; falling back to bundled development key");
                 rawKey = "classpath:keys/patient_public.pem";
+            } else if (!StringUtils.hasText(rawKey) && isSaasManagerConfig) {
+                log.debug("SAAS Manager public key missing from configuration; falling back to staff key");
+                rawKey = "classpath:keys/staff_public.pem";
             }
             RSAKey rsaKey = resolveKey(rawKey);
             RSASSAVerifier verifier = new RSASSAVerifier(rsaKey);
@@ -65,7 +69,7 @@ public class RsaJwtVerifier implements JwtVerifier {
             String issuer = claims.getIssuer();
             String expectedAudience = StringUtils.hasText(tokenConfig.audience())
                     ? tokenConfig.audience()
-                    : (isStaffConfig ? "staff" : "patient");
+                    : (isStaffConfig ? "staff" : (isSaasManagerConfig ? "saas-manager" : "patient"));
             String expectedIssuer = StringUtils.hasText(tokenConfig.issuer())
                     ? tokenConfig.issuer()
                     : "https://api.example-clinic.com";
@@ -83,12 +87,18 @@ public class RsaJwtVerifier implements JwtVerifier {
             }
 
             List<String> roles = extractRoles(claims.getClaim("roles"));
+            Long tenantId = extractTenantId(claims);
 
-            JwtAudience audienceEnum = tokenConfig.audience().equalsIgnoreCase("staff")
-                    ? JwtAudience.STAFF
-                    : JwtAudience.PATIENT;
+            JwtAudience audienceEnum;
+            if (tokenConfig.audience().equalsIgnoreCase("staff")) {
+                audienceEnum = JwtAudience.STAFF;
+            } else if (tokenConfig.audience().equalsIgnoreCase("saas-manager")) {
+                audienceEnum = JwtAudience.SAAS_MANAGER;
+            } else {
+                audienceEnum = JwtAudience.PATIENT;
+            }
 
-            return new JwtPrincipal(subject, audienceEnum, roles);
+            return new JwtPrincipal(subject, audienceEnum, roles, tenantId);
         } catch (ParseException | JOSEException e) {
             throw new InvalidJwtException("Failed to parse JWT", e);
         }
@@ -158,5 +168,24 @@ public class RsaJwtVerifier implements JwtVerifier {
             return "ROLE_PATIENT";
         }
         return role.startsWith("ROLE_") ? role : "ROLE_" + role.toUpperCase(Locale.ROOT);
+    }
+
+    private Long extractTenantId(com.nimbusds.jwt.JWTClaimsSet claims) {
+        try {
+            Object tenantIdClaim = claims.getClaim("tenantId");
+            if (tenantIdClaim == null) {
+                return null;
+            }
+            if (tenantIdClaim instanceof Number) {
+                return ((Number) tenantIdClaim).longValue();
+            }
+            if (tenantIdClaim instanceof String) {
+                return Long.parseLong((String) tenantIdClaim);
+            }
+            return null;
+        } catch (Exception e) {
+            log.debug("Failed to extract tenantId from JWT claims", e);
+            return null;
+        }
     }
 }

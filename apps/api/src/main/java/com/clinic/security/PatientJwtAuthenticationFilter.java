@@ -1,5 +1,8 @@
 package com.clinic.security;
 
+import com.clinic.modules.core.tenant.TenantContext;
+import com.clinic.modules.core.tenant.TenantContextHolder;
+import com.clinic.modules.core.tenant.TenantService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,9 +27,17 @@ public class PatientJwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(PatientJwtAuthenticationFilter.class);
 
     private final JwtTokenService patientJwtTokenService;
+    private final TenantContextHolder tenantContextHolder;
+    private final TenantService tenantService;
 
-    public PatientJwtAuthenticationFilter(PatientJwtTokenService patientJwtTokenService) {
+    public PatientJwtAuthenticationFilter(
+            PatientJwtTokenService patientJwtTokenService,
+            TenantContextHolder tenantContextHolder,
+            TenantService tenantService
+    ) {
         this.patientJwtTokenService = patientJwtTokenService;
+        this.tenantContextHolder = tenantContextHolder;
+        this.tenantService = tenantService;
     }
 
     @Override
@@ -67,6 +78,14 @@ public class PatientJwtAuthenticationFilter extends OncePerRequestFilter {
         );
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Set tenant context from JWT
+        if (jwtPrincipal.tenantId() != null) {
+            var tenant = tenantService.requireTenant(jwtPrincipal.tenantId());
+            tenantContextHolder.setTenant(new TenantContext(tenant.getId(), tenant.getSlug()));
+            log.debug("Set tenant context for patient: tenantId={}, slug={}", tenant.getId(), tenant.getSlug());
+        }
+
         filterChain.doFilter(request, response);
     }
 }

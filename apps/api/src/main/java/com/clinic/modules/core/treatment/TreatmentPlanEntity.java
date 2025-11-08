@@ -3,6 +3,7 @@ package com.clinic.modules.core.treatment;
 import com.clinic.modules.core.doctor.DoctorEntity;
 import com.clinic.modules.core.patient.PatientEntity;
 import com.clinic.modules.core.service.ClinicServiceEntity;
+import com.clinic.modules.core.tenant.TenantEntity;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -22,6 +23,10 @@ public class TreatmentPlanEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private TenantEntity tenant;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "patient_id")
@@ -308,6 +313,14 @@ public class TreatmentPlanEntity {
 
     public List<TreatmentPlanPaymentEntity> getDirectPayments() {
         return directPayments;
+    }
+
+    public TenantEntity getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(TenantEntity tenant) {
+        this.tenant = tenant;
     }
 
     @Override

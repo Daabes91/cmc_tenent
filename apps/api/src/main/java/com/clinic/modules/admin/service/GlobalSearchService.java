@@ -95,19 +95,19 @@ public class GlobalSearchService {
         List<GlobalSearchResultItem> results = new ArrayList<>();
 
         if (permissionService.canView("patients")) {
-            patientRepository.searchPatients(term, pageable).forEach(patient ->
+            patientRepository.searchPatientsByTenantId(tenantId, term, pageable).forEach(patient ->
                     results.add(mapPatient(patient))
             );
         }
 
         if (permissionService.canView("doctors")) {
-            doctorRepository.searchDoctors(term, pageable).forEach(doctor ->
+            doctorRepository.searchDoctors(tenantId, term, pageable).forEach(doctor ->
                     results.add(mapDoctor(doctor))
             );
         }
 
         if (permissionService.canView("appointments")) {
-            appointmentRepository.searchAppointments(term, pageable).forEach(appointment ->
+            appointmentRepository.searchByTenantIdAndTerm(tenantId, term, pageable).forEach(appointment ->
                     results.add(mapAppointment(appointment, zoneId))
             );
         }
@@ -137,7 +137,7 @@ public class GlobalSearchService {
         }
 
         if (permissionService.canView("services") || permissionService.isAdmin()) {
-            materialCatalogRepository.searchMaterials(term, pageable).forEach(material ->
+            materialCatalogRepository.searchMaterialsByTenantId(tenantId, term, pageable).forEach(material ->
                     results.add(mapMaterial(material))
             );
         }

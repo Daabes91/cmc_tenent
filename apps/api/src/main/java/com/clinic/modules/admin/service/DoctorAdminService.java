@@ -7,6 +7,7 @@ import com.clinic.modules.core.doctor.DoctorRepository;
 import com.clinic.modules.core.service.ClinicServiceEntity;
 import com.clinic.modules.core.service.ClinicServiceRepository;
 import com.clinic.modules.core.tenant.TenantContextHolder;
+import com.clinic.modules.core.tenant.TenantService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,18 +22,22 @@ public class DoctorAdminService {
     private final DoctorRepository doctorRepository;
     private final ClinicServiceRepository serviceRepository;
     private final TenantContextHolder tenantContextHolder;
+    private final TenantService tenantService;
 
     public DoctorAdminService(DoctorRepository doctorRepository,
                               ClinicServiceRepository serviceRepository,
-                              TenantContextHolder tenantContextHolder) {
+                              TenantContextHolder tenantContextHolder,
+                              TenantService tenantService) {
         this.doctorRepository = doctorRepository;
         this.serviceRepository = serviceRepository;
         this.tenantContextHolder = tenantContextHolder;
+        this.tenantService = tenantService;
     }
 
     @Transactional(readOnly = true)
     public List<DoctorAdminResponse> listDoctors() {
-        return doctorRepository.findAllWithServices()
+        Long tenantId = currentTenantId();
+        return doctorRepository.findAllWithServices(tenantId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -40,13 +45,15 @@ public class DoctorAdminService {
 
     @Transactional(readOnly = true)
     public DoctorAdminResponse getDoctor(Long id) {
-        DoctorEntity entity = doctorRepository.findById(id)
+        Long tenantId = currentTenantId();
+        DoctorEntity entity = doctorRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
         return toResponse(entity);
     }
 
     @Transactional
     public DoctorAdminResponse createDoctor(DoctorUpsertRequest request) {
+        Long tenantId = currentTenantId();
         String fullNameEn = requireName(request.fullNameEn());
         DoctorEntity doctor = new DoctorEntity(
                 fullNameEn,
@@ -57,6 +64,9 @@ public class DoctorAdminService {
                 normalize(request.bioAr()),
                 encodeLocales(request.locales())
         );
+
+        // Assign current tenant before save
+        doctor.setTenant(tenantService.requireTenant(tenantId));
 
         Set<ClinicServiceEntity> services = resolveServices(request.serviceIds());
         doctor.assignServices(services);
@@ -70,7 +80,8 @@ public class DoctorAdminService {
 
     @Transactional
     public DoctorAdminResponse updateDoctor(Long id, DoctorUpsertRequest request) {
-        DoctorEntity doctor = doctorRepository.findById(id)
+        Long tenantId = currentTenantId();
+        DoctorEntity doctor = doctorRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
 
         String fullNameEn = requireName(request.fullNameEn());
@@ -95,7 +106,8 @@ public class DoctorAdminService {
 
     @Transactional
     public void deleteDoctor(Long id) {
-        DoctorEntity doctor = doctorRepository.findById(id)
+        Long tenantId = currentTenantId();
+        DoctorEntity doctor = doctorRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
 
         Set<ClinicServiceEntity> linkedServices = new HashSet<>(doctor.getServices());
@@ -113,10 +125,20 @@ public class DoctorAdminService {
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
-        List<ClinicServiceEntity> services = serviceRepository.findAllByTenantIdAndIdIn(currentTenantId(), distinctIds);
+        Long tenantId = currentTenantId();
+        List<ClinicServiceEntity> services = serviceRepository.findAllByTenantIdAndIdIn(tenantId, distinctIds);
         if (services.size() != distinctIds.size()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more services could not be found");
         }
+        
+        // Validate all services belong to the current tenant
+        for (ClinicServiceEntity service : services) {
+            if (service.getTenant() == null || !service.getTenant().getId().equals(tenantId)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "Cannot assign services from different tenants to doctor");
+            }
+        }
+        
         return new HashSet<>(services);
     }
 

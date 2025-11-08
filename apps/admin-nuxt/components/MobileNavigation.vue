@@ -46,6 +46,24 @@
       
       <!-- Mobile Actions -->
       <div class="flex items-center gap-2">
+        <!-- View Website Button -->
+        <button
+          @click="openWebsite"
+          :class="[
+            'flex items-center justify-center rounded-lg transition-colors duration-200',
+            'hover:bg-slate-100 dark:hover:bg-white/10',
+            'focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2',
+            'touch-manipulation',
+            getTouchTargetClass()
+          ]"
+          :aria-label="$t('layout.header.viewWebsite')"
+        >
+          <UIcon
+            name="i-lucide-globe"
+            class="w-5 h-5 text-slate-600 dark:text-slate-300"
+          />
+        </button>
+
         <!-- Theme Toggle -->
         <button
           @click="$emit('toggle-theme')"
@@ -58,12 +76,12 @@
           ]"
           :aria-label="'Toggle theme'"
         >
-          <UIcon 
-            :name="isDark ? 'i-lucide-sun' : 'i-lucide-moon'" 
-            class="w-5 h-5 text-slate-600 dark:text-slate-300" 
+          <UIcon
+            :name="isDark ? 'i-lucide-sun' : 'i-lucide-moon'"
+            class="w-5 h-5 text-slate-600 dark:text-slate-300"
           />
         </button>
-        
+
         <!-- User Menu -->
         <UDropdown :items="userMenuItems" :ui="mobileDropdownUi">
           <button
@@ -297,6 +315,33 @@ const handleNavClick = (item: any) => {
 const handleQuickAction = (action: QuickAction) => {
   action.action();
   closeSidebar();
+};
+
+// Open patient-facing website with tenant slug
+const config = useRuntimeConfig();
+const { tenantSlug } = useTenantSlug();
+const openWebsite = () => {
+  const baseUrl = config.public.webUrl;
+
+  // Build URL with tenant slug subdomain
+  // For local: http://daabes.localhost:3001
+  // For production: https://daabes.yourdomain.com
+  try {
+    const url = new URL(baseUrl);
+    const slug = tenantSlug.value;
+
+    // Check if hostname already includes the tenant slug
+    if (!url.hostname.startsWith(`${slug}.`)) {
+      // Insert tenant slug as subdomain
+      url.hostname = `${slug}.${url.hostname}`;
+    }
+
+    window.open(url.toString(), '_blank');
+  } catch (error) {
+    // Fallback to base URL if URL construction fails
+    console.error('Failed to construct tenant URL:', error);
+    window.open(baseUrl, '_blank');
+  }
 };
 
 // Touch target utility

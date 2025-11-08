@@ -29,7 +29,7 @@ public class PatientJwtTokenService implements JwtTokenService {
         try {
             var config = securityProperties.jwt().patient();
             JwtPrincipal principal = jwtVerifier.verify(token, config);
-            return Optional.of(new JwtPrincipal(principal.subject(), JwtAudience.PATIENT, principal.roles()));
+            return Optional.of(principal);
         } catch (InvalidJwtException ex) {
             log.debug("Patient JWT rejected: {}", ex.getMessage());
             return Optional.empty();

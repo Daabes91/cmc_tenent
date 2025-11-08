@@ -204,6 +204,19 @@
 
             <div class="flex flex-wrap items-center gap-2">
               <TenantSwitcher />
+
+              <!-- View Website Button -->
+              <UButton
+                icon="i-lucide-globe"
+                variant="ghost"
+                size="md"
+                :aria-label="t('layout.header.viewWebsite')"
+                class="text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/10 dark:hover:text-white"
+                @click="openWebsite"
+              >
+                <span class="hidden xl:inline">{{ t('layout.header.viewWebsite') }}</span>
+              </UButton>
+
               <UButton
                 :icon="themeIcon"
                 variant="ghost"
@@ -403,6 +416,33 @@ const themeLabel = computed(() =>
 );
 const toggleTheme = () => {
   colorMode.preference = isDark.value ? "light" : "dark";
+};
+
+// Open patient-facing website with tenant slug
+const config = useRuntimeConfig();
+const { tenantSlug } = useTenantSlug();
+const openWebsite = () => {
+  const baseUrl = config.public.webUrl;
+
+  // Build URL with tenant slug subdomain
+  // For local: http://daabes.localhost:3001
+  // For production: https://daabes.yourdomain.com
+  try {
+    const url = new URL(baseUrl);
+    const slug = tenantSlug.value;
+
+    // Check if hostname already includes the tenant slug
+    if (!url.hostname.startsWith(`${slug}.`)) {
+      // Insert tenant slug as subdomain
+      url.hostname = `${slug}.${url.hostname}`;
+    }
+
+    window.open(url.toString(), '_blank');
+  } catch (error) {
+    // Fallback to base URL if URL construction fails
+    console.error('Failed to construct tenant URL:', error);
+    window.open(baseUrl, '_blank');
+  }
 };
 
 // Mobile navigation handlers

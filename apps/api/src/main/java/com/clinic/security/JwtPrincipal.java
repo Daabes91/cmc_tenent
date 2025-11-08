@@ -5,7 +5,8 @@ import java.util.List;
 public record JwtPrincipal(
         String subject,
         JwtAudience audience,
-        List<String> roles
+        List<String> roles,
+        Long tenantId
 ) {
 }
 

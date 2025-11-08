@@ -685,26 +685,23 @@ const upcoming = computed(() => {
   return appointments.slice(0, 5);
 });
 
-const doctors = [
-  {
-    name: "Dr. Layla Rahman",
-    specialty: "Cosmetic Dentistry",
-    status: "In clinic",
-    nextSlot: "10:30 AM"
-  },
-  {
-    name: "Dr. Omar Idris",
-    specialty: "Oral Surgery",
-    status: "Post-op review",
-    nextSlot: "11:15 AM"
-  },
-  {
-    name: "Dr. Noor Haddad",
-    specialty: "General Dentistry",
-    status: "Consultation",
-    nextSlot: "12:00 PM"
-  }
-];
+// Fetch team on call from API
+const { data: teamOnCallData } = await useAsyncData("team-on-call", () =>
+  fetcher("/dashboard/team-on-call", [])
+);
+
+const doctors = computed(() => {
+  const team = teamOnCallData.value ?? [];
+
+  // Transform API response to match expected format
+  return team.map((member: any) => ({
+    id: member.id,
+    name: member.name,
+    specialty: member.specialty || "General Practice",
+    status: member.status,
+    nextSlot: member.nextSlot ? formatTime(member.nextSlot) : "—"
+  }));
+});
 
 // Use clinic timezone for all date/time displays
 // CRITICAL: All admins see times in clinic timezone, not their browser timezone

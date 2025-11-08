@@ -24,6 +24,7 @@
     "header": {
       "searchPlaceholder": "Find patients, schedule updates, or quick actions...",
       "newBooking": "New booking",
+      "viewWebsite": "View Website",
       "theme": {
         "dark": "Switch to dark theme",
         "light": "Switch to light theme"

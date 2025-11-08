@@ -4,6 +4,7 @@ import com.clinic.modules.core.doctor.DoctorEntity;
 import com.clinic.modules.core.patient.PatientEntity;
 import com.clinic.modules.core.payment.PayPalPaymentEntity;
 import com.clinic.modules.core.service.ClinicServiceEntity;
+import com.clinic.modules.core.tenant.TenantEntity;
 import com.clinic.modules.core.treatment.PaymentMethod;
 import com.clinic.modules.core.treatment.TreatmentPlanEntity;
 import jakarta.persistence.*;
@@ -19,6 +20,10 @@ public class AppointmentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private TenantEntity tenant;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "patient_id")
@@ -122,6 +127,14 @@ public class AppointmentEntity {
 
     public Long getId() {
         return id;
+    }
+
+    public TenantEntity getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(TenantEntity tenant) {
+        this.tenant = tenant;
     }
 
     public PatientEntity getPatient() {

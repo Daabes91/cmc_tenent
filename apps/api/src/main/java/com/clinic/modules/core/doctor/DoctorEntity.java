@@ -1,6 +1,7 @@
 package com.clinic.modules.core.doctor;
 
 import com.clinic.modules.core.service.ClinicServiceEntity;
+import com.clinic.modules.core.tenant.TenantEntity;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -60,6 +61,10 @@ public class DoctorEntity {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private TenantEntity tenant;
 
     @ManyToMany
     @JoinTable(
@@ -167,6 +172,14 @@ public class DoctorEntity {
 
     public Set<DoctorAvailabilityEntity> getAvailabilities() {
         return availabilities;
+    }
+
+    public TenantEntity getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(TenantEntity tenant) {
+        this.tenant = tenant;
     }
 
     public void updateDetails(String fullNameEn, String fullNameAr, String specialtyEn, String specialtyAr, String bioEn, String bioAr, String localeCodes) {

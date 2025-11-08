@@ -2,6 +2,7 @@ package com.clinic.modules.publicapi.service;
 
 import com.clinic.modules.core.appointment.AppointmentEntity;
 import com.clinic.modules.core.appointment.AppointmentRepository;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 import com.clinic.modules.publicapi.dto.PatientAppointmentResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,14 +18,18 @@ public class PatientAppointmentService {
             .withZone(ZoneId.systemDefault());
 
     private final AppointmentRepository appointmentRepository;
+    private final TenantContextHolder tenantContextHolder;
 
-    public PatientAppointmentService(AppointmentRepository appointmentRepository) {
+    public PatientAppointmentService(AppointmentRepository appointmentRepository,
+                                    TenantContextHolder tenantContextHolder) {
         this.appointmentRepository = appointmentRepository;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @Transactional(readOnly = true)
     public List<PatientAppointmentResponse> getPatientAppointments(Long patientId) {
-        var appointments = appointmentRepository.findByPatientIdOrderByScheduledAtDesc(patientId);
+        Long tenantId = tenantContextHolder.requireTenantId();
+        var appointments = appointmentRepository.findByTenantIdAndPatientIdOrderByScheduledAtDesc(tenantId, patientId);
         return appointments.stream()
                 .map(this::toResponse)
                 .toList();

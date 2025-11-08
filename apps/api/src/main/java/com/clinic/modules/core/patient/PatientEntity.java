@@ -1,5 +1,6 @@
 package com.clinic.modules.core.patient;
 
+import com.clinic.modules.core.tenant.TenantEntity;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -15,6 +16,14 @@ public class PatientEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private TenantEntity tenant;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "global_patient_id", nullable = false)
+    private GlobalPatientEntity globalPatient;
+
     @Column(name = "external_id", nullable = false, unique = true, length = 64)
     private String externalId;
 
@@ -29,9 +38,6 @@ public class PatientEntity {
 
     @Column(length = 32)
     private String phone;
-
-    @Column(name = "password_hash", length = 255)
-    private String passwordHash;
 
     /**
      * URL to the patient's profile image (stored in Cloudflare Images).
@@ -68,6 +74,22 @@ public class PatientEntity {
         return id;
     }
 
+    public TenantEntity getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(TenantEntity tenant) {
+        this.tenant = tenant;
+    }
+
+    public GlobalPatientEntity getGlobalPatient() {
+        return globalPatient;
+    }
+
+    public void setGlobalPatient(GlobalPatientEntity globalPatient) {
+        this.globalPatient = globalPatient;
+    }
+
     public String getExternalId() {
         return externalId;
     }
@@ -88,10 +110,6 @@ public class PatientEntity {
         return phone;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
     public String getProfileImageUrl() {
         return profileImageUrl;
     }
@@ -102,10 +120,6 @@ public class PatientEntity {
 
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
     }
 
     public void setProfileImageUrl(String profileImageUrl) {

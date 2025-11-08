@@ -1,7 +1,6 @@
 package com.clinic.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.List;
@@ -58,10 +57,11 @@ public class SecurityProperties {
     public record Jwt(
             Token patient,
             Token staff,
+            Token saasManager,
             Refresh refresh
     ) {
         public Jwt() {
-            this(new Token(), new Token(), new Refresh());
+            this(new Token(), new Token(), new Token(), new Refresh());
         }
     }
 

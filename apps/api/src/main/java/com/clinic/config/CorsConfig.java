@@ -45,5 +45,9 @@ public class CorsConfig {
         configuration.setAllowedOriginPatterns(origins);
         configuration.addAllowedOriginPattern("http://localhost:*");
         configuration.addAllowedOriginPattern("http://127.0.0.1:*");
+        // Allow subdomain-based origins for multi-tenant routing
+        // Matches: http://tenant-a.localhost:3001, http://daabes.localhost:3001, etc.
+        configuration.addAllowedOriginPattern("http://*.localhost:*");
+        configuration.addAllowedOriginPattern("https://*.localhost:*");
     }
 }

@@ -60,7 +60,9 @@ security:
   admin:
     ip-allowlist: ${ADMIN_IP_ALLOWLIST:127.0.0.1/32,::1/128}
   email:
-    sendgrid-api-key: ${SENDGRID_API_KEY}
+    # SendGrid API key is now configured per-tenant in clinic settings (database)
+    # This environment variable is only used as a fallback/legacy option
+    sendgrid-api-key: ${SENDGRID_API_KEY:}
     from-email: ${EMAIL_FROM:clinic.notifier@gmail.com}
     from-name: ${EMAIL_FROM_NAME:Clinic}
     enabled: ${EMAIL_ENABLED:true}

@@ -55,16 +55,17 @@ public class AvailabilityService {
         ClinicServiceEntity service = serviceRepository.findBySlugAndTenantId(request.serviceSlug(), tenantContextHolder.requireTenantId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
 
+        Long tenantId = tenantContextHolder.requireTenantId();
         List<DoctorEntity> doctors;
         if (request.doctorId() != null) {
-            DoctorEntity doctor = doctorRepository.findById(request.doctorId())
+            DoctorEntity doctor = doctorRepository.findByIdAndTenantId(request.doctorId(), tenantId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
             if (!doctor.getServices().contains(service)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Doctor does not provide the requested service");
             }
             doctors = List.of(doctor);
         } else {
-            doctors = doctorRepository.findAllByServiceSlug(service.getSlug(), tenantContextHolder.requireTenantId());
+            doctors = doctorRepository.findAllByServiceSlug(service.getSlug(), tenantId);
         }
 
         LocalDate requestedDate = parseDateOrDefault(request.date());
@@ -78,6 +79,7 @@ public class AvailabilityService {
     }
 
     private List<AvailabilitySlotResponse> generateSlotsForDoctor(DoctorEntity doctor, LocalDate date) {
+        Long tenantId = tenantContextHolder.requireTenantId();
         List<DoctorAvailabilityEntity> specificAvailabilities = availabilityRepository.findByDoctorIdAndSpecificDate(doctor.getId(), date);
         List<DoctorAvailabilityEntity> weeklyAvailabilities = availabilityRepository.findByDoctorIdAndRecurringWeeklyTrueAndDayOfWeek(
                 doctor.getId(),
@@ -95,17 +97,18 @@ public class AvailabilityService {
         Instant now = Instant.now();
 
         for (DoctorAvailabilityEntity availability : specificAvailabilities) {
-            slots.addAll(generateSlotsFromAvailability(doctor, availability, availability.getSpecificDate(), today, now));
+            slots.addAll(generateSlotsFromAvailability(tenantId, doctor, availability, availability.getSpecificDate(), today, now));
         }
 
         for (DoctorAvailabilityEntity availability : weeklyAvailabilities) {
-            slots.addAll(generateSlotsFromAvailability(doctor, availability, date, today, now));
+            slots.addAll(generateSlotsFromAvailability(tenantId, doctor, availability, date, today, now));
         }
 
         return slots;
     }
 
-    private List<AvailabilitySlotResponse> generateSlotsFromAvailability(DoctorEntity doctor,
+    private List<AvailabilitySlotResponse> generateSlotsFromAvailability(Long tenantId,
+                                                                         DoctorEntity doctor,
                                                                          DoctorAvailabilityEntity availability,
                                                                          LocalDate targetDate,
                                                                          LocalDate today,
@@ -139,6 +142,7 @@ public class AvailabilityService {
             }
 
             boolean conflict = appointmentRepository.existsActiveByDoctorAndTimeRange(
+                    tenantId,
                     doctor.getId(),
                     slotStartInstant,
                     slotEndInstant,

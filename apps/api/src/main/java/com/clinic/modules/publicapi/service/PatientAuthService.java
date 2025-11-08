@@ -1,31 +1,41 @@
 package com.clinic.modules.publicapi.service;
 
+import com.clinic.modules.core.patient.GlobalPatientEntity;
+import com.clinic.modules.core.patient.GlobalPatientService;
 import com.clinic.modules.core.patient.PatientContactUtils;
 import com.clinic.modules.core.patient.PatientEntity;
 import com.clinic.modules.core.patient.PatientRepository;
+import com.clinic.modules.core.tenant.TenantContextHolder;
+import com.clinic.modules.core.tenant.TenantService;
 import com.clinic.modules.publicapi.dto.PatientAuthResponse;
 import com.clinic.modules.publicapi.dto.PatientLoginRequest;
 import com.clinic.modules.publicapi.dto.PatientSignupRequest;
 import com.clinic.security.JwtIssuer;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 
 @Service
 public class PatientAuthService {
 
     private final PatientRepository patientRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final GlobalPatientService globalPatientService;
+    private final TenantService tenantService;
+    private final TenantContextHolder tenantContextHolder;
     private final JwtIssuer jwtIssuer;
 
     public PatientAuthService(PatientRepository patientRepository,
-                              PasswordEncoder passwordEncoder,
+                              GlobalPatientService globalPatientService,
+                              TenantService tenantService,
+                              TenantContextHolder tenantContextHolder,
                               JwtIssuer jwtIssuer) {
         this.patientRepository = patientRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.globalPatientService = globalPatientService;
+        this.tenantService = tenantService;
+        this.tenantContextHolder = tenantContextHolder;
         this.jwtIssuer = jwtIssuer;
     }
 
@@ -36,25 +46,43 @@ public class PatientAuthService {
         String firstName = request.firstName().trim();
         String lastName = request.lastName().trim();
 
-        PatientEntity patient = patientRepository.findByEmailIgnoreCase(email).orElse(null);
-        if (patient != null) {
-            if (StringUtils.hasText(patient.getPasswordHash())) {
-                throw conflict("An account already exists for this email address.");
-            }
+        Long tenantId = tenantContextHolder.requireTenantId();
+
+        // Find or create global patient
+        GlobalPatientEntity globalPatient = globalPatientService.findOrCreateGlobalPatient(
+                email,
+                phone,
+                request.dateOfBirth(),
+                request.password()
+        );
+
+        // Check if tenant profile already exists for this tenant
+        Optional<PatientEntity> existingProfile = patientRepository.findByTenantIdAndGlobalPatientId(
+                tenantId,
+                globalPatient.getId()
+        );
+
+        PatientEntity patient;
+        if (existingProfile.isPresent()) {
+            // Update existing tenant profile
+            patient = existingProfile.get();
             patient.updateDetails(firstName, lastName, email, phone, request.dateOfBirth());
         } else {
+            // Create new tenant profile linked to global patient
             patient = new PatientEntity(
                     firstName,
                     lastName,
                     email,
                     phone
             );
+            patient.setTenant(tenantService.requireTenant(tenantId));
+            patient.setGlobalPatient(globalPatient);
+            
             if (request.dateOfBirth() != null) {
                 patient.setDateOfBirth(request.dateOfBirth());
             }
         }
 
-        patient.setPasswordHash(passwordEncoder.encode(request.password()));
         patientRepository.save(patient);
 
         var token = jwtIssuer.issuePatientAccessToken(patient);
@@ -64,13 +92,22 @@ public class PatientAuthService {
     @Transactional
     public PatientAuthResponse login(PatientLoginRequest request) {
         String email = normalizeEmailOrThrow(request.email());
-        PatientEntity patient = patientRepository.findByEmailIgnoreCase(email)
+        Long tenantId = tenantContextHolder.requireTenantId();
+
+        // Authenticate against global patient
+        GlobalPatientEntity globalPatient = globalPatientService.findByEmail(email)
                 .orElseThrow(() -> unauthorized("Invalid email or password."));
 
-        if (!StringUtils.hasText(patient.getPasswordHash())
-                || !passwordEncoder.matches(request.password(), patient.getPasswordHash())) {
+        // Validate password using global patient password
+        if (!globalPatientService.validatePassword(globalPatient, request.password())) {
             throw unauthorized("Invalid email or password.");
         }
+
+        // Check if tenant profile exists for current tenant
+        PatientEntity patient = patientRepository.findByTenantIdAndGlobalPatientId(
+                tenantId,
+                globalPatient.getId()
+        ).orElseThrow(() -> unauthorized("No account found for this clinic. Please sign up first."));
 
         patient.markLogin();
         patientRepository.save(patient);
@@ -97,10 +134,6 @@ public class PatientAuthService {
 
     private ResponseStatusException unauthorized(String message) {
         return new ResponseStatusException(HttpStatus.UNAUTHORIZED, message);
-    }
-
-    private ResponseStatusException conflict(String message) {
-        return new ResponseStatusException(HttpStatus.CONFLICT, message);
     }
 
     private ResponseStatusException badRequest(String message) {

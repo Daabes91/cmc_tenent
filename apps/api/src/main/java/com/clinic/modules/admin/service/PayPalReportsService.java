@@ -6,6 +6,7 @@ import com.clinic.modules.admin.util.DateRange;
 import com.clinic.modules.core.payment.PayPalPaymentEntity;
 import com.clinic.modules.core.payment.PayPalPaymentRepository;
 import com.clinic.modules.core.payment.PaymentStatus;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,13 +21,16 @@ import java.util.List;
 public class PayPalReportsService {
 
     private final PayPalPaymentRepository payPalPaymentRepository;
+    private final TenantContextHolder tenantContextHolder;
 
     // PayPal fee rates (approximate)
     private static final BigDecimal PAYPAL_FIXED_FEE = new BigDecimal("0.30");
     private static final BigDecimal PAYPAL_PERCENTAGE_FEE = new BigDecimal("0.029"); // 2.9%
 
-    public PayPalReportsService(PayPalPaymentRepository payPalPaymentRepository) {
+    public PayPalReportsService(PayPalPaymentRepository payPalPaymentRepository,
+                                TenantContextHolder tenantContextHolder) {
         this.payPalPaymentRepository = payPalPaymentRepository;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @Transactional(readOnly = true)
@@ -37,13 +41,15 @@ public class PayPalReportsService {
 
     @Transactional(readOnly = true)
     public PayPalSummaryDTO getPayPalSummary(int page, int size, DateRange dateRange) {
+        Long tenantId = tenantContextHolder.requireTenantId();
+        
         // Convert DateRange to Instants for filtering
         ZoneId systemZone = ZoneId.systemDefault();
         Instant rangeStart = dateRange.getStartDate().atStartOfDay(systemZone).toInstant();
         Instant rangeEnd = dateRange.getEndDate().plusDays(1).atStartOfDay(systemZone).toInstant();
 
-        // Use optimized database query to filter payments by date range
-        List<PayPalPaymentEntity> allPayments = payPalPaymentRepository.findByCreatedAtBetween(rangeStart, rangeEnd);
+        // Use optimized database query to filter payments by date range and tenant
+        List<PayPalPaymentEntity> allPayments = payPalPaymentRepository.findByTenantIdAndCreatedAtBetween(tenantId, rangeStart, rangeEnd);
         
         if (allPayments.isEmpty()) {
             PayPalSummaryDTO.PaginationInfo emptyPagination = new PayPalSummaryDTO.PaginationInfo(

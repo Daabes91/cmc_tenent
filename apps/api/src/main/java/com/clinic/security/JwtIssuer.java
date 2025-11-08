@@ -62,6 +62,7 @@ public class JwtIssuer {
                 .claim("email", user.getEmail())
                 .claim("name", user.getFullName())
                 .claim("roles", List.of(roleToAuthority(user.getRole())))
+                .claim("tenantId", user.getTenant().getId())
                 .build();
 
         return signToken(claims, staffSigner, "staff");
@@ -83,6 +84,8 @@ public class JwtIssuer {
                 .claim("email", patient.getEmail())
                 .claim("name", (patient.getFirstName() + " " + patient.getLastName()).trim())
                 .claim("roles", List.of("ROLE_PATIENT"))
+                .claim("tenantProfileId", patient.getId())
+                .claim("globalPatientId", patient.getGlobalPatient().getId())
                 .build();
 
         return signToken(claims, patientSigner, "patient");

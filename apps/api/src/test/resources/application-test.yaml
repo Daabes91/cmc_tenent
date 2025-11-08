@@ -1,0 +1,77 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5442/clinic_multi_tenant
+    username: clinic
+    password: clinic_password
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+# JWT / Security (use same keys as local)
+jwt:
+  patient:
+    issuer: http://localhost:8080
+    audience: patient
+    public-key: classpath:keys/patient_public.pem
+    private-key: classpath:keys/patient_private.pem
+  staff:
+    issuer: http://localhost:8080
+    audience: staff
+    public-key: classpath:keys/staff_public.pem
+    private-key: classpath:keys/staff_private.pem
+
+# Disable email for tests
+security:
+  email:
+    enabled: false
+    sendgrid-api-key: test-key
+    from-email: test@example.com
+    from-name: Test Clinic
+
+# Cloudflare (fake for tests)
+cloudflare:
+  account-id: test-account
+  api-token: test-token
+  base-url: https://api.cloudflare.com/client/v4
+  delivery-url: https://imagedelivery.net/test
+  max-file-size-mb: 10
+  image-quality: 85
+  auto-optimize: true
+  allowed-extensions: jpg,jpeg,png,webp,gif
+
+# PayPal (fake for tests)
+paypal:
+  client-id: test-client-id
+  client-secret: test-secret
+  webhook-id: test-webhook
+  environment: sandbox
+  base-url: https://api-m.sandbox.paypal.com
+
+# Rate limiting (relaxed for tests)
+rate-limit:
+  public:
+    auth:
+      capacity: 100
+      period: PT1M
+    book:
+      capacity: 100
+      period: PT1M
+  admin:
+    auth:
+      capacity: 100
+      period: PT1M
+
+# Admin IP allowlist (allow all for tests)
+admin:
+  ip-allowlist:
+    primary: 0.0.0.0/0
+    secondary: ::/0
+
+# Timezone
+clinic:
+  timezone:
+    zone-id: Asia/Amman

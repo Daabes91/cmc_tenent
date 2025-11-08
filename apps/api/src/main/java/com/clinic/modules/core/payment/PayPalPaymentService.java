@@ -17,6 +17,7 @@ import com.clinic.modules.core.service.ClinicServiceRepository;
 import com.clinic.modules.core.settings.ClinicSettingsEntity;
 import com.clinic.modules.core.settings.ClinicSettingsRepository;
 import com.clinic.modules.core.tenant.TenantContextHolder;
+import com.clinic.modules.core.tenant.TenantService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ public class PayPalPaymentService {
     private final NotificationService notificationService;
     private final PayPalService payPalService;
     private final TenantContextHolder tenantContextHolder;
+    private final TenantService tenantService;
 
     @Autowired
     public PayPalPaymentService(PayPalPaymentRepository paymentRepository,
@@ -58,7 +60,8 @@ public class PayPalPaymentService {
                          EmailService emailService,
                          NotificationService notificationService,
                          PayPalService payPalService,
-                         TenantContextHolder tenantContextHolder) {
+                         TenantContextHolder tenantContextHolder,
+                         TenantService tenantService) {
         this.paymentRepository = paymentRepository;
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
@@ -69,6 +72,7 @@ public class PayPalPaymentService {
         this.notificationService = notificationService;
         this.payPalService = payPalService;
         this.tenantContextHolder = tenantContextHolder;
+        this.tenantService = tenantService;
     }
 
     @Transactional
@@ -117,6 +121,10 @@ public class PayPalPaymentService {
                 slotId,
                 PaymentType.VIRTUAL_CONSULTATION
             );
+            
+            // Assign current tenant
+            Long tenantId = tenantContextHolder.requireTenantId();
+            payment.setTenant(tenantService.requireTenant(tenantId));
 
             paymentRepository.save(payment);
 
@@ -132,7 +140,8 @@ public class PayPalPaymentService {
     @Transactional
     public boolean capturePayPalOrder(String orderId) {
         try {
-            Optional<PayPalPaymentEntity> paymentOpt = paymentRepository.findByOrderId(orderId);
+            Long tenantId = tenantContextHolder.requireTenantId();
+            Optional<PayPalPaymentEntity> paymentOpt = paymentRepository.findByTenantIdAndOrderId(tenantId, orderId);
             if (paymentOpt.isEmpty()) {
                 logger.error("Payment not found for order ID: {}", orderId);
                 return false;
@@ -176,8 +185,9 @@ public class PayPalPaymentService {
     @Transactional
     public boolean processWebhookPayment(String orderId, String captureId, String payerEmail, String payerName, String rawPayload) {
         try {
+            Long tenantId = tenantContextHolder.requireTenantId();
             // Check for idempotency - prevent duplicate processing
-            Optional<PayPalPaymentEntity> paymentOpt = paymentRepository.findByOrderId(orderId);
+            Optional<PayPalPaymentEntity> paymentOpt = paymentRepository.findByTenantIdAndOrderId(tenantId, orderId);
             if (paymentOpt.isEmpty()) {
                 logger.error("Payment not found for webhook order ID: {}", orderId);
                 return false;
@@ -376,7 +386,8 @@ public class PayPalPaymentService {
     }
 
     public Optional<PayPalPaymentEntity> findByOrderId(String orderId) {
-        return paymentRepository.findByOrderId(orderId);
+        Long tenantId = tenantContextHolder.requireTenantId();
+        return paymentRepository.findByTenantIdAndOrderId(tenantId, orderId);
     }
 
     private ClinicServiceEntity requireServiceForTenant(Long serviceId) {

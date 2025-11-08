@@ -31,6 +31,9 @@ public class TenantEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     protected TenantEntity() {
     }
 
@@ -93,5 +96,18 @@ public class TenantEntity {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public Instant getDeletedAt() {
+        return deletedAt;
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    public void softDelete() {
+        this.deletedAt = Instant.now();
+        this.status = TenantStatus.INACTIVE;
     }
 }

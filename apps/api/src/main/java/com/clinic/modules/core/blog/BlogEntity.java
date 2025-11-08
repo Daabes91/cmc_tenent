@@ -1,20 +1,27 @@
 package com.clinic.modules.core.blog;
 
+import com.clinic.modules.core.tenant.TenantEntity;
 import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "blogs")
+@Table(name = "blogs", uniqueConstraints = {
+    @UniqueConstraint(name = "idx_blogs_tenant_slug", columnNames = {"tenant_id", "slug"})
+})
 public class BlogEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private TenantEntity tenant;
+
     @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(nullable = false, unique = true, length = 250)
+    @Column(nullable = false, length = 250)
     private String slug;
 
     @Column(columnDefinition = "TEXT")
@@ -243,5 +250,13 @@ public class BlogEntity {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public TenantEntity getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(TenantEntity tenant) {
+        this.tenant = tenant;
     }
 }

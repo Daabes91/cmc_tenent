@@ -3,6 +3,7 @@ package com.clinic.modules.core.payment;
 import com.clinic.modules.core.appointment.AppointmentEntity;
 import com.clinic.modules.core.doctor.DoctorEntity;
 import com.clinic.modules.core.patient.PatientEntity;
+import com.clinic.modules.core.tenant.TenantEntity;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -20,6 +21,10 @@ public class PayPalPaymentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private TenantEntity tenant;
 
     @Column(name = "order_id", nullable = false, unique = true, length = 100)
     private String orderId;
@@ -175,6 +180,14 @@ public class PayPalPaymentEntity {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public TenantEntity getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(TenantEntity tenant) {
+        this.tenant = tenant;
     }
 
     @Override
