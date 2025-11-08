@@ -12,6 +12,7 @@ import com.clinic.modules.admin.staff.repository.StaffRefreshTokenRepository;
 import com.clinic.modules.admin.staff.repository.StaffUserRepository;
 import com.clinic.security.JwtIssuer;
 import com.clinic.security.TotpService;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,24 +32,29 @@ public class StaffAuthService {
     private final TotpService totpService;
     private final JwtIssuer jwtIssuer;
     private final SecurityProperties securityProperties;
+    private final TenantContextHolder tenantContextHolder;
 
     public StaffAuthService(StaffUserRepository staffUserRepository,
                             StaffRefreshTokenRepository refreshTokenRepository,
                             PasswordEncoder passwordEncoder,
                             TotpService totpService,
                             JwtIssuer jwtIssuer,
-                            SecurityProperties securityProperties) {
+                            SecurityProperties securityProperties,
+                            TenantContextHolder tenantContextHolder) {
         this.staffUserRepository = staffUserRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.totpService = totpService;
         this.jwtIssuer = jwtIssuer;
         this.securityProperties = securityProperties;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @Transactional
     public AuthTokensResponse login(StaffLoginRequest request) {
-        StaffUser staffUser = staffUserRepository.findByEmailIgnoreCase(request.email())
+        String normalizedEmail = request.email().trim().toLowerCase();
+        Long tenantId = tenantContextHolder.requireTenantId();
+        StaffUser staffUser = staffUserRepository.findByEmailIgnoreCaseAndTenantId(normalizedEmail, tenantId)
                 .orElseThrow(() -> unauthorized("Invalid credentials"));
 
         if (staffUser.getStatus() != StaffStatus.ACTIVE) {
@@ -115,7 +121,7 @@ public class StaffAuthService {
 
     @Transactional
     public void changePassword(Long staffId, String currentPassword, String newPassword) {
-        StaffUser staffUser = staffUserRepository.findById(staffId)
+        StaffUser staffUser = staffUserRepository.findByIdAndTenantId(staffId, tenantContextHolder.requireTenantId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Staff user not found"));
 
         if (!passwordEncoder.matches(currentPassword, staffUser.getPasswordHash())) {

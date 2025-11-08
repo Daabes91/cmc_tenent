@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface DoctorRepository extends JpaRepository<DoctorEntity, Long> {
 
-    @Query("select distinct d from DoctorEntity d join d.services s where s.slug = :slug")
-    List<DoctorEntity> findAllByServiceSlug(@Param("slug") String slug);
+    @Query("select distinct d from DoctorEntity d join d.services s where s.slug = :slug and s.tenant.id = :tenantId")
+    List<DoctorEntity> findAllByServiceSlug(@Param("slug") String slug, @Param("tenantId") Long tenantId);
 
     @Query("select distinct d from DoctorEntity d left join fetch d.services order by d.fullNameEn asc")
     List<DoctorEntity> findAllWithServices();

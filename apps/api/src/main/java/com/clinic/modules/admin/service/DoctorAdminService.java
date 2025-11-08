@@ -6,6 +6,7 @@ import com.clinic.modules.core.doctor.DoctorEntity;
 import com.clinic.modules.core.doctor.DoctorRepository;
 import com.clinic.modules.core.service.ClinicServiceEntity;
 import com.clinic.modules.core.service.ClinicServiceRepository;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,14 @@ public class DoctorAdminService {
 
     private final DoctorRepository doctorRepository;
     private final ClinicServiceRepository serviceRepository;
+    private final TenantContextHolder tenantContextHolder;
 
     public DoctorAdminService(DoctorRepository doctorRepository,
-                              ClinicServiceRepository serviceRepository) {
+                              ClinicServiceRepository serviceRepository,
+                              TenantContextHolder tenantContextHolder) {
         this.doctorRepository = doctorRepository;
         this.serviceRepository = serviceRepository;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @Transactional(readOnly = true)
@@ -109,7 +113,7 @@ public class DoctorAdminService {
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
-        List<ClinicServiceEntity> services = serviceRepository.findAllById(distinctIds);
+        List<ClinicServiceEntity> services = serviceRepository.findAllByTenantIdAndIdIn(currentTenantId(), distinctIds);
         if (services.size() != distinctIds.size()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more services could not be found");
         }
@@ -187,5 +191,9 @@ public class DoctorAdminService {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private Long currentTenantId() {
+        return tenantContextHolder.requireTenantId();
     }
 }

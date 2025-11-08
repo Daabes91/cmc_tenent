@@ -3,6 +3,7 @@ package com.clinic.modules.publicapi.service;
 import com.clinic.modules.core.doctor.DoctorEntity;
 import com.clinic.modules.core.doctor.DoctorRepository;
 import com.clinic.modules.core.service.ClinicServiceEntity;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 import com.clinic.modules.publicapi.dto.DoctorResponse;
 import com.clinic.modules.publicapi.dto.ServiceResponse;
 import org.springframework.stereotype.Service;
@@ -16,15 +17,18 @@ import java.util.Locale;
 public class DoctorDirectoryService {
 
     private final DoctorRepository doctorRepository;
+    private final TenantContextHolder tenantContextHolder;
 
-    public DoctorDirectoryService(DoctorRepository doctorRepository) {
+    public DoctorDirectoryService(DoctorRepository doctorRepository,
+                                  TenantContextHolder tenantContextHolder) {
         this.doctorRepository = doctorRepository;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @Transactional(readOnly = true)
     public List<DoctorResponse> listDoctors(String locale, String serviceSlug) {
         List<DoctorEntity> doctors = serviceSlug != null && !serviceSlug.isBlank()
-                ? doctorRepository.findAllByServiceSlug(serviceSlug)
+                ? doctorRepository.findAllByServiceSlug(serviceSlug, tenantContextHolder.requireTenantId())
                 : doctorRepository.findAllWithServices();
 
         Locale resolved = locale != null ? Locale.forLanguageTag(locale) : Locale.ENGLISH;

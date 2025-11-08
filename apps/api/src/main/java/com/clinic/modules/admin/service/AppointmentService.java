@@ -473,7 +473,7 @@ public class AppointmentService {
     }
 
     private ClinicServiceEntity getService(Long id) {
-        return serviceRepository.findById(id)
+        return serviceRepository.findByIdAndTenantId(id, tenantContextHolder.requireTenantId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
     }
 

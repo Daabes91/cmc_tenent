@@ -79,6 +79,16 @@
       }
     }
   },
+  "tenantSwitcher": {
+    "title": "Switch tenant",
+    "description": "Point the dashboard to another clinic workspace.",
+    "label": "Tenant slug",
+    "placeholder": "smile-care",
+    "hint": "You can also append ?tenant=slug to the URL or use tenant-specific domains.",
+    "apply": "Apply",
+    "reset": "Reset",
+    "activeTenant": "Tenant"
+  },
   "toasts": {
     "common": {
       "unexpectedError": "An unexpected error occurred. Please try again.",

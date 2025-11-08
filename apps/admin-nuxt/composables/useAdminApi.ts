@@ -18,6 +18,7 @@ type ApiResponseEnvelope<T> = {
 export function useAdminApi() {
   const baseURL = useApiBase();
   const auth = useAuth();
+  const { tenantSlug } = useTenantSlug();
 
   const authorizedRequest = async <T>(
     path: string,
@@ -30,6 +31,7 @@ export function useAdminApi() {
         baseURL,
         credentials: "include",
         headers: {
+          "X-Tenant-Slug": tenantSlug.value,
           ...auth.authorizationHeader(),
           ...(options.headers ?? {})
         },

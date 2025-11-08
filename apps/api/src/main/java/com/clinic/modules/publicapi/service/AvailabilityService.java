@@ -52,7 +52,7 @@ public class AvailabilityService {
 
     @Transactional(readOnly = true)
     public List<AvailabilitySlotResponse> computeAvailability(AvailabilityRequest request) {
-        ClinicServiceEntity service = serviceRepository.findBySlug(request.serviceSlug())
+        ClinicServiceEntity service = serviceRepository.findBySlugAndTenantId(request.serviceSlug(), tenantContextHolder.requireTenantId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
 
         List<DoctorEntity> doctors;
@@ -64,7 +64,7 @@ public class AvailabilityService {
             }
             doctors = List.of(doctor);
         } else {
-            doctors = doctorRepository.findAllByServiceSlug(service.getSlug());
+            doctors = doctorRepository.findAllByServiceSlug(service.getSlug(), tenantContextHolder.requireTenantId());
         }
 
         LocalDate requestedDate = parseDateOrDefault(request.date());

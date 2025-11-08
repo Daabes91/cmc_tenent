@@ -1,4 +1,4 @@
-import { computed } from "vue";
+import { computed, watch } from "vue";
 
 type ExchangeRatesMap = Record<string, number>;
 
@@ -233,11 +233,22 @@ export function useClinicSettings(options: UseClinicSettingsOptions = {}) {
   const pending = computed(() => pendingState.value);
   const error = computed(() => errorState.value);
 
-  const reset = () => {
+  function reset() {
     dataState.value = null;
     errorState.value = null;
     setPromise(null);
-  };
+  }
+
+  const { tenantSlug } = useTenantSlug();
+  watch(
+    () => tenantSlug.value,
+    () => {
+      reset();
+      fetchSettings(true).catch(() => {
+        /* handled via error state */
+      });
+    }
+  );
 
   return {
     settings,

@@ -6,19 +6,29 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 public interface StaffUserRepository extends JpaRepository<StaffUser, Long> {
-    Optional<StaffUser> findByEmailIgnoreCase(String email);
-    Optional<StaffUser> findByDoctorId(Long doctorId);
-    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
+
+    Optional<StaffUser> findByEmailIgnoreCaseAndTenantId(String email, Long tenantId);
+
+    Optional<StaffUser> findByIdAndTenantId(Long id, Long tenantId);
+
+    Optional<StaffUser> findByDoctorIdAndTenantId(Long doctorId, Long tenantId);
+
+    boolean existsByEmailIgnoreCaseAndIdNotAndTenantId(String email, Long id, Long tenantId);
+
+    List<StaffUser> findAllByTenantId(Long tenantId);
 
     @Query("""
             select s from StaffUser s
-            where lower(coalesce(s.fullName, '')) like lower(concat('%', :term, '%'))
-               or lower(s.email) like lower(concat('%', :term, '%'))
+            where s.tenant.id = :tenantId
+              and (
+                    lower(coalesce(s.fullName, '')) like lower(concat('%', :term, '%'))
+                 or lower(s.email) like lower(concat('%', :term, '%'))
+              )
             order by s.createdAt desc
             """)
-    List<StaffUser> searchStaff(@Param("term") String term, Pageable pageable);
+    List<StaffUser> searchStaff(@Param("tenantId") Long tenantId, @Param("term") String term, Pageable pageable);
 }

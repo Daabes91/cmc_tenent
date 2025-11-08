@@ -12,6 +12,7 @@ import type {
 } from './types';
 import {locales} from '@/i18n/request';
 import {withBasePath, stripBasePath} from '@/utils/basePath';
+import { getTenantSlugClient, TENANT_HEADER } from './tenant';
 
 const SUPPORTED_LOCALES = new Set(locales as readonly string[]);
 const DEFAULT_LOCALE = locales[0] as (typeof locales)[number];
@@ -29,13 +30,23 @@ class APIError extends Error {
 async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
 
-  const headers: HeadersInit = {
+  const headers = new Headers({
     'Content-Type': 'application/json',
-    ...options.headers,
-  };
+  });
+
+  if (options.headers) {
+    new Headers(options.headers as HeadersInit).forEach((value, key) => {
+      headers.set(key, value);
+    });
+  }
+
+  const tenantSlug = getTenantSlugClient();
+  if (tenantSlug) {
+    headers.set(TENANT_HEADER, tenantSlug);
+  }
 
   if (token && token !== 'null' && token !== 'undefined') {
-    (headers as Record<string, string>).Authorization = `Bearer ${token}`;
+    headers.set('Authorization', `Bearer ${token}`);
   }
 
   const response = await fetch(`${API_URL}${endpoint}`, { ...options, headers });

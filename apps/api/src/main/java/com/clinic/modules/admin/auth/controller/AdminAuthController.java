@@ -13,6 +13,7 @@ import com.clinic.modules.admin.staff.model.StaffUser;
 import com.clinic.modules.admin.auth.service.StaffAuthService;
 import com.clinic.modules.admin.staff.repository.StaffUserRepository;
 import com.clinic.modules.admin.staff.service.StaffManagementService;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 import com.clinic.security.JwtPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
@@ -29,13 +30,16 @@ public class AdminAuthController {
     private final StaffAuthService staffAuthService;
     private final StaffUserRepository staffUserRepository;
     private final StaffManagementService staffManagementService;
+    private final TenantContextHolder tenantContextHolder;
 
     public AdminAuthController(StaffAuthService staffAuthService,
                                StaffUserRepository staffUserRepository,
-                               StaffManagementService staffManagementService) {
+                               StaffManagementService staffManagementService,
+                               TenantContextHolder tenantContextHolder) {
         this.staffAuthService = staffAuthService;
         this.staffUserRepository = staffUserRepository;
         this.staffManagementService = staffManagementService;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @PostMapping("/login")
@@ -59,7 +63,7 @@ public class AdminAuthController {
         var principal = (JwtPrincipal) authentication.getPrincipal();
         Long staffId = Long.valueOf(principal.subject());
 
-        StaffUser staffUser = staffUserRepository.findById(staffId)
+        StaffUser staffUser = staffUserRepository.findByIdAndTenantId(staffId, tenantContextHolder.requireTenantId())
                 .orElseThrow(() -> new IllegalStateException("Staff user not found"));
 
         return ResponseEntity.ok(toProfileResponse(staffUser));
@@ -74,14 +78,18 @@ public class AdminAuthController {
         var principal = (JwtPrincipal) authentication.getPrincipal();
         Long staffId = Long.valueOf(principal.subject());
 
-        StaffUser staffUser = staffUserRepository.findById(staffId)
+        StaffUser staffUser = staffUserRepository.findByIdAndTenantId(staffId, tenantContextHolder.requireTenantId())
                 .orElseThrow(() -> new IllegalStateException("Staff user not found"));
 
         String normalizedEmail = request.email().trim().toLowerCase();
         String normalizedName = request.fullName().trim();
 
         if (!staffUser.getEmail().equalsIgnoreCase(normalizedEmail)) {
-            boolean emailTaken = staffUserRepository.existsByEmailIgnoreCaseAndIdNot(normalizedEmail, staffId);
+            boolean emailTaken = staffUserRepository.existsByEmailIgnoreCaseAndIdNotAndTenantId(
+                    normalizedEmail,
+                    staffId,
+                    tenantContextHolder.requireTenantId()
+            );
             if (emailTaken) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Email address is already in use.");
             }

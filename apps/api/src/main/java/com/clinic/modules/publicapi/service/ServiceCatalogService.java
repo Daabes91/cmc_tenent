@@ -4,7 +4,7 @@ import com.clinic.modules.core.service.ClinicServiceEntity;
 import com.clinic.modules.core.service.ClinicServiceRepository;
 import com.clinic.modules.publicapi.dto.ServiceDetailResponse;
 import com.clinic.modules.publicapi.dto.ServiceResponse;
-import org.springframework.data.domain.Sort;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,15 +17,18 @@ import java.util.Locale;
 public class ServiceCatalogService {
 
     private final ClinicServiceRepository serviceRepository;
+    private final TenantContextHolder tenantContextHolder;
 
-    public ServiceCatalogService(ClinicServiceRepository serviceRepository) {
+    public ServiceCatalogService(ClinicServiceRepository serviceRepository,
+                                 TenantContextHolder tenantContextHolder) {
         this.serviceRepository = serviceRepository;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @Transactional(readOnly = true)
     public List<ServiceResponse> fetchServices(String locale) {
         Locale resolved = resolveLocale(locale);
-        return serviceRepository.findAll(Sort.by("nameEn")).stream()
+        return serviceRepository.findByTenantIdOrderByNameEnAsc(currentTenantId()).stream()
                 .map(entity -> toSummaryDto(entity, resolved))
                 .toList();
     }
@@ -33,7 +36,7 @@ public class ServiceCatalogService {
     @Transactional(readOnly = true)
     public ServiceDetailResponse fetchServiceDetail(String slug, String locale) {
         Locale resolved = resolveLocale(locale);
-        ClinicServiceEntity service = serviceRepository.findBySlug(slug)
+        ClinicServiceEntity service = serviceRepository.findBySlugAndTenantId(slug, currentTenantId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
 
         String name = pickLocalized(service.getNameEn(), service.getNameAr(), resolved);
@@ -70,5 +73,9 @@ public class ServiceCatalogService {
             return Locale.ENGLISH;
         }
         return Locale.forLanguageTag(locale);
+    }
+
+    private Long currentTenantId() {
+        return tenantContextHolder.requireTenantId();
     }
 }

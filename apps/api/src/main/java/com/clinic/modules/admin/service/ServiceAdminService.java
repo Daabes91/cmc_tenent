@@ -4,7 +4,8 @@ import com.clinic.modules.admin.dto.ServiceSummaryResponse;
 import com.clinic.modules.admin.dto.ServiceUpsertRequest;
 import com.clinic.modules.core.service.ClinicServiceEntity;
 import com.clinic.modules.core.service.ClinicServiceRepository;
-import org.springframework.data.domain.Sort;
+import com.clinic.modules.core.tenant.TenantContextHolder;
+import com.clinic.modules.core.tenant.TenantService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,24 +21,27 @@ import java.util.Set;
 public class ServiceAdminService {
 
     private final ClinicServiceRepository serviceRepository;
+    private final TenantService tenantService;
+    private final TenantContextHolder tenantContextHolder;
 
-    public ServiceAdminService(ClinicServiceRepository serviceRepository) {
+    public ServiceAdminService(ClinicServiceRepository serviceRepository,
+                               TenantService tenantService,
+                               TenantContextHolder tenantContextHolder) {
         this.serviceRepository = serviceRepository;
+        this.tenantService = tenantService;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @Transactional(readOnly = true)
     public List<ServiceSummaryResponse> listServices() {
-        return serviceRepository.findAll(Sort.by("nameEn").ascending())
-                .stream()
+        return serviceRepository.findByTenantIdOrderByNameEnAsc(currentTenantId()).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public ServiceSummaryResponse getService(Long id) {
-        ClinicServiceEntity entity = serviceRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
-        return toResponse(entity);
+        return toResponse(requireService(id));
     }
 
     @Transactional
@@ -48,6 +52,7 @@ public class ServiceAdminService {
 
         ClinicServiceEntity entity = new ClinicServiceEntity(
                 slug,
+                tenantService.requireTenant(currentTenantId()),
                 nameEn,
                 normalize(request.nameAr()),
                 normalize(request.summaryEn()),
@@ -60,8 +65,7 @@ public class ServiceAdminService {
 
     @Transactional
     public ServiceSummaryResponse updateService(Long id, ServiceUpsertRequest request) {
-        ClinicServiceEntity entity = serviceRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
+        ClinicServiceEntity entity = requireService(id);
 
         String nameEn = requireName(request.nameEn());
         String slug = resolveSlug(request.slug(), nameEn);
@@ -80,8 +84,7 @@ public class ServiceAdminService {
 
     @Transactional
     public void deleteService(Long id) {
-        ClinicServiceEntity service = serviceRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
+        ClinicServiceEntity service = requireService(id);
 
         Set<com.clinic.modules.core.doctor.DoctorEntity> linkedDoctors = new HashSet<>(service.getDoctors());
         linkedDoctors.forEach(doctor -> doctor.getServices().remove(service));
@@ -116,8 +119,8 @@ public class ServiceAdminService {
     }
 
     private void ensureSlugAvailable(String slug, Long currentId) {
-        serviceRepository.findBySlug(slug)
-                .filter(existing -> !existing.getId().equals(currentId))
+        serviceRepository.findBySlugAndTenantId(slug, currentTenantId())
+                .filter(existing -> currentId == null || !existing.getId().equals(currentId))
                 .ifPresent(existing -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "Slug already in use");
                 });
@@ -148,5 +151,14 @@ public class ServiceAdminService {
                 .replaceAll("\\s+", "-")
                 .replaceAll("-+", "-");
         return normalized;
+    }
+
+    private ClinicServiceEntity requireService(Long id) {
+        return serviceRepository.findByIdAndTenantId(id, currentTenantId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
+    }
+
+    private Long currentTenantId() {
+        return tenantContextHolder.requireTenantId();
     }
 }

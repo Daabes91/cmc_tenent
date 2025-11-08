@@ -202,7 +202,8 @@
               </div>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <TenantSwitcher />
               <UButton
                 :icon="themeIcon"
                 variant="ghost"
@@ -329,6 +330,7 @@ import { nextTick } from "vue";
 import type { ModuleName } from '@/types/staff';
 import { dashboardSummaryMock, upcomingAppointmentsMock } from "@/data/mock";
 import { useAdminApi } from "@/composables/useAdminApi";
+import TenantSwitcher from "@/components/global/TenantSwitcher.vue";
 
 // Mobile navigation composables
 const { viewport } = useViewport();

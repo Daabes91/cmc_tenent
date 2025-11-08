@@ -81,8 +81,7 @@ public class PayPalPaymentService {
             DoctorEntity doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new IllegalArgumentException("Doctor not found"));
             
-            ClinicServiceEntity service = serviceRepository.findById(serviceId)
-                .orElseThrow(() -> new IllegalArgumentException("Service not found"));
+            ClinicServiceEntity service = requireServiceForTenant(serviceId);
 
             // Get clinic settings for fee
             ClinicSettingsEntity settings = requireSettings();
@@ -223,8 +222,7 @@ public class PayPalPaymentService {
             }
             
             // Get service
-            ClinicServiceEntity service = serviceRepository.findById(1L) // Default service - adjust as needed
-                .orElseThrow(() -> new IllegalArgumentException("Default service not found"));
+            ClinicServiceEntity service = resolveDefaultServiceForTenant();
 
             // Determine slot duration and meeting link from clinic settings
             ClinicSettingsEntity settings = requireSettings();
@@ -379,5 +377,15 @@ public class PayPalPaymentService {
 
     public Optional<PayPalPaymentEntity> findByOrderId(String orderId) {
         return paymentRepository.findByOrderId(orderId);
+    }
+
+    private ClinicServiceEntity requireServiceForTenant(Long serviceId) {
+        return serviceRepository.findByIdAndTenantId(serviceId, tenantContextHolder.requireTenantId())
+                .orElseThrow(() -> new IllegalArgumentException("Service not found"));
+    }
+
+    private ClinicServiceEntity resolveDefaultServiceForTenant() {
+        return serviceRepository.findFirstByTenantIdOrderByCreatedAtAsc(tenantContextHolder.requireTenantId())
+                .orElseThrow(() -> new IllegalArgumentException("No services configured for this clinic"));
     }
 }

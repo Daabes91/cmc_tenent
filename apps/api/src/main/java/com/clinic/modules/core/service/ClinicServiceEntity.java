@@ -1,13 +1,13 @@
 package com.clinic.modules.core.service;
 
+import com.clinic.modules.core.doctor.DoctorEntity;
+import com.clinic.modules.core.tenant.TenantEntity;
 import jakarta.persistence.*;
 
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
-import com.clinic.modules.core.doctor.DoctorEntity;
 
 @Entity
 @Table(name = "services")
@@ -19,6 +19,10 @@ public class ClinicServiceEntity {
 
     @Column(nullable = false, unique = true, length = 120)
     private String slug;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private TenantEntity tenant;
 
     @Column(name = "name_en", nullable = false, length = 160)
     private String nameEn;
@@ -47,8 +51,9 @@ public class ClinicServiceEntity {
     protected ClinicServiceEntity() {
     }
 
-    public ClinicServiceEntity(String slug, String nameEn, String nameAr, String summaryEn, String summaryAr) {
+    public ClinicServiceEntity(String slug, TenantEntity tenant, String nameEn, String nameAr, String summaryEn, String summaryAr) {
         this.slug = slug;
+        this.tenant = tenant;
         this.nameEn = nameEn;
         this.nameAr = nameAr;
         this.summaryEn = summaryEn;
@@ -66,6 +71,14 @@ public class ClinicServiceEntity {
 
     public String getSlug() {
         return slug;
+    }
+
+    public TenantEntity getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(TenantEntity tenant) {
+        this.tenant = tenant;
     }
 
     public void updateDetails(String slug, String nameEn, String nameAr, String summaryEn, String summaryAr) {

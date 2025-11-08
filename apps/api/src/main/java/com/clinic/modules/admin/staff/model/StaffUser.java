@@ -1,6 +1,7 @@
 package com.clinic.modules.admin.staff.model;
 
 import com.clinic.modules.core.doctor.DoctorEntity;
+import com.clinic.modules.core.tenant.TenantEntity;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -40,6 +41,10 @@ public class StaffUser {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "doctor_id")
     private DoctorEntity doctor;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private TenantEntity tenant;
 
     public StaffUser() {
     }
@@ -123,6 +128,14 @@ public class StaffUser {
 
     public void setDoctor(DoctorEntity doctor) {
         this.doctor = doctor;
+    }
+
+    public TenantEntity getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(TenantEntity tenant) {
+        this.tenant = tenant;
     }
 
     @Override

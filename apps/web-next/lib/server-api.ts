@@ -1,9 +1,23 @@
+import { headers as nextHeaders, cookies } from 'next/headers';
 import type { Blog, ClinicSettings, Doctor } from './types';
+import { TENANT_COOKIE, TENANT_HEADER, getDefaultTenantSlug } from './tenant';
 
 const API_URL =
   process.env.NEXT_SERVER_API_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
   'http://localhost:8080/public';
+
+function getTenantSlugServer() {
+  const headerSlug = nextHeaders().get(TENANT_HEADER);
+  if (headerSlug) {
+    return headerSlug;
+  }
+  const cookieSlug = cookies().get(TENANT_COOKIE)?.value;
+  if (cookieSlug) {
+    return cookieSlug;
+  }
+  return getDefaultTenantSlug();
+}
 
 
 
@@ -22,6 +36,9 @@ export async function getClinicSettingsServer(): Promise<ClinicSettings | null> 
   try {
     const response = await fetch(`${API_URL}/settings`, {
       // Add cache control for better performance
+      headers: {
+        [TENANT_HEADER]: getTenantSlugServer(),
+      },
       next: { revalidate: 300 }, // Revalidate every 5 minutes
     });
 
@@ -56,6 +73,9 @@ export function getSafeClinicNameServer(clinicName?: string): string {
 async function safeFetch<T>(url: string): Promise<T | null> {
   try {
     const response = await fetch(url, {
+      headers: {
+        [TENANT_HEADER]: getTenantSlugServer(),
+      },
       next: { revalidate: 300 },
     });
 

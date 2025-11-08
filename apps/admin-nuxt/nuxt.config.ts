@@ -52,7 +52,8 @@ export default defineNuxtConfig({
     apiBase: process.env.NUXT_PRIVATE_API_BASE ?? "http://api:8080/admin",
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE ?? "http://localhost:8080/admin",
-      publicApiBase: process.env.NUXT_PUBLIC_PUBLIC_API_BASE ?? "http://localhost:8080"
+      publicApiBase: process.env.NUXT_PUBLIC_PUBLIC_API_BASE ?? "http://localhost:8080",
+      defaultTenantSlug: process.env.NUXT_PUBLIC_DEFAULT_TENANT?.toLowerCase() ?? "default"
     }
   },
   vite: {

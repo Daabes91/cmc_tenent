@@ -76,7 +76,7 @@ public class BookingService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required to book appointments");
         }
 
-        ClinicServiceEntity service = serviceRepository.findBySlug(request.serviceSlug())
+        ClinicServiceEntity service = serviceRepository.findBySlugAndTenantId(request.serviceSlug(), tenantContextHolder.requireTenantId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
 
         DoctorEntity doctor = resolveDoctor(request, service);
@@ -135,7 +135,7 @@ public class BookingService {
         String normalizedEmail = normalizeOptionalEmail(request.guestEmail());
 
         // Find service
-        ClinicServiceEntity service = serviceRepository.findBySlug(request.serviceSlug())
+        ClinicServiceEntity service = serviceRepository.findBySlugAndTenantId(request.serviceSlug(), tenantContextHolder.requireTenantId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
 
         // Resolve doctor (auto-assign if not provided)
@@ -192,7 +192,7 @@ public class BookingService {
     private DoctorEntity resolveDoctorForGuest(Long doctorId, ClinicServiceEntity service) {
         if (doctorId == null) {
             // Auto-assign first available doctor for the service
-            return doctorRepository.findAllByServiceSlug(service.getSlug()).stream()
+            return doctorRepository.findAllByServiceSlug(service.getSlug(), tenantContextHolder.requireTenantId()).stream()
                     .findFirst()
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No doctor available for service"));
         }
@@ -321,7 +321,7 @@ public class BookingService {
 
     private DoctorEntity resolveDoctor(BookingRequest request, ClinicServiceEntity service) {
         if (request.doctorId() == null) {
-            return doctorRepository.findAllByServiceSlug(service.getSlug()).stream()
+            return doctorRepository.findAllByServiceSlug(service.getSlug(), tenantContextHolder.requireTenantId()).stream()
                     .findFirst()
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No doctor available for service"));
         }

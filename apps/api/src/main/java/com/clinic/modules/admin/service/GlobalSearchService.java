@@ -21,6 +21,7 @@ import com.clinic.modules.core.treatment.MaterialCatalogEntity;
 import com.clinic.modules.core.treatment.MaterialCatalogRepository;
 import com.clinic.modules.core.blog.BlogEntity;
 import com.clinic.modules.core.blog.BlogRepository;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,7 @@ public class GlobalSearchService {
     private final InsuranceCompanyRepository insuranceCompanyRepository;
     private final MaterialCatalogRepository materialCatalogRepository;
     private final BlogRepository blogRepository;
+    private final TenantContextHolder tenantContextHolder;
 
     public GlobalSearchService(PermissionService permissionService,
                                PatientRepository patientRepository,
@@ -60,7 +62,8 @@ public class GlobalSearchService {
                                StaffUserRepository staffUserRepository,
                                InsuranceCompanyRepository insuranceCompanyRepository,
                                MaterialCatalogRepository materialCatalogRepository,
-                               BlogRepository blogRepository) {
+                               BlogRepository blogRepository,
+                               TenantContextHolder tenantContextHolder) {
         this.permissionService = permissionService;
         this.patientRepository = patientRepository;
         this.doctorRepository = doctorRepository;
@@ -71,6 +74,7 @@ public class GlobalSearchService {
         this.insuranceCompanyRepository = insuranceCompanyRepository;
         this.materialCatalogRepository = materialCatalogRepository;
         this.blogRepository = blogRepository;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @Transactional(readOnly = true)
@@ -86,6 +90,7 @@ public class GlobalSearchService {
 
         int limit = Math.max(1, limitPerType);
         Pageable pageable = PageRequest.of(0, limit);
+        Long tenantId = tenantContextHolder.requireTenantId();
 
         List<GlobalSearchResultItem> results = new ArrayList<>();
 
@@ -108,7 +113,7 @@ public class GlobalSearchService {
         }
 
         if (permissionService.canView("services")) {
-            clinicServiceRepository.searchServices(term, pageable).forEach(service ->
+            clinicServiceRepository.searchServices(tenantId, term, pageable).forEach(service ->
                     results.add(mapService(service))
             );
         }
@@ -120,7 +125,7 @@ public class GlobalSearchService {
         }
 
         if (permissionService.canView("staff")) {
-            staffUserRepository.searchStaff(term, pageable).forEach(staff ->
+            staffUserRepository.searchStaff(tenantId, term, pageable).forEach(staff ->
                     results.add(mapStaff(staff))
             );
         }

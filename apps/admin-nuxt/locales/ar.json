@@ -79,6 +79,16 @@
       }
     }
   },
+  "tenantSwitcher": {
+    "title": "تبديل المستأجر",
+    "description": "اختر عيادة أخرى لإدارة إعداداتها.",
+    "label": "معرّف العيادة",
+    "placeholder": "smile-care",
+    "hint": "يمكنك أيضاً إضافة ‎?tenant=slug‎ إلى الرابط أو استخدام نطاق خاص بكل عيادة.",
+    "apply": "تطبيق",
+    "reset": "إعادة الضبط",
+    "activeTenant": "العيادة"
+  },
   "toasts": {
     "common": {
       "unexpectedError": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",

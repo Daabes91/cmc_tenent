@@ -8,6 +8,8 @@ import com.clinic.modules.admin.staff.repository.StaffUserRepository;
 import com.clinic.modules.core.doctor.DoctorEntity;
 import com.clinic.modules.core.doctor.DoctorRepository;
 import com.clinic.modules.core.email.EmailService;
+import com.clinic.modules.core.tenant.TenantContextHolder;
+import com.clinic.modules.core.tenant.TenantService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +37,8 @@ public class StaffManagementService {
     private final DoctorRepository doctorRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final TenantService tenantService;
+    private final TenantContextHolder tenantContextHolder;
 
     @Value("${app.admin-url:http://localhost:3000}")
     private String adminUrl;
@@ -45,7 +49,9 @@ public class StaffManagementService {
             StaffInvitationTokenRepository invitationTokenRepository,
             DoctorRepository doctorRepository,
             PasswordEncoder passwordEncoder,
-            EmailService emailService
+            EmailService emailService,
+            TenantService tenantService,
+            TenantContextHolder tenantContextHolder
     ) {
         this.staffUserRepository = staffUserRepository;
         this.staffPermissionsRepository = staffPermissionsRepository;
@@ -53,6 +59,8 @@ public class StaffManagementService {
         this.doctorRepository = doctorRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.tenantService = tenantService;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     /**
@@ -60,10 +68,11 @@ public class StaffManagementService {
      */
     @Transactional
     public StaffResponse createStaff(CreateStaffRequest request) {
-        log.info("Creating new staff member with email: {}", request.email());
+        String normalizedEmail = request.email().trim().toLowerCase();
+        log.info("Creating new staff member with email: {}", normalizedEmail);
 
         // Check if email already exists
-        if (staffUserRepository.findByEmailIgnoreCase(request.email()).isPresent()) {
+        if (staffUserRepository.findByEmailIgnoreCaseAndTenantId(normalizedEmail, currentTenantId()).isPresent()) {
             throw new IllegalArgumentException("Staff member with email " + request.email() + " already exists");
         }
 
@@ -78,14 +87,14 @@ public class StaffManagementService {
                     .orElseThrow(() -> new IllegalArgumentException("Doctor with ID " + request.doctorId() + " not found"));
 
             // Check if doctor is already linked to another staff account
-            if (staffUserRepository.findByDoctorId(request.doctorId()).isPresent()) {
+            if (staffUserRepository.findByDoctorIdAndTenantId(request.doctorId(), currentTenantId()).isPresent()) {
                 throw new IllegalArgumentException("This doctor is already linked to another staff account");
             }
         }
 
         // Create staff user with INVITED status and a temporary password
         StaffUser staffUser = new StaffUser();
-        staffUser.setEmail(request.email().toLowerCase());
+        staffUser.setEmail(normalizedEmail);
         staffUser.setFullName(request.fullName());
         staffUser.setRole(request.role());
         staffUser.setStatus(StaffStatus.INVITED);
@@ -99,6 +108,7 @@ public class StaffManagementService {
             log.info("Linked staff user to doctor ID: {}", request.doctorId());
         }
 
+        staffUser.setTenant(tenantService.requireTenant(currentTenantId()));
         staffUser = staffUserRepository.save(staffUser);
         log.info("Staff user created with ID: {}", staffUser.getId());
 
@@ -120,7 +130,7 @@ public class StaffManagementService {
     @Transactional(readOnly = true)
     public List<StaffResponse> getAllStaff() {
         log.debug("Fetching all staff members");
-        List<StaffUser> staffUsers = staffUserRepository.findAll();
+        List<StaffUser> staffUsers = staffUserRepository.findAllByTenantId(currentTenantId());
 
         return staffUsers.stream()
                 .map(this::mapToStaffResponseWithPermissions)
@@ -133,8 +143,7 @@ public class StaffManagementService {
     @Transactional(readOnly = true)
     public StaffResponse getStaffById(Long id) {
         log.debug("Fetching staff member with ID: {}", id);
-        StaffUser staffUser = staffUserRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Staff member not found"));
+        StaffUser staffUser = requireStaffUser(id);
 
         return mapToStaffResponseWithPermissions(staffUser);
     }
@@ -146,18 +155,18 @@ public class StaffManagementService {
     public StaffResponse updateStaff(Long id, UpdateStaffRequest request) {
         log.info("Updating staff member with ID: {}", id);
 
-        StaffUser staffUser = staffUserRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Staff member not found"));
+        StaffUser staffUser = requireStaffUser(id);
 
         boolean updated = false;
 
         // Update email if provided
-        if (request.email() != null && !request.email().equals(staffUser.getEmail())) {
+        if (request.email() != null && !request.email().equalsIgnoreCase(staffUser.getEmail())) {
+            String normalizedEmail = request.email().trim().toLowerCase();
             // Check if new email is already in use
-            if (staffUserRepository.findByEmailIgnoreCase(request.email()).isPresent()) {
+            if (staffUserRepository.existsByEmailIgnoreCaseAndIdNotAndTenantId(normalizedEmail, id, currentTenantId())) {
                 throw new IllegalArgumentException("Email " + request.email() + " is already in use");
             }
-            staffUser.setEmail(request.email().toLowerCase());
+            staffUser.setEmail(normalizedEmail);
             updated = true;
         }
 
@@ -192,7 +201,7 @@ public class StaffManagementService {
                     .orElseThrow(() -> new IllegalArgumentException("Doctor with ID " + request.doctorId() + " not found"));
 
             // Check if doctor is already linked to another staff account (excluding current staff)
-            staffUserRepository.findByDoctorId(request.doctorId()).ifPresent(existingStaff -> {
+            staffUserRepository.findByDoctorIdAndTenantId(request.doctorId(), currentTenantId()).ifPresent(existingStaff -> {
                 if (!existingStaff.getId().equals(id)) {
                     throw new IllegalArgumentException("This doctor is already linked to another staff account");
                 }
@@ -224,20 +233,18 @@ public class StaffManagementService {
     public void deleteStaff(Long id) {
         log.info("Deleting staff member with ID: {}", id);
 
-        if (!staffUserRepository.existsById(id)) {
-            throw new IllegalArgumentException("Staff member not found");
-        }
+        StaffUser staffUser = requireStaffUser(id);
 
         // Delete permissions (will cascade)
-        staffPermissionsRepository.deleteByStaffUserId(id);
+        staffPermissionsRepository.deleteByStaffUserId(staffUser.getId());
 
         // Delete invitation tokens (will cascade)
-        invitationTokenRepository.deleteByStaffUserId(id);
+        invitationTokenRepository.deleteByStaffUserId(staffUser.getId());
 
         // Delete staff user
-        staffUserRepository.deleteById(id);
+        staffUserRepository.delete(staffUser);
 
-        log.info("Staff member deleted: {}", id);
+        log.info("Staff member deleted: {}", staffUser.getId());
     }
 
     /**
@@ -247,8 +254,7 @@ public class StaffManagementService {
     public void resendInvitation(Long staffId) {
         log.info("Resending invitation to staff ID: {}", staffId);
 
-        StaffUser staffUser = staffUserRepository.findById(staffId)
-                .orElseThrow(() -> new IllegalArgumentException("Staff member not found"));
+        StaffUser staffUser = requireStaffUser(staffId);
 
         if (staffUser.getStatus() == StaffStatus.ACTIVE) {
             throw new IllegalStateException("Cannot send invitation to active staff member");
@@ -297,6 +303,7 @@ public class StaffManagementService {
      */
     @Transactional(readOnly = true)
     public ModulePermissionsDto getStaffPermissions(Long staffId) {
+        requireStaffUser(staffId);
         StaffPermissions permissions = staffPermissionsRepository.findByStaffUserId(staffId)
                 .orElseThrow(() -> new IllegalArgumentException("Permissions not found for staff member"));
 
@@ -308,6 +315,7 @@ public class StaffManagementService {
      */
     @Transactional
     public void updateStaffPermissions(Long staffId, ModulePermissionsDto permissionsDto) {
+        requireStaffUser(staffId);
         StaffPermissions permissions = staffPermissionsRepository.findByStaffUserId(staffId)
                 .orElseGet(() -> new StaffPermissions(staffId));
 
@@ -417,5 +425,14 @@ public class StaffManagementService {
     public void cleanupExpiredTokens() {
         log.info("Cleaning up expired invitation tokens");
         invitationTokenRepository.deleteExpiredTokens(Instant.now());
+    }
+
+    private StaffUser requireStaffUser(Long id) {
+        return staffUserRepository.findByIdAndTenantId(id, currentTenantId())
+                .orElseThrow(() -> new IllegalArgumentException("Staff member not found"));
+    }
+
+    private Long currentTenantId() {
+        return tenantContextHolder.requireTenantId();
     }
 }
