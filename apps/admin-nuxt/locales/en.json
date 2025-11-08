@@ -184,6 +184,9 @@
       "form": {
         "title": "Welcome back",
         "subtitle": "Enter your credentials to access your dashboard",
+        "tenantLabel": "Clinic slug",
+        "tenantPlaceholder": "e.g., smilecare",
+        "tenantHint": "Match the slug configured for your clinic (default, smilecare, etc.).",
         "emailLabel": "Email Address",
         "emailPlaceholder": "you{at}clinic.com",
         "passwordLabel": "Password",

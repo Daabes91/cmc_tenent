@@ -9,6 +9,7 @@ const MAX_TIMEOUT_DELAY = 2_147_483_647; // Max safe setTimeout delay in millise
 
 export function useAuth() {
   const apiBase = useApiBase();
+  const { tenantSlug } = useTenantSlug();
 
   const isDev = import.meta.dev;
 
@@ -60,6 +61,7 @@ export function useAuth() {
       const response = await $fetch<AuthTokensResponse>("/auth/login", {
         baseURL: apiBase,
         method: "POST",
+        headers: tenantHeaders(),
         body: payload
       });
 
@@ -102,6 +104,7 @@ export function useAuth() {
         const response = await $fetch<AuthTokensResponse>("/auth/refresh", {
           baseURL: apiBase,
           method: "POST",
+          headers: tenantHeaders(),
           body: { refreshToken: refreshTokenCookie.value }
         });
         console.log('[Auth] Token refresh successful');
@@ -128,6 +131,7 @@ export function useAuth() {
       await $fetch("/auth/logout", {
         baseURL: apiBase,
         method: "POST",
+        headers: tenantHeaders(),
         body: { refreshToken: refreshTokenCookie.value }
       }).catch(() => undefined);
     }
@@ -162,7 +166,10 @@ export function useAuth() {
     try {
       const profile = await $fetch<{ email: string; fullName: string; role: string }>("/auth/profile", {
         baseURL: apiBase,
-        headers: authorizationHeader()
+        headers: {
+          ...authorizationHeader(),
+          ...tenantHeaders()
+        }
       });
       userEmail.value = profile.email;
       userName.value = profile.fullName;
@@ -276,4 +283,9 @@ export function useAuth() {
     userName,
     userRole
   };
+
+  function tenantHeaders() {
+    const slug = tenantSlug.value;
+    return slug ? { "X-Tenant-Slug": slug } : {};
+  }
 }

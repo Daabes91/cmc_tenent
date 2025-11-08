@@ -101,6 +101,30 @@
             />
 
             <form @submit.prevent="onSubmit" class="space-y-5">
+              <UFormGroup
+                :label="t('auth.login.form.tenantLabel')"
+                :hint="t('auth.login.form.tenantHint')"
+                name="tenant"
+                required
+              >
+                <div class="relative">
+                  <input
+                    id="tenant-input"
+                    name="tenant"
+                    type="text"
+                    autocomplete="off"
+                    :placeholder="t('auth.login.form.tenantPlaceholder')"
+                    class="block w-full transition-all duration-200 border border-slate-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 placeholder:text-slate-400 dark:placeholder:text-gray-500 disabled:bg-slate-50 dark:disabled:bg-gray-800 disabled:cursor-not-allowed form-input rounded-lg h-11 text-base py-2.5 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white ring-1 ring-inset ring-gray-300 dark:ring-gray-600 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 pl-16 pr-3.5"
+                    v-model="loginTenantSlug"
+                  />
+                  <span class="absolute inset-y-0 start-0 flex items-center pointer-events-none px-3.5 rounded-s-lg bg-primary-gradient-soft">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 dark:bg-gray-800/90 shadow-inner">
+                      <UIcon name="i-lucide-building" class="h-4 w-4 text-primary-600 dark:text-primary-300" aria-hidden="true" />
+                    </span>
+                  </span>
+                </div>
+              </UFormGroup>
+
               <UFormGroup :label="t('auth.login.form.emailLabel')" name="email" required>
                 <div class="relative">
                   <input
@@ -229,6 +253,51 @@ const auth = useAuth();
 const router = useRouter();
 const route = useRoute();
 const colorMode = useColorMode();
+const { tenantSlug, setTenantSlug } = useTenantSlug();
+const loginTenantSlug = ref<string>(tenantSlug.value);
+
+const tenantFromQuery = computed(() => {
+  const value = Array.isArray(route.query.tenant)
+    ? route.query.tenant[0]
+    : route.query.tenant;
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
+});
+
+const applyTenantFromQuery = (slug: string) => {
+  if (!slug) return;
+  setTenantSlug(slug);
+  if (import.meta.client) {
+    const cleanedQuery = { ...route.query };
+    delete cleanedQuery.tenant;
+    router.replace({ path: route.path, query: cleanedQuery }).catch(() => {});
+  }
+};
+
+if (tenantFromQuery.value) {
+  applyTenantFromQuery(tenantFromQuery.value);
+}
+
+watch(tenantFromQuery, (slug) => {
+  if (slug) {
+    applyTenantFromQuery(slug);
+  }
+});
+
+watch(
+  () => tenantSlug.value,
+  (slug) => {
+    if (slug && slug !== loginTenantSlug.value) {
+      loginTenantSlug.value = slug;
+    }
+  },
+  { immediate: true }
+);
+
+watch(loginTenantSlug, (slug) => {
+  if (slug) {
+    setTenantSlug(slug);
+  }
+});
 
 const form = reactive<StaffLoginRequest>({
   email: "",

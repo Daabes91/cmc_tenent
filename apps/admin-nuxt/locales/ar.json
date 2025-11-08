@@ -184,6 +184,9 @@
       "form": {
         "title": "مرحباً بعودتك",
         "subtitle": "أدخل بياناتك للوصول إلى لوحة التحكم",
+        "tenantLabel": "معرّف العيادة",
+        "tenantPlaceholder": "مثال: smilecare",
+        "tenantHint": "أدخل معرّف العيادة كما هو مكوَّن (default، smilecare، إلخ).",
         "emailLabel": "البريد الإلكتروني",
         "emailPlaceholder": "you{at}clinic.com",
         "passwordLabel": "كلمة المرور",
