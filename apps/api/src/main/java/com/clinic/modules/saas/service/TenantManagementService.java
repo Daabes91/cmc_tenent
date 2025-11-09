@@ -180,20 +180,21 @@ public class TenantManagementService {
     }
 
     /**
-     * List all tenants with pagination and optional inclusion of soft-deleted tenants.
+     * List all tenants with pagination, optional status filter, and optional inclusion of soft-deleted tenants.
      *
      * @param pageable Pagination parameters
      * @param includeDeleted Whether to include soft-deleted tenants
+     * @param status Optional status filter (null for all statuses)
      * @return Paginated list of tenants
      */
     @Transactional(readOnly = true)
-    public TenantListResponse listTenants(Pageable pageable, boolean includeDeleted) {
-        log.debug("Tenant list requested - page: {}, size: {}, includeDeleted: {}", 
-                pageable.getPageNumber(), pageable.getPageSize(), includeDeleted);
+    public TenantListResponse listTenants(Pageable pageable, boolean includeDeleted, com.clinic.modules.core.tenant.TenantStatus status) {
+        log.debug("Tenant list requested - page: {}, size: {}, includeDeleted: {}, status: {}",
+                pageable.getPageNumber(), pageable.getPageSize(), includeDeleted, status);
 
-        Page<TenantEntity> page = tenantRepository.findAllWithDeletedFilter(includeDeleted, pageable);
+        Page<TenantEntity> page = tenantRepository.findAllWithFilters(includeDeleted, status, pageable);
 
-        log.debug("Tenant list retrieved - totalElements: {}, totalPages: {}, currentPage: {}", 
+        log.debug("Tenant list retrieved - totalElements: {}, totalPages: {}, currentPage: {}",
                 page.getTotalElements(), page.getTotalPages(), page.getNumber());
 
         return new TenantListResponse(
@@ -218,8 +219,8 @@ public class TenantManagementService {
      */
     @Transactional
     public TenantResponse updateTenant(Long id, TenantUpdateRequest request) {
-        log.info("Tenant update initiated - tenantId: {}, name: {}, customDomain: {}", 
-                id, request.name(), request.customDomain());
+        log.info("Tenant update initiated - tenantId: {}, name: {}, customDomain: {}, status: {}",
+                id, request.name(), request.customDomain(), request.status());
 
         // Retrieve tenant (exclude soft-deleted)
         TenantEntity tenant = tenantRepository.findByIdAndNotDeleted(id)
@@ -230,6 +231,7 @@ public class TenantManagementService {
 
         String oldName = tenant.getName();
         String oldCustomDomain = tenant.getCustomDomain();
+        com.clinic.modules.core.tenant.TenantStatus oldStatus = tenant.getStatus();
 
         // Update fields if provided
         if (request.name() != null && !request.name().isBlank()) {
@@ -240,11 +242,16 @@ public class TenantManagementService {
             tenant.setCustomDomain(request.customDomain().isBlank() ? null : request.customDomain());
         }
 
+        if (request.status() != null) {
+            tenant.setStatus(request.status());
+        }
+
         tenant = tenantRepository.save(tenant);
-        log.info("Tenant updated successfully - tenantId: {}, slug: {}, nameChanged: {}, customDomainChanged: {}", 
-                tenant.getId(), tenant.getSlug(), 
-                !oldName.equals(tenant.getName()), 
-                !java.util.Objects.equals(oldCustomDomain, tenant.getCustomDomain()));
+        log.info("Tenant updated successfully - tenantId: {}, slug: {}, nameChanged: {}, customDomainChanged: {}, statusChanged: {}",
+                tenant.getId(), tenant.getSlug(),
+                !oldName.equals(tenant.getName()),
+                !java.util.Objects.equals(oldCustomDomain, tenant.getCustomDomain()),
+                !oldStatus.equals(tenant.getStatus()));
 
         return mapToTenantResponse(tenant);
     }

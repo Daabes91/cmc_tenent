@@ -1,5 +1,6 @@
 package com.clinic.modules.saas.controller;
 
+import com.clinic.modules.core.tenant.TenantStatus;
 import com.clinic.modules.saas.dto.*;
 import com.clinic.modules.saas.service.TenantManagementService;
 import jakarta.validation.Valid;
@@ -44,11 +45,12 @@ public class TenantManagementController {
     }
 
     /**
-     * List all tenants with pagination.
+     * List all tenants with pagination and optional status filter.
      *
      * @param page Page number (default: 0)
      * @param size Page size (default: 20)
      * @param includeDeleted Whether to include soft-deleted tenants (default: false)
+     * @param status Optional status filter (ACTIVE, INACTIVE, SUSPENDED). Null or omitted returns all statuses.
      * @return Paginated list of tenants (200 OK)
      */
     @GetMapping
@@ -56,10 +58,12 @@ public class TenantManagementController {
     public ResponseEntity<TenantListResponse> listTenants(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "false") boolean includeDeleted) {
-        log.debug("Listing tenants - page: {}, size: {}, includeDeleted: {}", page, size, includeDeleted);
+            @RequestParam(defaultValue = "false") boolean includeDeleted,
+            @RequestParam(required = false) TenantStatus status) {
+        log.debug("Listing tenants - page: {}, size: {}, includeDeleted: {}, status: {}",
+                page, size, includeDeleted, status);
         Pageable pageable = PageRequest.of(page, size);
-        TenantListResponse response = tenantManagementService.listTenants(pageable, includeDeleted);
+        TenantListResponse response = tenantManagementService.listTenants(pageable, includeDeleted, status);
         return ResponseEntity.ok(response);
     }
 
@@ -85,7 +89,7 @@ public class TenantManagementController {
      * Note: Slug cannot be modified after creation.
      *
      * @param id Tenant ID
-     * @param request Update request with optional name and custom domain
+     * @param request Update request with optional name, custom domain, and status
      * @return Updated tenant details (200 OK)
      */
     @PutMapping("/{id}")
@@ -93,8 +97,8 @@ public class TenantManagementController {
     public ResponseEntity<TenantResponse> updateTenant(
             @PathVariable Long id,
             @Valid @RequestBody TenantUpdateRequest request) {
-        log.info("API request received - PUT /saas/tenants/{} - name: {}, customDomain: {}", 
-                id, request.name(), request.customDomain());
+        log.info("API request received - PUT /saas/tenants/{} - name: {}, customDomain: {}, status: {}",
+                id, request.name(), request.customDomain(), request.status());
         TenantResponse response = tenantManagementService.updateTenant(id, request);
         log.info("API response sent - PUT /saas/tenants/{} - status: 200", id);
         return ResponseEntity.ok(response);

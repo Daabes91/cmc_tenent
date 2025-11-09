@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  saas-admin:
+    build:
+      context: ../..
+      dockerfile: apps/saas-admin-nuxt/Dockerfile
+      args:
+        NUXT_PUBLIC_API_BASE: http://localhost:8080
+        NUXT_PUBLIC_SAAS_API_BASE: http://localhost:8080/saas
+        NUXT_PUBLIC_APP_NAME: SAAS Manager Panel
+        NUXT_PUBLIC_APP_URL: http://localhost:3002
+        NUXT_PUBLIC_ENABLE_ANALYTICS: "true"
+        NUXT_PUBLIC_ENABLE_AUDIT_LOGS: "true"
+    container_name: clinic-saas-admin
+    restart: unless-stopped
+    environment:
+      NUXT_PUBLIC_API_BASE: http://localhost:8080
+      NUXT_PUBLIC_SAAS_API_BASE: http://localhost:8080/saas
+      NUXT_PUBLIC_APP_NAME: SAAS Manager Panel
+      NUXT_PUBLIC_APP_URL: http://localhost:3002
+      NUXT_PUBLIC_ENABLE_ANALYTICS: "true"
+      NUXT_PUBLIC_ENABLE_AUDIT_LOGS: "true"
+      NODE_ENV: development
+    ports:
+      - "3002:3002"
+    volumes:
+      # Mount source code for hot reload in development
+      - ./:/app
+      - /app/node_modules
+      - /app/.nuxt
+    networks:
+      - clinic-net
+    depends_on:
+      - api
+
+  api:
+    image: clinic-api:latest
+    container_name: clinic-api-dev
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/clinic_multi_tenant
+      SPRING_DATASOURCE_USERNAME: clinic
+      SPRING_DATASOURCE_PASSWORD: clinic_password
+      SPRING_PROFILES_ACTIVE: dev
+    ports:
+      - "8080:8080"
+    networks:
+      - clinic-net
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    container_name: clinic-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: clinic_multi_tenant
+      POSTGRES_USER: clinic
+      POSTGRES_PASSWORD: clinic_password
+    ports:
+      - "5442:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - clinic-net
+
+volumes:
+  postgres_dev_data:
+
+networks:
+  clinic-net:
+    driver: bridge

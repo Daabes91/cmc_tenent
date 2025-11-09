@@ -37,7 +37,20 @@ services:
       EMAIL_ENABLED: "false"
       PUBLIC_APP_ORIGIN: http://web:3001
       ADMIN_APP_ORIGIN: http://admin:3000
+      SAAS_ADMIN_APP_ORIGIN: http://saas-admin:3002
       ADMIN_IP_ALLOWLIST: 0.0.0.0/0,::/0
+      JWT_PATIENT_ISSUER: https://api.example-clinic.com
+      JWT_PATIENT_AUDIENCE: patient
+      JWT_PATIENT_PUBLIC_KEY: classpath:keys/patient_public.pem
+      JWT_PATIENT_PRIVATE_KEY: classpath:keys/patient_private.pem
+      JWT_STAFF_ISSUER: https://api.example-clinic.com
+      JWT_STAFF_AUDIENCE: staff
+      JWT_STAFF_PUBLIC_KEY: classpath:keys/staff_public.pem
+      JWT_STAFF_PRIVATE_KEY: classpath:keys/staff_private.pem
+      JWT_SAAS_MANAGER_ISSUER: https://api.example-clinic.com
+      JWT_SAAS_MANAGER_AUDIENCE: saas-manager
+      JWT_SAAS_MANAGER_PUBLIC_KEY: classpath:keys/staff_public.pem
+      JWT_SAAS_MANAGER_PRIVATE_KEY: classpath:keys/staff_private.pem
     depends_on:
       postgres:
         condition: service_healthy
@@ -91,6 +104,41 @@ services:
       - "3000:3000"
     networks:
       - clinic-net
+
+  saas-admin:
+    build:
+      context: ./apps/saas-admin-nuxt
+      dockerfile: Dockerfile
+      args:
+        NUXT_PUBLIC_API_BASE: http://localhost:8080
+        NUXT_PUBLIC_SAAS_API_BASE: http://localhost:8080/saas
+        NUXT_PUBLIC_APP_NAME: SAAS Manager Panel
+        NUXT_PUBLIC_APP_URL: http://localhost:3002
+        NUXT_PUBLIC_ENABLE_ANALYTICS: "true"
+        NUXT_PUBLIC_ENABLE_AUDIT_LOGS: "true"
+    container_name: clinic-saas-admin
+    restart: unless-stopped
+    environment:
+      NUXT_PUBLIC_API_BASE: http://localhost:8080
+      NUXT_PUBLIC_SAAS_API_BASE: http://localhost:8080/saas
+      NUXT_PUBLIC_APP_NAME: SAAS Manager Panel
+      NUXT_PUBLIC_APP_URL: http://localhost:3002
+      NUXT_PUBLIC_ENABLE_ANALYTICS: "true"
+      NUXT_PUBLIC_ENABLE_AUDIT_LOGS: "true"
+      NODE_ENV: production
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3002:3002"
+    networks:
+      - clinic-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3002/saas-admin || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   postgres_data:

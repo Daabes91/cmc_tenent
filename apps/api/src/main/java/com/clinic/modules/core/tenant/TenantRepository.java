@@ -33,4 +33,14 @@ public interface TenantRepository extends JpaRepository<TenantEntity, Long> {
     // Find by slug excluding soft-deleted
     @Query("SELECT t FROM TenantEntity t WHERE LOWER(t.slug) = LOWER(:slug) AND t.deletedAt IS NULL")
     Optional<TenantEntity> findBySlugIgnoreCaseAndNotDeleted(@Param("slug") String slug);
+
+    // Find all tenants with optional status and deleted filter
+    @Query("SELECT t FROM TenantEntity t WHERE " +
+           "(:includeDeleted = true OR t.deletedAt IS NULL) AND " +
+           "(:status IS NULL OR t.status = :status)")
+    Page<TenantEntity> findAllWithFilters(
+        @Param("includeDeleted") boolean includeDeleted,
+        @Param("status") TenantStatus status,
+        Pageable pageable
+    );
 }

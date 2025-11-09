@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  saas-admin:
+    build:
+      context: ../..
+      dockerfile: apps/saas-admin-nuxt/Dockerfile
+      args:
+        NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE}
+        NUXT_PUBLIC_SAAS_API_BASE: ${NUXT_PUBLIC_SAAS_API_BASE}
+        NUXT_PUBLIC_APP_NAME: ${NUXT_PUBLIC_APP_NAME}
+        NUXT_PUBLIC_APP_URL: ${NUXT_PUBLIC_APP_URL}
+        NUXT_PUBLIC_ENABLE_ANALYTICS: ${NUXT_PUBLIC_ENABLE_ANALYTICS}
+        NUXT_PUBLIC_ENABLE_AUDIT_LOGS: ${NUXT_PUBLIC_ENABLE_AUDIT_LOGS}
+    image: clinic-saas-admin:latest
+    container_name: clinic-saas-admin
+    restart: unless-stopped
+    environment:
+      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE}
+      NUXT_PUBLIC_SAAS_API_BASE: ${NUXT_PUBLIC_SAAS_API_BASE}
+      NUXT_PUBLIC_APP_NAME: ${NUXT_PUBLIC_APP_NAME}
+      NUXT_PUBLIC_APP_URL: ${NUXT_PUBLIC_APP_URL}
+      NUXT_PUBLIC_ENABLE_ANALYTICS: ${NUXT_PUBLIC_ENABLE_ANALYTICS}
+      NUXT_PUBLIC_ENABLE_AUDIT_LOGS: ${NUXT_PUBLIC_ENABLE_AUDIT_LOGS}
+      NODE_ENV: production
+    ports:
+      - "${HOST_PORT:-3002}:3002"
+    networks:
+      - clinic-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3002/saas-admin || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    image: nginx:alpine
+    container_name: clinic-saas-admin-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - saas-admin
+    networks:
+      - clinic-net
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  nginx_logs:
+
+networks:
+  clinic-net:
+    driver: bridge

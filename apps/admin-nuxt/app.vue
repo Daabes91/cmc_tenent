@@ -30,29 +30,14 @@ const activeLocale = computed(() => locales.value.find((item: any) => item.code 
 const direction = computed(() => activeLocale.value?.dir ?? "ltr");
 
 const auth = useAuth();
+
 // Get clinic settings for dynamic branding
 const { settings: clinicSettings, refresh: loadClinicSettings, reset: resetClinicSettings } = useClinicSettings({
   immediate: false
 });
 
-if (import.meta.server && auth.isAuthenticated.value) {
-  try {
-    await loadClinicSettings();
-  } catch (error) {
-    logBrandingError({
-      type: BrandingErrorType.API_FAILURE,
-      message: "Failed to prefetch clinic settings during SSR",
-      originalError: error instanceof Error ? {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      } : null,
-      timestamp: new Date().toISOString()
-    });
-  }
-} else {
-  resetClinicSettings();
-}
+// Initialize clinic data on client mount
+const { fetchClinicTimezone } = useClinicTimezone();
 
 // Page name for dynamic title
 const pageName = ref('Dashboard');
@@ -71,28 +56,16 @@ const adminTitle = computed(() => brandingConfig.value.title);
 
 
 
+// Watch for logout to reset settings
 if (import.meta.client) {
   watch(
     () => auth.isAuthenticated.value,
-    (isAuthed) => {
-      if (isAuthed) {
-        loadClinicSettings().catch((error) => {
-          logBrandingError({
-            type: BrandingErrorType.API_FAILURE,
-            message: 'Failed to load clinic settings after authentication',
-            originalError: error instanceof Error ? {
-              name: error.name,
-              message: error.message,
-              stack: error.stack
-            } : null,
-            timestamp: new Date().toISOString()
-          });
-        });
-      } else {
+    (isAuthed, wasAuthed) => {
+      // Reset settings only when user explicitly logs out
+      if (wasAuthed === true && !isAuthed) {
         resetClinicSettings();
       }
-    },
-    { immediate: true }
+    }
   );
 }
 
@@ -118,10 +91,26 @@ watch(() => route.path, (newPath: string) => {
   }
 }, { immediate: true });
 
-// Initialize clinic timezone on app load with comprehensive error logging
-// This ensures all admins see appointment times in the clinic's timezone
-const { fetchClinicTimezone } = useClinicTimezone();
+// Initialize clinic data on app load
+// Load settings and timezone on client-side only to avoid SSR hydration issues
 onMounted(async () => {
+  // Load clinic settings for branding
+  try {
+    await loadClinicSettings();
+  } catch (error) {
+    logBrandingError({
+      type: BrandingErrorType.API_FAILURE,
+      message: "Failed to load clinic settings on mount",
+      originalError: error instanceof Error ? {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      } : null,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Load clinic timezone for appointment display
   try {
     await monitorClinicSettingsLoading(
       () => fetchClinicTimezone(),

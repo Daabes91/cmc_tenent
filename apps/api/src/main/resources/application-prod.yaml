@@ -15,3 +15,10 @@ security:
       public-key: ${JWT_STAFF_PUBLIC_KEY}
       private-key: ${JWT_STAFF_PRIVATE_KEY}
       clock-skew: PT30S
+    saas-manager:
+      issuer: ${JWT_SAAS_MANAGER_ISSUER}
+      audience: ${JWT_SAAS_MANAGER_AUDIENCE}
+      public-key: ${JWT_SAAS_MANAGER_PUBLIC_KEY}
+      private-key: ${JWT_SAAS_MANAGER_PRIVATE_KEY}
+      access-ttl: ${JWT_SAAS_MANAGER_ACCESS_TTL:PT720H}
+      clock-skew: PT30S

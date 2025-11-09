@@ -1,5 +1,6 @@
 package com.clinic.modules.saas.dto;
 
+import com.clinic.modules.core.tenant.TenantStatus;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -16,6 +17,8 @@ public record TenantUpdateRequest(
                 message = "Custom domain must be a valid domain name format"
         )
         @Size(max = 255, message = "Custom domain must not exceed 255 characters")
-        String customDomain
+        String customDomain,
+
+        TenantStatus status
 ) {
 }

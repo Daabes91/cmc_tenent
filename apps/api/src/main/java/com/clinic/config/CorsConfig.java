@@ -25,9 +25,14 @@ public class CorsConfig {
         CorsConfiguration adminCors = baseCorsConfiguration();
         applyOrigins(adminCors, securityProperties.cors().adminOrigins());
 
+        // SAAS Manager CORS configuration
+        CorsConfiguration saasCors = baseCorsConfiguration();
+        applyOrigins(saasCors, securityProperties.cors().adminOrigins());
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/public/**", publicCors);
         source.registerCorsConfiguration("/admin/**", adminCors);
+        source.registerCorsConfiguration("/saas/**", saasCors);
         return source;
     }
 

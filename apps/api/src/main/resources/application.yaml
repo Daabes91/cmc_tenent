@@ -40,6 +40,13 @@ security:
       public-key: ${JWT_STAFF_PUBLIC_KEY:classpath:keys/staff_public.pem}
       private-key: ${JWT_STAFF_PRIVATE_KEY:classpath:keys/staff_private.pem}
       clock-skew: PT30S
+    saas-manager:
+      issuer: ${JWT_SAAS_MANAGER_ISSUER:https://api.example-clinic.com}
+      audience: ${JWT_SAAS_MANAGER_AUDIENCE:saas-manager}
+      public-key: ${JWT_SAAS_MANAGER_PUBLIC_KEY:classpath:keys/staff_public.pem}
+      private-key: ${JWT_SAAS_MANAGER_PRIVATE_KEY:classpath:keys/staff_private.pem}
+      access-ttl: ${JWT_SAAS_MANAGER_ACCESS_TTL:PT720H}
+      clock-skew: PT30S
     refresh:
       ttl: PT30M
   cors:
@@ -47,6 +54,8 @@ security:
       - ${PUBLIC_APP_ORIGIN:http://localhost:3001}
     admin-origins:
       - ${ADMIN_APP_ORIGIN:http://localhost:3000}
+      - ${SAAS_ADMIN_APP_ORIGIN:http://localhost:3002}
+      - http://localhost:3001
   rate-limiting:
     public-auth:
       capacity: ${RATE_LIMIT_PUBLIC_AUTH_CAPACITY:5}
