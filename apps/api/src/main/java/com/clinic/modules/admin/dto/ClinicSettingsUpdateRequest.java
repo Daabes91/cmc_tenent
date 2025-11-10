@@ -34,7 +34,10 @@ public record ClinicSettingsUpdateRequest(
         String sendgridApiKey,
         @Email String emailFrom,
         String emailFromName,
-        Boolean emailEnabled
+        Boolean emailEnabled,
+        String heroMediaType,
+        String heroImageUrl,
+        String heroVideoId
 ) {
     public record WorkingHoursUpdate(
             String monday,

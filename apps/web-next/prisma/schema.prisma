@@ -1,0 +1,587 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Theme {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  name      String
+  status    String   @default("published")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  tenants   Tenant[]
+
+  @@index([status])
+  @@map("Theme")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model appointments {
+  id                     BigInt           @id @default(autoincrement())
+  patient_id             BigInt?
+  doctor_id              BigInt?
+  service_id             BigInt?
+  scheduled_at           DateTime         @db.Timestamptz(6)
+  status                 String           @db.VarChar(32)
+  notes                  String?
+  created_at             DateTime?        @default(now()) @db.Timestamptz(6)
+  booking_mode           String           @default("CLINIC_VISIT") @db.VarChar(24)
+  treatment_plan_id      BigInt?
+  follow_up_visit_number Int?
+  payment_collected      Boolean          @default(false)
+  patient_attended       Boolean?
+  paypal_payment_id      BigInt?
+  source                 String           @default("WEB") @db.VarChar(20)
+  payment_amount         Decimal?         @db.Decimal(10, 2)
+  payment_currency       String?          @db.VarChar(3)
+  payment_method         String?          @db.VarChar(32)
+  payment_date           DateTime?        @db.Timestamptz(6)
+  payment_reference      String?          @db.VarChar(120)
+  payment_notes          String?
+  slot_duration_minutes  Int              @default(30)
+  tenant_id              BigInt
+  doctors                doctors?         @relation(fields: [doctor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  patients               patients?        @relation(fields: [patient_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  paypal_payments        paypal_payments? @relation(fields: [paypal_payment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  services               services?        @relation(fields: [service_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  treatment_plans        treatment_plans? @relation(fields: [treatment_plan_id], references: [id], onUpdate: NoAction)
+  tenants                Tenant          @relation(fields: [tenant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_appointments_tenant")
+
+  @@index([booking_mode], map: "idx_appointments_booking_mode")
+  @@index([created_at], map: "idx_appointments_created_at")
+  @@index([payment_collected, created_at], map: "idx_appointments_payment_collected_created_at")
+  @@index([status, created_at], map: "idx_appointments_status_created_at")
+  @@index([tenant_id, doctor_id, scheduled_at], map: "idx_appointments_tenant_doctor_scheduled")
+  @@index([tenant_id], map: "idx_appointments_tenant_id")
+  @@index([tenant_id, patient_id, scheduled_at], map: "idx_appointments_tenant_patient_scheduled")
+  @@index([tenant_id, scheduled_at], map: "idx_appointments_tenant_scheduled")
+  @@index([treatment_plan_id], map: "idx_appointments_treatment_plan")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model blogs {
+  id               BigInt    @id @default(autoincrement())
+  title            String    @db.VarChar(200)
+  slug             String    @db.VarChar(250)
+  excerpt          String?
+  content          String
+  featured_image   String?   @db.VarChar(500)
+  author_id        BigInt?
+  author_name      String?   @db.VarChar(100)
+  meta_title       String?   @db.VarChar(70)
+  meta_description String?   @db.VarChar(160)
+  meta_keywords    String?   @db.VarChar(255)
+  og_title         String?   @db.VarChar(95)
+  og_description   String?   @db.VarChar(200)
+  og_image         String?   @db.VarChar(500)
+  status           String    @default("DRAFT") @db.VarChar(20)
+  published_at     DateTime? @db.Timestamp(6)
+  view_count       BigInt    @default(0)
+  locale           String    @default("en") @db.VarChar(5)
+  created_at       DateTime  @default(now()) @db.Timestamp(6)
+  updated_at       DateTime  @default(now()) @db.Timestamp(6)
+  tenant_id        BigInt
+  tenants          Tenant   @relation(fields: [tenant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_blogs_tenant")
+
+  @@unique([tenant_id, slug], map: "idx_blogs_tenant_slug")
+  @@index([locale], map: "idx_blogs_locale")
+  @@index([published_at(sort: Desc)], map: "idx_blogs_published_at")
+  @@index([tenant_id], map: "idx_blogs_tenant_id")
+  @@index([tenant_id, published_at(sort: Desc)], map: "idx_blogs_tenant_published_at")
+  @@index([tenant_id, status], map: "idx_blogs_tenant_status")
+  @@index([tenant_id, status, locale], map: "idx_blogs_tenant_status_locale")
+  @@index([tenant_id, status, published_at(sort: Desc)], map: "idx_blogs_tenant_status_published_at")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model clinic_settings {
+  id                                BigInt    @id @default(autoincrement())
+  clinic_name                       String?   @db.VarChar(200)
+  phone                             String?   @db.VarChar(50)
+  email                             String?   @db.VarChar(150)
+  address                           String?   @db.VarChar(500)
+  city                              String?   @db.VarChar(100)
+  state                             String?   @db.VarChar(100)
+  zip_code                          String?   @db.VarChar(20)
+  country                           String?   @db.VarChar(100)
+  monday_hours                      String?   @db.VarChar(50)
+  tuesday_hours                     String?   @db.VarChar(50)
+  wednesday_hours                   String?   @db.VarChar(50)
+  thursday_hours                    String?   @db.VarChar(50)
+  friday_hours                      String?   @db.VarChar(50)
+  saturday_hours                    String?   @db.VarChar(50)
+  sunday_hours                      String?   @db.VarChar(50)
+  facebook_url                      String?   @db.VarChar(300)
+  instagram_url                     String?   @db.VarChar(300)
+  twitter_url                       String?   @db.VarChar(300)
+  linkedin_url                      String?   @db.VarChar(300)
+  created_at                        DateTime  @default(now()) @db.Timestamp(6)
+  updated_at                        DateTime? @default(now()) @db.Timestamp(6)
+  currency                          String    @default("AED") @db.VarChar(3)
+  locale                            String    @default("en-AE") @db.VarChar(20)
+  logo_url                          String?   @db.VarChar(500)
+  logo_image_id                     String?   @db.VarChar(100)
+  virtual_consultation_fee          Decimal?  @db.Decimal(10, 2)
+  exchange_rates                    Json?
+  cloudflare_account_id             String?   @db.VarChar(100)
+  cloudflare_api_token              String?   @db.VarChar(500)
+  slot_duration_minutes             Int       @default(30)
+  virtual_consultation_meeting_link String?   @db.VarChar(500)
+  timezone                          String?   @db.VarChar(50)
+  paypal_client_id                  String?   @db.VarChar(200)
+  paypal_client_secret              String?   @db.VarChar(500)
+  paypal_environment                String?   @db.VarChar(20)
+  tenant_id                         BigInt    @unique(map: "ux_clinic_settings_tenant")
+  sendgrid_api_key                  String?
+  email_from                        String?   @db.VarChar(150)
+  email_from_name                   String?   @db.VarChar(150)
+  email_enabled                     Boolean?  @default(true)
+  tenants                           Tenant   @relation(fields: [tenant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_clinic_settings_tenant")
+
+  @@index([exchange_rates], map: "idx_clinic_settings_exchange_rates", type: Gin)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model doctor_availability {
+  id               BigInt    @id @default(autoincrement())
+  doctor_id        BigInt
+  recurring_weekly Boolean
+  day_of_week      String?   @db.VarChar(16)
+  specific_date    DateTime? @db.Date
+  start_time       DateTime  @db.Time(6)
+  end_time         DateTime  @db.Time(6)
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @db.Timestamptz(6)
+  doctors          doctors   @relation(fields: [doctor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([doctor_id], map: "idx_doctor_availability_doctor")
+}
+
+model doctor_services {
+  doctor_id  BigInt
+  service_id BigInt
+  doctors    doctors  @relation(fields: [doctor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  services   services @relation(fields: [service_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([doctor_id, service_id])
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model doctors {
+  id                  BigInt                @id @default(autoincrement())
+  locale              String?               @db.VarChar(8)
+  created_at          DateTime?             @default(now()) @db.Timestamptz(6)
+  image_url           String?               @db.VarChar(500)
+  email               String?               @db.VarChar(120)
+  phone               String?               @db.VarChar(20)
+  display_order       Int                   @default(0)
+  is_active           Boolean               @default(true)
+  full_name_en        String                @db.VarChar(160)
+  full_name_ar        String?               @db.VarChar(160)
+  specialty_en        String?               @db.VarChar(120)
+  specialty_ar        String?               @db.VarChar(120)
+  bio_en              String?
+  bio_ar              String?
+  tenant_id           BigInt
+  appointments        appointments[]
+  doctor_availability doctor_availability[]
+  doctor_services     doctor_services[]
+  tenant              Tenant                @relation(fields: [tenant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_doctors_tenant")
+  paypal_payments     paypal_payments[]
+  staff_users         staff_users?
+  treatment_plans     treatment_plans[]
+
+  @@index([display_order], map: "idx_doctors_display_order")
+  @@index([is_active], map: "idx_doctors_is_active")
+  @@index([tenant_id, is_active], map: "idx_doctors_tenant_active")
+}
+
+model flyway_schema_history {
+  installed_rank Int      @id(map: "flyway_schema_history_pk")
+  version        String?  @db.VarChar(50)
+  description    String   @db.VarChar(200)
+  type           String   @db.VarChar(20)
+  script         String   @db.VarChar(1000)
+  checksum       Int?
+  installed_by   String   @db.VarChar(100)
+  installed_on   DateTime @default(now()) @db.Timestamp(6)
+  execution_time Int
+  success        Boolean
+
+  @@index([success], map: "flyway_schema_history_s_idx")
+}
+
+model followup_visits {
+  id                   BigInt           @id @default(autoincrement())
+  treatment_plan_id    BigInt
+  visit_number         Int
+  visit_date           DateTime         @db.Timestamp(6)
+  notes                String?
+  performed_procedures String?
+  created_at           DateTime         @db.Timestamp(6)
+  updated_at           DateTime         @db.Timestamp(6)
+  treatment_plans      treatment_plans  @relation(fields: [treatment_plan_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  material_usage       material_usage[]
+  payments             payments[]
+
+  @@index([treatment_plan_id], map: "idx_followup_visits_plan")
+  @@index([treatment_plan_id, visit_number], map: "idx_followup_visits_plan_number")
+}
+
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model global_patients {
+  id            BigInt     @id @default(autoincrement())
+  external_id   String     @unique @db.VarChar(64)
+  email         String     @unique @db.VarChar(160)
+  phone         String?    @db.VarChar(32)
+  password_hash String     @db.VarChar(255)
+  date_of_birth DateTime?  @db.Date
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime   @default(now()) @db.Timestamptz(6)
+  patients      patients[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model insurance_companies {
+  id             BigInt   @id @default(autoincrement())
+  name_en        String   @db.VarChar(160)
+  logo_url       String?  @db.VarChar(500)
+  website_url    String?  @db.VarChar(255)
+  phone          String?  @db.VarChar(20)
+  email          String?  @db.VarChar(100)
+  description_en String?
+  is_active      Boolean  @default(true)
+  display_order  Int?     @default(0)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @default(now()) @db.Timestamptz(6)
+  name_ar        String?  @db.VarChar(160)
+  description_ar String?
+  tenant_id      BigInt
+  tenant         Tenant   @relation(fields: [tenant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_insurance_companies_tenant")
+
+  @@unique([tenant_id, name_en], map: "ux_insurance_companies_tenant_name_en")
+  @@index([is_active, display_order], map: "idx_insurance_companies_active_order")
+  @@index([tenant_id, is_active, display_order], map: "idx_insurance_companies_tenant_active_order")
+  @@index([tenant_id], map: "idx_insurance_companies_tenant_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model material_catalog {
+  id              BigInt           @id @default(autoincrement())
+  name            String           @db.VarChar(200)
+  description     String?
+  unit_cost       Decimal          @db.Decimal(10, 2)
+  unit_of_measure String?          @db.VarChar(50)
+  active          Boolean          @default(true)
+  created_at      DateTime         @db.Timestamp(6)
+  updated_at      DateTime         @db.Timestamp(6)
+  currency        String           @db.VarChar(3)
+  tenant_id       BigInt
+  tenants         Tenant          @relation(fields: [tenant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_material_catalog_tenant")
+  material_usage  material_usage[]
+
+  @@unique([tenant_id, name], map: "ux_material_catalog_tenant_name")
+  @@index([active], map: "idx_material_catalog_active")
+  @@index([currency], map: "idx_material_catalog_currency")
+  @@index([tenant_id, active], map: "idx_material_catalog_tenant_active")
+  @@index([tenant_id], map: "idx_material_catalog_tenant_id")
+}
+
+model material_usage {
+  id               BigInt           @id @default(autoincrement())
+  visit_id         BigInt
+  material_id      BigInt
+  quantity         Decimal          @db.Decimal(10, 2)
+  unit_cost        Decimal          @db.Decimal(10, 2)
+  notes            String?
+  created_at       DateTime         @db.Timestamp(6)
+  material_catalog material_catalog @relation(fields: [material_id], references: [id], onUpdate: NoAction)
+  followup_visits  followup_visits  @relation(fields: [visit_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([material_id], map: "idx_material_usage_material")
+  @@index([visit_id], map: "idx_material_usage_visit")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model patients {
+  id                BigInt            @id @default(autoincrement())
+  external_id       String            @unique @db.VarChar(64)
+  first_name        String            @db.VarChar(80)
+  last_name         String            @db.VarChar(80)
+  email             String?           @db.VarChar(160)
+  phone             String?           @db.VarChar(32)
+  created_at        DateTime?         @default(now()) @db.Timestamptz(6)
+  password_hash     String?           @db.VarChar(255)
+  last_login_at     DateTime?         @db.Timestamptz(6)
+  profile_image_url String?           @db.VarChar(500)
+  date_of_birth     DateTime?         @db.Date
+  global_patient_id BigInt?
+  tenant_id         BigInt
+  appointments      appointments[]
+  global_patients   global_patients?  @relation(fields: [global_patient_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_patients_global_patient")
+  tenants           Tenant           @relation(fields: [tenant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_patients_tenant")
+  paypal_payments   paypal_payments[]
+  treatment_plans   treatment_plans[]
+
+  @@unique([tenant_id, global_patient_id], map: "ux_patients_tenant_global_patient")
+  @@index([created_at], map: "idx_patients_created_at")
+  @@index([tenant_id, created_at(sort: Desc)], map: "idx_patients_tenant_created")
+  @@index([tenant_id], map: "idx_patients_tenant_id")
+}
+
+model payments {
+  id                    BigInt          @id @default(autoincrement())
+  visit_id              BigInt
+  amount                Decimal         @db.Decimal(10, 2)
+  payment_method        String          @db.VarChar(32)
+  transaction_reference String?         @db.VarChar(255)
+  payment_date          DateTime        @db.Timestamp(6)
+  notes                 String?
+  created_at            DateTime        @db.Timestamp(6)
+  currency              String          @db.VarChar(3)
+  followup_visits       followup_visits @relation(fields: [visit_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([currency], map: "idx_payments_currency")
+  @@index([payment_date], map: "idx_payments_date")
+  @@index([visit_id], map: "idx_payments_visit")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model paypal_payments {
+  id           BigInt         @id @default(autoincrement())
+  order_id     String         @db.VarChar(100)
+  capture_id   String?        @db.VarChar(100)
+  status       String         @db.VarChar(20)
+  amount       Decimal        @db.Decimal(10, 2)
+  currency     String         @db.VarChar(3)
+  patient_id   BigInt
+  doctor_id    BigInt
+  slot_id      String?        @db.VarChar(255)
+  type         String         @db.VarChar(30)
+  payer_email  String?        @db.VarChar(150)
+  payer_name   String?        @db.VarChar(200)
+  raw_payload  String?
+  created_at   DateTime       @default(now()) @db.Timestamp(6)
+  updated_at   DateTime?      @default(now()) @db.Timestamp(6)
+  tenant_id    BigInt
+  appointments appointments[]
+  tenants      Tenant        @relation(fields: [tenant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_paypal_payments_tenant")
+  doctors      doctors        @relation(fields: [doctor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  patients     patients       @relation(fields: [patient_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([tenant_id, order_id], map: "ux_paypal_payments_tenant_order_id")
+  @@index([order_id], map: "idx_paypal_payment_order_id")
+  @@index([created_at], map: "idx_paypal_payments_created_at")
+  @@index([status, created_at], map: "idx_paypal_payments_status_created_at")
+  @@index([tenant_id], map: "idx_paypal_payments_tenant_id")
+  @@index([tenant_id, patient_id], map: "idx_paypal_payments_tenant_patient")
+  @@index([tenant_id, status], map: "idx_paypal_payments_tenant_status")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model saas_managers {
+  id            BigInt   @id @default(autoincrement())
+  email         String   @unique @db.VarChar(160)
+  full_name     String   @db.VarChar(160)
+  password_hash String   @db.VarChar(255)
+  status        String   @default("ACTIVE") @db.VarChar(16)
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  updated_at    DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([email], map: "idx_saas_managers_email")
+  @@index([status], map: "idx_saas_managers_status")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model services {
+  id              BigInt            @id @default(autoincrement())
+  slug            String            @db.VarChar(120)
+  name_en         String            @db.VarChar(160)
+  name_ar         String?           @db.VarChar(160)
+  summary_en      String?
+  summary_ar      String?
+  created_at      DateTime?         @default(now()) @db.Timestamptz(6)
+  image_url       String?           @db.VarChar(500)
+  tenant_id       BigInt
+  appointments    appointments[]
+  doctor_services doctor_services[]
+  tenants         Tenant           @relation(fields: [tenant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_services_tenant")
+  treatment_plans treatment_plans[]
+
+  @@unique([tenant_id, slug], map: "ux_services_tenant_slug")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model staff_invitation_tokens {
+  id            BigInt      @id @default(autoincrement())
+  staff_user_id BigInt
+  token         String      @unique @db.VarChar(128)
+  expires_at    DateTime    @db.Timestamp(6)
+  used_at       DateTime?   @db.Timestamp(6)
+  created_at    DateTime    @default(now()) @db.Timestamp(6)
+  staff_users   staff_users @relation(fields: [staff_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_staff_invitation_staff_user")
+
+  @@index([token], map: "idx_staff_invitation_tokens_token")
+  @@index([staff_user_id], map: "idx_staff_invitation_tokens_user_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model staff_permissions {
+  id                          BigInt      @id @default(autoincrement())
+  staff_user_id               BigInt      @unique
+  appointments_permissions    Json?       @default("[]")
+  patients_permissions        Json?       @default("[]")
+  doctors_permissions         Json?       @default("[]")
+  services_permissions        Json?       @default("[]")
+  treatment_plans_permissions Json?       @default("[]")
+  reports_permissions         Json?       @default("[]")
+  settings_permissions        Json?       @default("[]")
+  staff_permissions           Json?       @default("[]")
+  blogs_permissions           Json?       @default("[]")
+  created_at                  DateTime    @default(now()) @db.Timestamp(6)
+  updated_at                  DateTime    @default(now()) @db.Timestamp(6)
+  staff_users                 staff_users @relation(fields: [staff_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_staff_permissions_user")
+
+  @@index([staff_user_id], map: "idx_staff_permissions_user_id")
+}
+
+model staff_refresh_tokens {
+  id            BigInt      @id @default(autoincrement())
+  staff_user_id BigInt
+  token         String      @unique @db.VarChar(128)
+  expires_at    DateTime    @db.Timestamptz(6)
+  revoked       Boolean     @default(false)
+  created_at    DateTime    @default(now()) @db.Timestamptz(6)
+  staff_users   staff_users @relation(fields: [staff_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model staff_users {
+  id                      BigInt                    @id @default(autoincrement())
+  email                   String                    @db.VarChar(160)
+  full_name               String?                   @db.VarChar(160)
+  role                    String                    @db.VarChar(32)
+  password_hash           String                    @db.VarChar(255)
+  two_factor_secret       String?                   @db.VarChar(64)
+  status                  String?                   @default("ACTIVE") @db.VarChar(16)
+  created_at              DateTime?                 @default(now()) @db.Timestamptz(6)
+  doctor_id               BigInt?                   @unique(map: "uq_staff_users_doctor_id")
+  tenant_id               BigInt
+  staff_invitation_tokens staff_invitation_tokens[]
+  staff_permissions       staff_permissions?
+  staff_refresh_tokens    staff_refresh_tokens[]
+  doctors                 doctors?                  @relation(fields: [doctor_id], references: [id], onUpdate: NoAction, map: "fk_staff_users_doctor")
+  tenant                  Tenant                    @relation(fields: [tenant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_staff_users_tenant")
+
+  @@index([doctor_id], map: "idx_staff_users_doctor_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Tenant {
+  id                  BigInt                @id @default(autoincrement())
+  slug                String                @unique @db.VarChar(64)
+  name                String                @db.VarChar(200)
+  status              String                @default("ACTIVE") @db.VarChar(32)
+  customDomain        String?               @map("custom_domain") @db.VarChar(255)
+  createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt           DateTime?             @map("deleted_at") @db.Timestamp(6)
+  domain              String?               @unique
+  themeId             String?
+  appointments        appointments[]
+  blogs               blogs[]
+  clinic_settings     clinic_settings?
+  doctors             doctors[]
+  insurance_companies insurance_companies[]
+  material_catalog    material_catalog[]
+  patients            patients[]
+  paypal_payments     paypal_payments[]
+  services            services[]
+  staff_users         staff_users[]
+  theme               Theme?                @relation(fields: [themeId], references: [id])
+  treatment_plans     treatment_plans[]
+
+  @@index([deletedAt], map: "idx_tenants_deleted_at")
+  @@index([themeId], map: "tenants_themeId_idx")
+  @@map("tenants")
+}
+
+model treatment_plan_audit_log {
+  id                  BigInt          @id @default(autoincrement())
+  treatment_plan_id   BigInt
+  changed_by_staff_id BigInt?
+  changed_by_name     String?         @db.VarChar(255)
+  change_type         String          @db.VarChar(100)
+  old_value           String?
+  new_value           String?
+  notes               String?
+  changed_at          DateTime        @db.Timestamp(6)
+  treatment_plans     treatment_plans @relation(fields: [treatment_plan_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([changed_at], map: "idx_audit_log_changed_at")
+  @@index([treatment_plan_id], map: "idx_audit_log_plan")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model treatment_plan_payments {
+  id                     BigInt          @id @default(autoincrement())
+  treatment_plan_id      BigInt
+  amount                 Decimal         @db.Decimal(10, 2)
+  currency               String          @default("SAR") @db.VarChar(3)
+  payment_method         String          @db.VarChar(32)
+  transaction_reference  String?         @db.VarChar(255)
+  payment_date           DateTime        @db.Timestamptz(6)
+  notes                  String?
+  recorded_by_staff_id   BigInt
+  recorded_by_staff_name String          @db.VarChar(255)
+  created_at             DateTime        @default(now()) @db.Timestamptz(6)
+  treatment_plans        treatment_plans @relation(fields: [treatment_plan_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([created_at], map: "idx_treatment_plan_payments_created_at")
+  @@index([payment_date], map: "idx_treatment_plan_payments_payment_date")
+  @@index([recorded_by_staff_id], map: "idx_treatment_plan_payments_recorded_by_staff_id")
+  @@index([treatment_plan_id], map: "idx_treatment_plan_payments_treatment_plan_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model treatment_plans {
+  id                       BigInt                     @id @default(autoincrement())
+  patient_id               BigInt
+  doctor_id                BigInt
+  treatment_type_id        BigInt
+  total_price              Decimal                    @db.Decimal(10, 2)
+  currency                 String                     @default("JOD") @db.VarChar(3)
+  planned_followups        Int
+  completed_visits         Int                        @default(0)
+  status                   String                     @db.VarChar(32)
+  notes                    String?
+  discount_amount          Decimal?                   @db.Decimal(10, 2)
+  discount_reason          String?
+  created_at               DateTime                   @db.Timestamp(6)
+  updated_at               DateTime                   @db.Timestamp(6)
+  started_at               DateTime?                  @db.Timestamp(6)
+  completed_at             DateTime?                  @db.Timestamp(6)
+  followup_cadence         String                     @default("WEEKLY") @db.VarChar(16)
+  tenant_id                BigInt
+  appointments             appointments[]
+  followup_visits          followup_visits[]
+  treatment_plan_audit_log treatment_plan_audit_log[]
+  treatment_plan_payments  treatment_plan_payments[]
+  tenant                   Tenant                     @relation(fields: [tenant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_treatment_plans_tenant")
+  doctors                  doctors                    @relation(fields: [doctor_id], references: [id], onUpdate: NoAction)
+  patients                 patients                   @relation(fields: [patient_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  services                 services                   @relation(fields: [treatment_type_id], references: [id], onUpdate: NoAction)
+
+  @@index([tenant_id, doctor_id], map: "idx_treatment_plans_tenant_doctor")
+  @@index([tenant_id], map: "idx_treatment_plans_tenant_id")
+  @@index([tenant_id, patient_id], map: "idx_treatment_plans_tenant_patient")
+  @@index([tenant_id, status], map: "idx_treatment_plans_tenant_status")
+  @@index([treatment_type_id], map: "idx_treatment_plans_treatment_type")
+}

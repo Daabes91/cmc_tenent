@@ -6,8 +6,10 @@ import dynamic from 'next/dynamic';
 import {useLocale, useTranslations} from 'next-intl';
 import {Link} from '@/navigation';
 import {api} from '@/lib/api';
-import type {Service, InsuranceCompany} from '@/lib/types';
+import type {Service, InsuranceCompany, HeroMedia} from '@/lib/types';
 import {useLocalizedPageTitle} from '@/hooks/usePageTitle';
+import {YouTubeEmbed} from '@/components/YouTubeEmbed';
+import {HeroSectionErrorBoundary} from '@/components/HeroSectionErrorBoundary';
 
 const BookingSlider = dynamic(() => import('@/components/BookingSlider'), {
   ssr: false,
@@ -33,6 +35,9 @@ export default function Home() {
   const [loadingServices, setLoadingServices] = useState(true);
   const [insuranceCompanies, setInsuranceCompanies] = useState<InsuranceCompany[]>([]);
   const [loadingInsurance, setLoadingInsurance] = useState(true);
+  const [heroMedia, setHeroMedia] = useState<HeroMedia>({ type: 'image' });
+  const [loadingHeroMedia, setLoadingHeroMedia] = useState(true);
+  const [heroMediaError, setHeroMediaError] = useState(false);
   const hero = useTranslations('hero');
   const servicesT = useTranslations('services');
   const booking = useTranslations('booking');
@@ -42,6 +47,9 @@ export default function Home() {
   const common = useTranslations('common');
   const locale = useLocale();
   const isRTL = locale === 'ar';
+
+  // Default hero image URL
+  const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1200&auto=format&fit=crop';
 
   // Set localized page title
   useLocalizedPageTitle({
@@ -72,8 +80,87 @@ export default function Home() {
       }
     };
 
+    const loadHeroMedia = async () => {
+      try {
+        // Check cache first (5 minute cache)
+        const cacheKey = 'hero-media-settings';
+        const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+        
+        if (typeof window !== 'undefined') {
+          const cached = sessionStorage.getItem(cacheKey);
+          const cacheTime = sessionStorage.getItem(`${cacheKey}-time`);
+          
+          if (cached && cacheTime) {
+            const age = Date.now() - parseInt(cacheTime, 10);
+            if (age < cacheExpiry) {
+              const cachedData = JSON.parse(cached);
+              setHeroMedia(cachedData);
+              setLoadingHeroMedia(false);
+              console.log('Using cached hero media settings');
+              return;
+            }
+          }
+        }
+
+        const settings = await api.getClinicSettings();
+        
+        console.log('Hero media settings loaded:', {
+          heroMediaType: settings.heroMediaType,
+          hasVideoId: !!settings.heroVideoId,
+          hasImageUrl: !!settings.heroImageUrl,
+          timestamp: new Date().toISOString(),
+        });
+        
+        let mediaConfig: HeroMedia;
+        
+        // Extract hero media configuration from clinic settings
+        if (settings.heroMediaType === 'video' && settings.heroVideoId) {
+          mediaConfig = {
+            type: 'video',
+            videoId: settings.heroVideoId,
+          };
+        } else if (settings.heroMediaType === 'image' && settings.heroImageUrl) {
+          mediaConfig = {
+            type: 'image',
+            imageUrl: settings.heroImageUrl,
+          };
+        } else {
+          // Default to image type with default image
+          console.log('No custom hero media configured, using default image');
+          mediaConfig = {
+            type: 'image',
+            imageUrl: DEFAULT_HERO_IMAGE,
+          };
+        }
+        
+        setHeroMedia(mediaConfig);
+        
+        // Cache the result
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(cacheKey, JSON.stringify(mediaConfig));
+          sessionStorage.setItem(`${cacheKey}-time`, Date.now().toString());
+        }
+      } catch (error) {
+        console.error('Failed to load hero media settings:', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          timestamp: new Date().toISOString(),
+        });
+        
+        // Fallback to default image on error
+        setHeroMediaError(true);
+        setHeroMedia({
+          type: 'image',
+          imageUrl: DEFAULT_HERO_IMAGE,
+        });
+      } finally {
+        setLoadingHeroMedia(false);
+      }
+    };
+
     void loadServices();
     void loadInsuranceCompanies();
+    void loadHeroMedia();
   }, [locale]);
 
   // Handle hash navigation for booking section
@@ -107,6 +194,34 @@ export default function Home() {
   const scrollToBooking = () => {
     const bookingSection = document.getElementById('booking-section');
     bookingSection?.scrollIntoView({behavior: 'smooth', block: 'start'});
+  };
+
+  // Handle YouTube video load errors by falling back to default image
+  const handleVideoError = () => {
+    console.error('YouTube video failed to load, falling back to default image', {
+      videoId: heroMedia.type === 'video' ? heroMedia.videoId : 'N/A',
+      timestamp: new Date().toISOString(),
+    });
+    
+    setHeroMediaError(true);
+    setHeroMedia({
+      type: 'image',
+      imageUrl: DEFAULT_HERO_IMAGE,
+    });
+  };
+
+  // Handle image load errors by using default image
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.error('Hero image failed to load, falling back to default', {
+      attemptedUrl: heroMedia.type === 'image' ? heroMedia.imageUrl : 'N/A',
+      timestamp: new Date().toISOString(),
+    });
+    
+    const target = e.target as HTMLImageElement;
+    if (target.src !== DEFAULT_HERO_IMAGE) {
+      target.src = DEFAULT_HERO_IMAGE;
+      setHeroMediaError(true);
+    }
   };
 
   const stats = useMemo(
@@ -251,31 +366,66 @@ export default function Home() {
           </div>
 
           <div className="relative z-10">
-            <div className="relative">
-              <Image
-                src="https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1200&auto=format&fit=crop"
-                alt={hero('imageAlt')}
-                width={1200}
-                height={800}
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="h-full w-full rounded-3xl border border-slate-100/60 object-cover shadow-2xl transition-colors dark:border-slate-800/60 dark:shadow-blue-900/50"
-              />
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-blue-600/10 dark:from-blue-500/20 to-transparent transition-colors" />
-            </div>
+            <HeroSectionErrorBoundary fallbackImage={DEFAULT_HERO_IMAGE}>
+              {loadingHeroMedia ? (
+                // Loading skeleton for hero media - responsive height
+                <div className="relative">
+                  <div className="animate-pulse h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] w-full rounded-2xl sm:rounded-3xl border border-slate-100/60 bg-slate-200 dark:border-slate-800/60 dark:bg-slate-800 transition-colors duration-300" />
+                </div>
+              ) : heroMedia.type === 'video' && heroMedia.videoId && !heroMediaError ? (
+                // YouTube video embed with error handling - responsive
+                <div className="relative">
+                  <YouTubeEmbed
+                    videoId={heroMedia.videoId}
+                    className="border border-slate-100/60 shadow-xl sm:shadow-2xl transition-all duration-300 dark:border-slate-800/60 dark:shadow-blue-900/50"
+                    onError={handleVideoError}
+                  />
+                  {/* Fallback to image if video fails to render */}
+                  {heroMediaError && (
+                    <div className="absolute inset-0">
+                      <Image
+                        src={DEFAULT_HERO_IMAGE}
+                        alt={hero('imageAlt')}
+                        width={1200}
+                        height={800}
+                        priority
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 50vw"
+                        className="h-full w-full rounded-2xl sm:rounded-3xl border border-slate-100/60 object-cover shadow-xl sm:shadow-2xl transition-all duration-300 dark:border-slate-800/60 dark:shadow-blue-900/50"
+                      />
+                      <div className="absolute inset-0 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-blue-600/10 via-blue-500/5 dark:from-blue-500/20 dark:via-blue-600/10 to-transparent transition-colors duration-300" />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Image display (default or custom) - responsive
+                <div className="relative">
+                  <Image
+                    src={heroMedia.imageUrl || DEFAULT_HERO_IMAGE}
+                    alt={hero('imageAlt')}
+                    width={1200}
+                    height={800}
+                    priority
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 50vw"
+                    className="h-full w-full rounded-2xl sm:rounded-3xl border border-slate-100/60 object-cover shadow-xl sm:shadow-2xl transition-all duration-300 dark:border-slate-800/60 dark:shadow-blue-900/50"
+                    onError={handleImageError}
+                  />
+                  <div className="absolute inset-0 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-blue-600/10 via-blue-500/5 dark:from-blue-500/20 dark:via-blue-600/10 to-transparent transition-colors duration-300" />
+                </div>
+              )}
+            </HeroSectionErrorBoundary>
 
-            <div className="mt-8 grid grid-cols-2 gap-4">
+            <div className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <h2 className="sr-only">{hero('highlightsHeading')}</h2>
               {heroHighlights.map((highlight) => (
                 <div
                   key={highlight.title}
-                  className="rounded-2xl border border-slate-100/70 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/70 p-6 shadow-lg dark:shadow-blue-900/40 backdrop-blur transition-colors"
+                  className="rounded-xl sm:rounded-2xl border border-slate-100/70 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/70 p-4 sm:p-6 shadow-md sm:shadow-lg dark:shadow-blue-900/40 backdrop-blur transition-all duration-300"
                 >
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100/80 dark:bg-blue-500/15 transition-colors">
+                  <div className="mb-3 sm:mb-4 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg sm:rounded-xl bg-blue-100/80 dark:bg-blue-500/15 transition-colors duration-300">
                     {highlight.icon}
                   </div>
-                  <h3 className="text-slate-900 dark:text-slate-100 font-bold">{highlight.title}</h3>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{highlight.description}</p>
+                  <h3 className="text-sm sm:text-base text-slate-900 dark:text-slate-100 font-bold transition-colors">{highlight.title}</h3>
+                  <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 transition-colors">{highlight.description}</p>
                 </div>
               ))}
             </div>

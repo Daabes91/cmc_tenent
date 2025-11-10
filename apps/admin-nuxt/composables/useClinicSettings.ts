@@ -46,6 +46,9 @@ type ClinicSettingsPayload = {
   emailFrom?: string | null;
   emailFromName?: string | null;
   emailEnabled?: boolean | null;
+  heroMediaType?: string | null;
+  heroImageUrl?: string | null;
+  heroVideoId?: string | null;
 };
 
 type UseClinicSettingsOptions = {
@@ -168,6 +171,11 @@ export function useClinicSettings(options: UseClinicSettingsOptions = {}) {
     const clinicName = payload.clinicName?.trim() || null;
     const logoUrl = payload.logoUrl?.trim() || null;
 
+    // Hero media fields
+    const heroMediaType = payload.heroMediaType?.trim() || 'image';
+    const heroImageUrl = payload.heroImageUrl?.trim() || null;
+    const heroVideoId = payload.heroVideoId?.trim() || null;
+
     return {
       ...payload,
       clinicName,
@@ -182,7 +190,10 @@ export function useClinicSettings(options: UseClinicSettingsOptions = {}) {
       sendgridApiKey,
       emailFrom,
       emailFromName,
-      emailEnabled
+      emailEnabled,
+      heroMediaType,
+      heroImageUrl,
+      heroVideoId
     };
   });
 

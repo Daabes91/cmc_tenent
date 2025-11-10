@@ -47,6 +47,11 @@
         "title": "Expert Team",
         "description": "Certified dental specialists"
       }
+    },
+    "media": {
+      "videoTitle": "Hero background video",
+      "defaultImageAlt": "Default hero section image",
+      "loadingVideo": "Loading video..."
     }
   },
   "services": {

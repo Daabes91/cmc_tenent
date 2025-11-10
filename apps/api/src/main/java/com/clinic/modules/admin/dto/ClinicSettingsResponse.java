@@ -33,7 +33,10 @@ public record ClinicSettingsResponse(
         String sendgridApiKey,
         String emailFrom,
         String emailFromName,
-        Boolean emailEnabled
+        Boolean emailEnabled,
+        String heroMediaType,
+        String heroImageUrl,
+        String heroVideoId
 ) {
     public record WorkingHours(
             String monday,

@@ -639,6 +639,35 @@
               </div>
             </div>
 
+            <!-- Hero Media Section -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
+              <div class="bg-gradient-to-r from-pink-500 to-rose-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <UIcon name="i-lucide-image" class="h-5 w-5 text-white" />
+                  <div>
+                    <h2 class="text-lg font-semibold text-white">{{ t('clinicSettings.sections.heroMedia.title') }}</h2>
+                    <p class="text-sm text-pink-100">{{ t('clinicSettings.sections.heroMedia.subtitle') }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="p-6">
+                <div v-if="loading" class="space-y-4">
+                  <USkeleton class="h-12 rounded-xl" />
+                  <USkeleton class="h-64 rounded-xl" />
+                </div>
+                <div v-else>
+                  <HeroMediaConfiguration
+                    :model-value="{
+                      mediaType: formData.heroMediaType,
+                      imageUrl: formData.heroImageUrl,
+                      videoId: formData.heroVideoId
+                    }"
+                    @update:model-value="updateHeroMedia"
+                  />
+                </div>
+              </div>
+            </div>
+
             <!-- Operating Hours Section -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
               <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
@@ -900,6 +929,9 @@ interface ClinicSettingsForm {
   emailFrom: string;
   emailFromName: string;
   emailEnabled: boolean;
+  heroMediaType: string;
+  heroImageUrl: string;
+  heroVideoId: string;
 }
 
 const DEFAULT_CURRENCY = "AED";
@@ -996,7 +1028,10 @@ const formData = ref<ClinicSettingsForm>({
   sendgridApiKey: "",
   emailFrom: "",
   emailFromName: "",
-  emailEnabled: false
+  emailEnabled: false,
+  heroMediaType: "image",
+  heroImageUrl: "",
+  heroVideoId: ""
 });
 
 const saving = ref(false);
@@ -1073,7 +1108,10 @@ watch(
       sendgridApiKey: newSettings.sendgridApiKey || "",
       emailFrom: newSettings.emailFrom || "",
       emailFromName: newSettings.emailFromName || "",
-      emailEnabled: newSettings.emailEnabled ?? true
+      emailEnabled: newSettings.emailEnabled ?? true,
+      heroMediaType: newSettings.heroMediaType || "image",
+      heroImageUrl: newSettings.heroImageUrl || "",
+      heroVideoId: newSettings.heroVideoId || ""
     };
   },
   { immediate: true }
@@ -1144,6 +1182,7 @@ const overviewMetrics = computed(() => {
 });
 
 async function saveSettings() {
+  // Validate email configuration
   if (formData.value.emailEnabled && !emailConfigComplete.value) {
     toast.add({
       title: t('clinicSettings.toasts.emailValidation.title'),
@@ -1154,7 +1193,29 @@ async function saveSettings() {
     return;
   }
 
+  // Validate hero media configuration
+  if (formData.value.heroMediaType === 'video' && !formData.value.heroVideoId) {
+    toast.add({
+      title: t('clinicSettings.toasts.heroMediaValidation.title'),
+      description: t('clinicSettings.toasts.heroMediaValidation.description'),
+      color: "amber",
+      icon: "i-lucide-alert-triangle",
+      timeout: 5000
+    });
+    return;
+  }
+
   saving.value = true;
+  
+  // Show loading toast
+  const loadingToast = toast.add({
+    title: t('clinicSettings.toasts.saving.title'),
+    description: t('clinicSettings.toasts.saving.description'),
+    color: "blue",
+    icon: "i-lucide-loader-2",
+    timeout: 0 // Don't auto-dismiss
+  });
+
   try {
     const feeValue = formData.value.virtualConsultationFee
       ? Number(formData.value.virtualConsultationFee)
@@ -1185,7 +1246,10 @@ async function saveSettings() {
       sendgridApiKey: sanitize(formData.value.sendgridApiKey),
       emailFrom: sanitize(formData.value.emailFrom),
       emailFromName: sanitize(formData.value.emailFromName),
-      emailEnabled: formData.value.emailEnabled
+      emailEnabled: formData.value.emailEnabled,
+      heroMediaType: formData.value.heroMediaType || "image",
+      heroImageUrl: sanitize(formData.value.heroImageUrl),
+      heroVideoId: sanitize(formData.value.heroVideoId)
     };
 
     await request("/settings", {
@@ -1193,20 +1257,45 @@ async function saveSettings() {
       body: payload
     });
 
+    // Remove loading toast
+    toast.remove(loadingToast.id);
+
+    // Show success toast with hero media specific message if applicable
+    const hasHeroMedia = (payload.heroMediaType === 'image' && payload.heroImageUrl) || 
+                         (payload.heroMediaType === 'video' && payload.heroVideoId);
+    
     toast.add({
       title: t('clinicSettings.toasts.saveSuccess.title'),
-      description: t('clinicSettings.toasts.saveSuccess.description'),
+      description: hasHeroMedia 
+        ? t('clinicSettings.toasts.saveSuccessWithHeroMedia.description')
+        : t('clinicSettings.toasts.saveSuccess.description'),
       color: "green",
-      icon: "i-lucide-check-circle"
+      icon: "i-lucide-check-circle",
+      timeout: 5000
     });
 
     await refresh();
   } catch (err: any) {
+    // Remove loading toast
+    if (loadingToast) {
+      toast.remove(loadingToast.id);
+    }
+
+    // Determine if it's a hero media specific error
+    const errorMessage = err?.data?.message ?? err?.message ?? t('clinicSettings.toasts.saveError.description');
+    const isHeroMediaError = errorMessage.toLowerCase().includes('hero') || 
+                             errorMessage.toLowerCase().includes('media') ||
+                             errorMessage.toLowerCase().includes('youtube') ||
+                             errorMessage.toLowerCase().includes('image');
+
     toast.add({
-      title: t('clinicSettings.toasts.saveError.title'),
-      description: err?.data?.message ?? err?.message ?? t('clinicSettings.toasts.saveError.description'),
+      title: isHeroMediaError 
+        ? t('clinicSettings.toasts.heroMediaSaveError.title')
+        : t('clinicSettings.toasts.saveError.title'),
+      description: errorMessage,
       color: "red",
-      icon: "i-lucide-alert-circle"
+      icon: "i-lucide-alert-circle",
+      timeout: 8000
     });
   } finally {
     saving.value = false;
@@ -1232,6 +1321,12 @@ function handleLogoError(error: string) {
     color: "red",
     icon: "i-lucide-alert-circle"
   });
+}
+
+function updateHeroMedia(value: { mediaType: string; imageUrl?: string | null; videoId?: string | null }) {
+  formData.value.heroMediaType = value.mediaType || 'image';
+  formData.value.heroImageUrl = value.imageUrl || '';
+  formData.value.heroVideoId = value.videoId || '';
 }
 
 function resetForm() {
@@ -1278,7 +1373,10 @@ function resetForm() {
     sendgridApiKey: current.sendgridApiKey || "",
     emailFrom: current.emailFrom || "",
     emailFromName: current.emailFromName || "",
-    emailEnabled: current.emailEnabled ?? true
+    emailEnabled: current.emailEnabled ?? true,
+    heroMediaType: current.heroMediaType || "image",
+    heroImageUrl: current.heroImageUrl || "",
+    heroVideoId: current.heroVideoId || ""
   };
 }
 </script>

@@ -1,0 +1,276 @@
+/**
+ * Barber Theme Styles
+ * Modern barbershop design with bold, masculine styling
+ * Color palette: Dark neutrals with amber/gold accents
+ */
+
+/* Theme Container */
+.barber-theme {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  background-color: #171717; /* neutral-900 */
+  color: #d4d4d4; /* neutral-300 */
+}
+
+/* Header Styles */
+.barber-header {
+  background: linear-gradient(to bottom, #0a0a0a, #171717);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.barber-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 0.25rem;
+  border: 2px solid #f59e0b; /* amber-500 */
+}
+
+.barber-name {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.barber-name:hover {
+  transform: translateY(-1px);
+}
+
+.barber-cta-button {
+  position: relative;
+  overflow: hidden;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.barber-cta-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.barber-cta-button:hover::before {
+  left: 100%;
+}
+
+/* Navigation Styles */
+.barber-navigation {
+  background: #171717; /* neutral-900 */
+  box-shadow: inset 0 1px 0 rgba(245, 158, 11, 0.1);
+}
+
+.barber-nav-link {
+  position: relative;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.barber-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: #f59e0b; /* amber-500 */
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.barber-nav-link:hover::after {
+  width: 80%;
+}
+
+/* Main Content Styles */
+.barber-theme main {
+  background: linear-gradient(to bottom, #171717, #0a0a0a);
+  min-height: 60vh;
+}
+
+/* Footer Styles */
+.barber-footer {
+  background: linear-gradient(to top, #0a0a0a, #171717);
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.barber-footer-section h3 {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.barber-footer-section h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50%;
+  height: 2px;
+  background: #f59e0b; /* amber-500 */
+}
+
+/* Custom Scrollbar */
+.barber-theme ::-webkit-scrollbar {
+  width: 12px;
+}
+
+.barber-theme ::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.barber-theme ::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 6px;
+  border: 2px solid #0a0a0a;
+}
+
+.barber-theme ::-webkit-scrollbar-thumb:hover {
+  background: #f59e0b;
+}
+
+/* Typography Enhancements */
+.barber-theme h1,
+.barber-theme h2,
+.barber-theme h3,
+.barber-theme h4,
+.barber-theme h5,
+.barber-theme h6 {
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fafafa; /* neutral-50 */
+}
+
+.barber-theme a {
+  transition: color 0.2s ease;
+}
+
+/* Accent Elements */
+.barber-theme .accent-border {
+  border-color: #f59e0b; /* amber-500 */
+}
+
+.barber-theme .accent-bg {
+  background-color: #f59e0b; /* amber-500 */
+}
+
+.barber-theme .accent-text {
+  color: #f59e0b; /* amber-500 */
+}
+
+/* Card Styles */
+.barber-theme .card {
+  background: #262626; /* neutral-800 */
+  border: 1px solid #404040; /* neutral-700 */
+  border-radius: 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.barber-theme .card:hover {
+  border-color: #f59e0b; /* amber-500 */
+  box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Button Styles */
+.barber-theme .btn-primary {
+  background: #f59e0b; /* amber-500 */
+  color: #0a0a0a;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 2px solid #f59e0b;
+  border-radius: 0;
+  padding: 0.75rem 2rem;
+  transition: all 0.2s ease;
+}
+
+.barber-theme .btn-primary:hover {
+  background: #fbbf24; /* amber-400 */
+  border-color: #fbbf24;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+}
+
+.barber-theme .btn-secondary {
+  background: transparent;
+  color: #f59e0b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 2px solid #f59e0b;
+  border-radius: 0;
+  padding: 0.75rem 2rem;
+  transition: all 0.2s ease;
+}
+
+.barber-theme .btn-secondary:hover {
+  background: #f59e0b;
+  color: #0a0a0a;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .barber-header {
+    padding: 0.5rem 0;
+  }
+  
+  .barber-name span:first-child {
+    font-size: 1.5rem;
+  }
+  
+  .barber-navigation {
+    overflow-x: auto;
+  }
+  
+  .barber-nav-link {
+    font-size: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+  
+  .barber-footer {
+    text-align: center;
+  }
+  
+  .barber-footer-section {
+    margin-bottom: 2rem;
+  }
+}
+
+/* Animation Classes */
+@keyframes barber-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.barber-theme .animate-fade-in {
+  animation: barber-fade-in 0.5s ease-out;
+}
+
+/* Stripe Pattern (Optional decorative element) */
+.barber-stripe {
+  background: repeating-linear-gradient(
+    45deg,
+    #f59e0b,
+    #f59e0b 10px,
+    #0a0a0a 10px,
+    #0a0a0a 20px
+  );
+  height: 4px;
+}

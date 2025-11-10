@@ -113,7 +113,9 @@ public class SecurityConfig {
                         .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'"))
                         .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
                         .xssProtection(Customizer.withDefaults())
-                        .frameOptions(frame -> frame.deny()))
+                        .frameOptions(frame -> frame.deny())
+                        // Disable default cache control to allow custom caching for specific endpoints
+                        .cacheControl(cache -> cache.disable()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/public/services/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/public/doctors/**").permitAll()

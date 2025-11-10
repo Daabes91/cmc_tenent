@@ -47,6 +47,11 @@
         "title": "فريق خبير",
         "description": "أخصائيو أسنان معتمدون"
       }
+    },
+    "media": {
+      "videoTitle": "فيديو خلفية قسم البطل",
+      "defaultImageAlt": "صورة قسم البطل الافتراضية",
+      "loadingVideo": "جارٍ تحميل الفيديو..."
     }
   },
   "services": {

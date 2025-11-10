@@ -7,6 +7,7 @@ import com.clinic.modules.core.settings.ClinicSettingsEntity;
 import com.clinic.modules.core.settings.ClinicSettingsRepository;
 import com.clinic.modules.core.tenant.TenantContextHolder;
 import com.clinic.modules.core.tenant.TenantService;
+import com.clinic.util.YouTubeUrlValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -155,6 +156,25 @@ public class ClinicSettingsService {
             settings.setCloudflareApiToken(normalize(request.cloudflareApiToken()));
         }
 
+        // Update hero media settings
+        if (request.heroMediaType() != null) {
+            String mediaType = normalize(request.heroMediaType());
+            if (mediaType != null && (mediaType.equals("image") || mediaType.equals("video"))) {
+                settings.setHeroMediaType(mediaType);
+            }
+        }
+        if (request.heroImageUrl() != null) {
+            settings.setHeroImageUrl(normalize(request.heroImageUrl()));
+        }
+        if (request.heroVideoId() != null) {
+            String videoId = normalize(request.heroVideoId());
+            // Validate if it's a URL and extract video ID, or use as-is if already an ID
+            if (videoId != null && YouTubeUrlValidator.isValidYouTubeUrl(videoId)) {
+                videoId = YouTubeUrlValidator.extractVideoId(videoId);
+            }
+            settings.setHeroVideoId(videoId);
+        }
+
         ClinicSettingsEntity saved = settingsRepository.save(settings);
         return mapToResponse(saved);
     }
@@ -246,7 +266,10 @@ public class ClinicSettingsService {
                 resolvedSendgridKey,
                 resolvedEmailFrom,
                 resolvedEmailFromName,
-                resolvedEmailEnabled
+                resolvedEmailEnabled,
+                entity.getHeroMediaType(),
+                entity.getHeroImageUrl(),
+                entity.getHeroVideoId()
         );
     }
 

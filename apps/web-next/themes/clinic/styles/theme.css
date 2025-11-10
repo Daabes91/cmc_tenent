@@ -1,0 +1,221 @@
+/**
+ * Clinic Theme Styles
+ * Professional medical clinic design with emphasis on trust, cleanliness, and accessibility
+ */
+
+/* Theme Variables */
+.clinic-theme {
+  --clinic-primary: #2563eb;
+  --clinic-primary-dark: #1d4ed8;
+  --clinic-secondary: #10b981;
+  --clinic-accent: #f59e0b;
+  --clinic-text: #1f2937;
+  --clinic-text-light: #6b7280;
+  --clinic-bg: #f9fafb;
+  --clinic-white: #ffffff;
+  --clinic-border: #e5e7eb;
+}
+
+/* Header Styles */
+.clinic-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--clinic-white);
+}
+
+.clinic-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.clinic-name {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.clinic-name:hover {
+  opacity: 0.8;
+}
+
+.clinic-cta-button {
+  position: relative;
+  overflow: hidden;
+  transform: translateY(0);
+  transition: all 0.2s ease;
+}
+
+.clinic-cta-button:hover {
+  transform: translateY(-2px);
+}
+
+.clinic-cta-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.clinic-cta-button:hover::before {
+  left: 100%;
+}
+
+/* Navigation Styles */
+.clinic-navigation {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.clinic-nav-link {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+.clinic-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: white;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.clinic-nav-link:hover::after {
+  width: 80%;
+}
+
+/* Main Content Styles */
+.clinic-theme main {
+  background: var(--clinic-bg);
+  min-height: calc(100vh - 400px);
+}
+
+/* Footer Styles */
+.clinic-footer {
+  background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+  border-top: 4px solid var(--clinic-primary);
+}
+
+.clinic-footer a {
+  transition: color 0.2s ease;
+}
+
+.clinic-footer h3 {
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.clinic-footer h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: var(--clinic-primary);
+  border-radius: 2px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .clinic-header {
+    position: relative;
+  }
+  
+  .clinic-logo-container {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .clinic-name span:first-child {
+    font-size: 1.25rem;
+  }
+  
+  .clinic-navigation {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .clinic-navigation > div {
+    justify-content: flex-start;
+    min-width: max-content;
+  }
+  
+  .clinic-nav-link {
+    white-space: nowrap;
+  }
+}
+
+/* Accessibility Enhancements */
+.clinic-theme *:focus-visible {
+  outline: 2px solid var(--clinic-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Print Styles */
+@media print {
+  .clinic-header,
+  .clinic-navigation,
+  .clinic-footer {
+    display: none;
+  }
+  
+  .clinic-theme main {
+    padding: 0;
+    background: white;
+  }
+}
+
+/* Animation for smooth transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.clinic-theme main > div {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Custom scrollbar for webkit browsers */
+.clinic-theme ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.clinic-theme ::-webkit-scrollbar-track {
+  background: var(--clinic-bg);
+}
+
+.clinic-theme ::-webkit-scrollbar-thumb {
+  background: var(--clinic-primary);
+  border-radius: 4px;
+}
+
+.clinic-theme ::-webkit-scrollbar-thumb:hover {
+  background: var(--clinic-primary-dark);
+}

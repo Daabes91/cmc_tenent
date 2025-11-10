@@ -18,7 +18,7 @@ ENV NODE_OPTIONS=--max-old-space-size=4096
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY apps/web-next .
-RUN corepack enable && pnpm install --no-frozen-lockfile && pnpm run build
+RUN corepack enable && pnpm install --no-frozen-lockfile && npx prisma generate && pnpm run build
 
 FROM node:20-alpine AS runner
 ARG NEXT_PUBLIC_API_URL
@@ -30,6 +30,7 @@ ENV NODE_ENV=production
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
 EXPOSE 3001
 CMD ["npm", "run", "start"]

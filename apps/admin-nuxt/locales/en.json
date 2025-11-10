@@ -3221,6 +3221,10 @@
       "email": {
         "title": "Email Delivery",
         "subtitle": "Configure SendGrid credentials and sender identity"
+      },
+      "heroMedia": {
+        "title": "Hero Media",
+        "subtitle": "Customize the hero section background on your landing page"
       }
     },
     "form": {
@@ -3451,9 +3455,114 @@
         "title": "Upload failed",
         "description": "Unable to upload logo. Please try again."
       },
+      "heroImageSuccess": {
+        "title": "Hero image uploaded",
+        "description": "Your hero section image has been uploaded successfully"
+      },
+      "heroImageError": {
+        "title": "Upload failed",
+        "description": "Unable to upload hero image. Please try again."
+      },
       "emailValidation": {
         "title": "Complete email settings",
         "description": "Provide an API key, sender email, and sender name before enabling transactional emails."
+      },
+      "heroMediaValidation": {
+        "title": "Invalid hero media configuration",
+        "description": "Please enter a valid YouTube URL or switch to image mode."
+      },
+      "saving": {
+        "title": "Saving settings...",
+        "description": "Please wait while we update your clinic settings"
+      },
+      "saveSuccessWithHeroMedia": {
+        "description": "Your clinic settings and hero media have been updated successfully"
+      },
+      "heroMediaSaveError": {
+        "title": "Hero media save failed",
+        "description": "Unable to save hero media configuration. Please check your settings and try again."
+      }
+    }
+  },
+  "heroMedia": {
+    "config": {
+      "title": "Hero Media Configuration",
+      "description": "Customize the background media displayed in the hero section of your landing page",
+      "mediaType": {
+        "label": "Media Type",
+        "hint": "Choose between a static image or a YouTube video for your hero section",
+        "options": {
+          "image": "Image",
+          "video": "Video"
+        }
+      },
+      "image": {
+        "label": "Hero Image",
+        "hint": "Upload a high-quality image to display in the hero section",
+        "altText": "Hero section background image",
+        "uploading": "Uploading image..."
+      },
+      "video": {
+        "label": "YouTube Video URL",
+        "hint": "Enter a YouTube video URL to embed as the hero background",
+        "placeholder": "https://www.youtube.com/watch?v=...",
+        "errors": {
+          "invalidUrl": "Please enter a valid YouTube URL",
+          "validationFailed": "Failed to validate YouTube URL"
+        },
+        "examples": {
+          "title": "Supported URL Formats",
+          "description": "You can use any of these YouTube URL formats:"
+        }
+      },
+      "actions": {
+        "clear": "Clear Media",
+        "clearShort": "Clear"
+      }
+    },
+    "preview": {
+      "title": "Preview",
+      "description": "See how your hero media will appear on the landing page",
+      "videoTitle": "Hero background video",
+      "imageAlt": "Hero section image",
+      "defaultImageAlt": "Default hero section image",
+      "type": {
+        "image": "Image",
+        "video": "Video"
+      },
+      "status": {
+        "configured": "Configured",
+        "default": "Using default"
+      },
+      "fallback": {
+        "title": "No custom media configured",
+        "description": "Default image will be displayed"
+      },
+      "error": {
+        "title": "Failed to load media",
+        "description": "Please check your configuration and try again"
+      }
+    },
+    "toasts": {
+      "imageUploadSuccess": {
+        "title": "Image Uploaded",
+        "description": "Hero image has been uploaded successfully"
+      },
+      "imageUploadError": {
+        "title": "Upload Failed",
+        "description": "Failed to upload hero image. Please try again."
+      },
+      "youtubeUrlValid": {
+        "title": "Valid YouTube URL",
+        "description": "YouTube video has been validated successfully"
+      },
+      "invalidYoutubeUrl": {
+        "title": "Invalid YouTube URL",
+        "description": "Please enter a valid YouTube video URL"
+      },
+      "mediaCleared": {
+        "title": "Media Cleared",
+        "description": "Hero media configuration has been reset"
       }
     }
   },

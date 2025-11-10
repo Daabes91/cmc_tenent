@@ -46,13 +46,30 @@ public class CorsConfig {
     }
 
     private void applyOrigins(CorsConfiguration configuration, List<String> origins) {
+        // Add explicitly configured origins
         configuration.setAllowedOrigins(origins);
         configuration.setAllowedOriginPatterns(origins);
+        
+        // Development: Allow localhost with any port
         configuration.addAllowedOriginPattern("http://localhost:*");
         configuration.addAllowedOriginPattern("http://127.0.0.1:*");
-        // Allow subdomain-based origins for multi-tenant routing
-        // Matches: http://tenant-a.localhost:3001, http://daabes.localhost:3001, etc.
+        configuration.addAllowedOriginPattern("https://localhost:*");
+        configuration.addAllowedOriginPattern("https://127.0.0.1:*");
+        
+        // Multi-tenant: Allow any subdomain on localhost (for development)
+        // Matches: http://tenant-a.localhost:3001, http://clinica.localhost:3001, etc.
         configuration.addAllowedOriginPattern("http://*.localhost:*");
         configuration.addAllowedOriginPattern("https://*.localhost:*");
+        
+        // Multi-tenant: Allow any subdomain on configured base domain (for production)
+        // This will match tenant subdomains like: https://tenant-a.yourdomain.com
+        String baseDomain = securityProperties.cors().baseDomain();
+        if (baseDomain != null && !baseDomain.isEmpty()) {
+            configuration.addAllowedOriginPattern("http://*." + baseDomain);
+            configuration.addAllowedOriginPattern("https://*." + baseDomain);
+            // Also allow the base domain itself
+            configuration.addAllowedOriginPattern("http://" + baseDomain);
+            configuration.addAllowedOriginPattern("https://" + baseDomain);
+        }
     }
 }

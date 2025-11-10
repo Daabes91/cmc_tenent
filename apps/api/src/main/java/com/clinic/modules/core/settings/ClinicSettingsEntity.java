@@ -143,6 +143,16 @@ public class ClinicSettingsEntity {
     @Column(name = "paypal_environment", length = 20)
     private String paypalEnvironment;
 
+    // Hero Media Configuration
+    @Column(name = "hero_media_type", length = 10)
+    private String heroMediaType = "image";
+
+    @Column(name = "hero_image_url", columnDefinition = "TEXT")
+    private String heroImageUrl;
+
+    @Column(name = "hero_video_id", length = 20)
+    private String heroVideoId;
+
     @Column(name = "updated_at")
     private Instant updatedAt;
 
@@ -488,5 +498,29 @@ public class ClinicSettingsEntity {
 
     public void setPaypalEnvironment(String paypalEnvironment) {
         this.paypalEnvironment = paypalEnvironment;
+    }
+
+    public String getHeroMediaType() {
+        return heroMediaType;
+    }
+
+    public void setHeroMediaType(String heroMediaType) {
+        this.heroMediaType = heroMediaType;
+    }
+
+    public String getHeroImageUrl() {
+        return heroImageUrl;
+    }
+
+    public void setHeroImageUrl(String heroImageUrl) {
+        this.heroImageUrl = heroImageUrl;
+    }
+
+    public String getHeroVideoId() {
+        return heroVideoId;
+    }
+
+    public void setHeroVideoId(String heroVideoId) {
+        this.heroVideoId = heroVideoId;
     }
 }

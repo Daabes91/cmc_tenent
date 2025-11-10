@@ -234,6 +234,16 @@ export interface ClinicSettings {
     linkedin: string;
   };
   virtualConsultationMeetingLink?: string | null;
+  heroMediaType?: 'image' | 'video';
+  heroImageUrl?: string | null;
+  heroVideoId?: string | null;
+}
+
+// Hero Media types
+export interface HeroMedia {
+  type: 'image' | 'video';
+  imageUrl?: string;
+  videoId?: string;
 }
 
 // Blog types

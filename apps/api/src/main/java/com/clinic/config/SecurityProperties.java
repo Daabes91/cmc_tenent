@@ -89,10 +89,11 @@ public class SecurityProperties {
 
     public record Cors(
             List<String> publicOrigins,
-            List<String> adminOrigins
+            List<String> adminOrigins,
+            String baseDomain
     ) {
         public Cors() {
-            this(List.of("http://localhost:3000"), List.of("http://localhost:3001"));
+            this(List.of("http://localhost:3000"), List.of("http://localhost:3001"), "");
         }
     }
 

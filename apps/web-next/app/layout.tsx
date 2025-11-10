@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "@/themes/default/styles/theme.css";
+import "@/themes/clinic/styles/theme.css";
+import "@/themes/barber/styles/theme.css";
 import { headers } from "next/headers";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { DynamicHead } from "@/components/DynamicHead";
