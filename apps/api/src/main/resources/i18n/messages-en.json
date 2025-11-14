@@ -1,0 +1,657 @@
+{
+  "common": {
+    "clinicName": "Qadri's Clinic",
+    "tagline": "Dental Excellence",
+    "loading": "Loading...",
+    "loadingHours": "Loading hours...",
+    "languageEnglish": "English",
+    "languageArabic": "Arabic"
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "doctors": "Doctors",
+    "blog": "Blog",
+    "bookNow": "Book Now",
+    "signIn": "Sign In",
+    "getStarted": "Get Started",
+    "dashboard": "Dashboard",
+    "signOut": "Sign Out",
+    "myDashboard": "My Dashboard",
+    "bookAppointment": "Book Appointment",
+    "language": {
+      "label": "Language",
+      "english": "English",
+      "arabic": "العربية"
+    }
+  },
+  "hero": {
+    "badge": "Trusted Dental Excellence",
+    "title": "Advanced Dental Care & Cosmetic Dentistry at",
+    "subtitle": "Book preventive checkups, orthodontics, implants, teeth whitening, and virtual consultations with our expert dental team.",
+    "highlightsHeading": "What makes our clinic stand out",
+    "bookAppointment": "Book Appointment",
+    "ourServices": "Our Services",
+    "stats": {
+      "yearsExperience": "Years Experience",
+      "happyPatients": "Happy Patients",
+      "satisfactionRate": "Satisfaction Rate"
+    },
+    "imageAlt": "Qadri's Clinic - Modern Dental Care",
+    "features": {
+      "support": {
+        "title": "24/7 Support",
+        "description": "Emergency dental care available"
+      },
+      "team": {
+        "title": "Expert Team",
+        "description": "Certified dental specialists"
+      }
+    },
+    "media": {
+      "videoTitle": "Hero background video",
+      "defaultImageAlt": "Default hero section image",
+      "loadingVideo": "Loading video..."
+    }
+  },
+  "services": {
+    "title": "Comprehensive Dental Services",
+    "subtitle": "From preventive care to advanced cosmetic procedures, we offer a full range of dental services tailored to your needs.",
+    "exploreAll": "Explore All Services",
+    "empty": "No services available at the moment."
+  },
+  "servicesPage": {
+    "loading": "Loading services...",
+    "errors": {
+      "load": "Failed to load services"
+    },
+    "header": {
+      "title": "Our Dental Services",
+      "subtitle": "Comprehensive dental care services for you and your family at Qadri's Clinic"
+    },
+    "empty": {
+      "title": "No services available at the moment.",
+      "description": "Please check back later or contact us for more information."
+    },
+    "actions": {
+      "bookService": "Book This Service"
+    },
+    "cta": {
+      "title": "Ready to Schedule Your Visit?",
+      "subtitle": "Our experienced team is here to provide you with the best dental care. Book your appointment today.",
+      "button": "Book Appointment"
+    }
+  },
+  "blogPage": {
+    "loading": "Loading blog posts...",
+    "errors": {
+      "load": "Failed to load blog posts"
+    },
+    "header": {
+      "badge": "Health & Wellness Blog",
+      "title": "Our Blog",
+      "subtitle": "Expert insights, tips, and updates about dental health and wellness"
+    },
+    "empty": {
+      "title": "No blog posts yet",
+      "description": "Check back soon for new articles and updates."
+    },
+    "cards": {
+      "readMore": "Read more"
+    }
+  },
+  "blogDetail": {
+    "loading": "Loading blog post...",
+    "errors": {
+      "load": "Failed to load blog post",
+      "notFound": "Blog post not found"
+    },
+    "back": "Back to blog",
+    "meta": {
+      "views": "{count} views"
+    },
+    "share": {
+      "title": "Share this article",
+      "subtitle": "Help others discover this content",
+      "copy": "Copy link",
+      "copied": "Link copied to clipboard!"
+    },
+    "cta": {
+      "title": "Ready to take the next step?",
+      "subtitle": "Book an appointment with our expert team today",
+      "button": "Book Appointment"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to manage your appointments and access your dental records",
+      "sessionExpired": "Your session has expired. Please sign in again to continue.",
+      "errors": {
+        "generic": "Login failed. Please check your credentials."
+      },
+      "form": {
+        "emailLabel": "Email Address",
+        "emailPlaceholder": "your@email.com",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Enter your password"
+      },
+      "buttons": {
+        "signIn": "Sign In",
+        "signingIn": "Signing in..."
+      },
+      "footer": {
+        "prompt": "Don't have an account?",
+        "link": "Sign up for free"
+      },
+      "hero": {
+        "title": "Your Smile, Our Priority",
+        "subtitle": "Access world-class dental care with convenient online booking and personalized treatment plans.",
+        "features": {
+          "experts": "Expert Dentists",
+          "support": "24/7 Support"
+        },
+        "stat": {
+          "value": "5K+",
+          "label": "Happy Patients"
+        }
+      }
+    },
+    "signup": {
+      "title": "Create Account",
+      "subtitle": "Join Qadri's Clinic to book appointments and manage your dental care",
+      "errors": {
+        "generic": "Signup failed. Please try again.",
+        "invalidPhone": "Please enter a valid phone number.",
+        "tooYoung": "You must be at least 14 years old to create an account."
+      },
+      "form": {
+        "firstNameLabel": "First Name",
+        "firstNamePlaceholder": "John",
+        "lastNameLabel": "Last Name",
+        "lastNamePlaceholder": "Doe",
+        "emailLabel": "Email Address",
+        "emailPlaceholder": "your@email.com",
+        "phoneLabel": "Phone Number",
+        "phonePlaceholder": "7 0000 0000",
+        "countryCodeLabel": "Country Code",
+        "countryOptions": {
+          "JO": "🇯🇴 +962",
+          "SA": "🇸🇦 +966",
+          "AE": "🇦🇪 +971",
+          "US": "🇺🇸 +1"
+        },
+        "dateOfBirthLabel": "Date of birth",
+        "dateOfBirthOptional": "Optional – helps us personalise reminders",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Min. 8 characters"
+      },
+      "passwordHint": "Must be at least 8 characters",
+      "buttons": {
+        "create": "Create Account",
+        "creating": "Creating your account..."
+      },
+      "terms": "By creating an account, you agree to our Terms of Service and Privacy Policy",
+      "footer": {
+        "prompt": "Already have an account?",
+        "link": "Sign in"
+      },
+      "hero": {
+        "title": "Join Thousands of Happy Patients",
+        "subtitle": "Experience seamless dental care with our easy-to-use platform. Book appointments, track your dental health, and more.",
+        "benefits": {
+          "booking": "Quick & Easy Online Booking",
+          "experts": "Access to Expert Dentists",
+          "records": "Digital Health Records"
+        },
+        "stat": {
+          "value": "98%",
+          "label": "Patient Satisfaction"
+        }
+      }
+    }
+  },
+  "patientDashboard": {
+    "loading": "Loading dashboard...",
+    "header": {
+      "welcome": "Welcome back, {name}! 👋",
+      "subtitle": "Here's your health overview",
+      "newAppointment": "New Appointment"
+    },
+    "stats": {
+      "upcoming": {
+        "title": "Upcoming",
+        "caption": "Appointments"
+      },
+      "active": {
+        "title": "Active",
+        "caption": "Treatments"
+      },
+      "completed": {
+        "title": "Completed",
+        "caption": "Visits"
+      }
+    },
+    "appointments": {
+      "title": "Upcoming Appointments",
+      "viewAll": "View All",
+      "emptyTitle": "No appointments yet",
+      "emptyCta": "Book Your First Visit"
+    },
+    "treatmentPlans": {
+      "title": "Active Treatment Plans",
+      "emptyTitle": "No active treatment plans",
+      "emptySubtitle": "Your personalized care plans will appear here once available."
+    },
+    "profile": {
+      "title": "Profile",
+      "editLabel": "Edit Profile",
+      "form": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "phone": "Phone",
+        "dateOfBirth": "Date of birth",
+        "dateOfBirthHint": "Optional – used to personalise reminders"
+      },
+      "labels": {
+        "dateOfBirth": "Birthday: {date}"
+      },
+      "buttons": {
+        "save": "Save",
+        "saving": "Saving...",
+        "cancel": "Cancel"
+      },
+      "userFallback": "User"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "items": {
+        "appointments": {
+          "title": "Book Appointment",
+          "subtitle": "Schedule a visit"
+        },
+        "services": {
+          "title": "Our Services",
+          "subtitle": "Explore treatments"
+        },
+        "doctors": {
+          "title": "Our Doctors",
+          "subtitle": "Meet our team"
+        }
+      }
+    },
+    "contact": {
+      "title": "Need Help?",
+      "phone": "+962 7 0000 0000",
+      "email": "info@qadriclinic.com",
+      "hours": "9 AM - 8 PM"
+    },
+    "status": {
+      "appointments": {
+        "SCHEDULED": "Scheduled",
+        "CONFIRMED": "Confirmed",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "plans": {
+        "IN_PROGRESS": "In progress",
+        "PLANNED": "Planned",
+        "COMPLETED": "Completed"
+      }
+    },
+    "modes": {
+      "CLINIC_VISIT": "In-clinic",
+      "VIRTUAL_CONSULTATION": "Virtual"
+    },
+    "labels": {
+      "doctor": "Dr. {name}",
+      "date": "Date",
+      "time": "Time",
+      "visits": "{completed} / {planned} visits",
+      "total": "Total",
+      "paid": "Paid",
+      "balance": "Balance",
+      "progress": "Progress",
+      "nextVisit": "Next Visit"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "pageInfo": "Page {current} of {total}"
+    },
+    "errors": {
+      "appointments": "Failed to load appointments",
+      "treatmentPlans": "Failed to load treatment plans",
+      "profileLoad": "Failed to load profile",
+      "profileImage": "Failed to update profile image",
+      "profileUpdate": "Failed to update profile",
+      "invalidDob": "Please enter a birth date for patients aged 14 or older."
+    }
+  },
+  "patientAppointments": {
+    "title": "My Appointments",
+    "subtitle": "Review all of your visits and track their current status.",
+    "loading": "Loading your appointments...",
+    "errors": {
+      "load": "Failed to load appointments"
+    },
+    "empty": {
+      "title": "No appointments yet",
+      "description": "Once you book an appointment it will appear here."
+    },
+    "labels": {
+      "service": "Service",
+      "doctor": "Doctor",
+      "scheduled": "Scheduled for",
+      "booked": "Booked on",
+      "mode": "Visit type",
+      "id": "Appointment ID",
+      "notes": "Notes"
+    },
+    "actions": {
+      "back": "Back to dashboard",
+      "book": "Book appointment"
+    }
+  },
+  "booking": {
+    "title": "Book Your Appointment",
+    "subtitle": "Quick and easy booking in just a few steps",
+    "quickBooking": "Quick Booking",
+    "quickBookingDesc": "Book without creating an account",
+    "steps": {
+      "contact": "Contact & Service",
+      "doctor": "Choose Doctor",
+      "datetime": "Date & Time",
+      "confirm": "Confirm"
+    },
+    "stepOf": "Step {step} of {total}: {name}",
+    "fields": {
+      "guestName": "Your Name (Optional)",
+      "guestNamePlaceholder": "John Doe",
+      "guestEmail": "Email (Optional)",
+      "guestEmailPlaceholder": "john@example.com",
+      "phoneNumber": "Phone Number",
+      "phoneNumberPlaceholder": "+1234567890",
+      "selectService": "Select Service",
+      "service": "Service",
+      "selectServicePlaceholder": "Choose a service...",
+      "required": "*",
+      "selectDoctor": "Select Doctor",
+      "doctor": "Doctor",
+      "selectDoctorOptional": "Select Doctor (Optional)",
+      "anyDoctorOption": "Any available doctor",
+      "chooseDoctorOption": "Choose a doctor...",
+      "consultationType": "Consultation Type",
+      "inClinic": "In-Clinic",
+      "virtual": "Virtual",
+      "preferredDate": "Preferred Date",
+      "availableSlots": "Available Slots",
+      "bookingSummary": "Booking Summary",
+      "phoneLabel": "Phone",
+      "serviceLabel": "Service",
+      "doctorLabel": "Doctor",
+      "typeLabel": "Type",
+      "dateLabel": "Date",
+      "timeLabel": "Time",
+      "selectedSlot": "Selected Slot",
+      "amount": "Amount",
+      "additionalNotes": "Additional Notes (Optional)",
+      "additionalNotesPlaceholder": "Any specific concerns..."
+    },
+    "buttons": {
+      "next": "Next",
+      "back": "Back",
+      "confirm": "Confirm Booking",
+      "viewAppointments": "View appointments",
+      "backToHome": "Back to home",
+      "bookAnother": "Book Another",
+      "loading": "Booking..."
+    },
+    "status": {
+      "confirmedTitle": "Booking Confirmed!",
+      "confirmedSubtitle": "Your appointment has been successfully scheduled.",
+      "welcomeBack": "Welcome, {name}",
+      "patientFallback": "Patient",
+      "scheduleAppointment": "Schedule your appointment",
+      "loading": "Preparing your checkout..."
+    },
+    "errors": {
+      "phoneRequired": "Phone number is required for guest bookings",
+      "loadSlots": "Failed to load slots",
+      "submit": "Failed to create booking"
+    },
+    "payment": {
+      "paypal": {
+        "configurationError": "Payment configuration is incomplete. Please contact support."
+      }
+    }
+  },
+  "whyChoose": {
+    "title": "Why Choose Qadri's Clinic?",
+    "subtitle": "We combine cutting-edge technology with compassionate care to deliver exceptional dental experiences.",
+    "features": {
+      "experts": {
+        "title": "Expert Professionals",
+        "description": "Highly qualified dentists with years of specialized experience"
+      },
+      "technology": {
+        "title": "Advanced Technology",
+        "description": "State-of-the-art equipment for precise diagnosis and treatment"
+      },
+      "comfort": {
+        "title": "Patient Comfort",
+        "description": "Relaxing environment designed to ease dental anxiety"
+      },
+      "affordable": {
+        "title": "Affordable Care",
+        "description": "Flexible payment plans and insurance options available"
+      }
+    }
+  },
+  "insurance": {
+    "title": "Accepted Insurance Partners",
+    "subtitle": "We work with leading insurance providers to make quality dental care accessible and affordable for you.",
+    "empty": {
+      "title": "Insurance Information Coming Soon",
+      "description": "We're updating our insurance partner information. Please contact us for current coverage details."
+    }
+  },
+  "cta": {
+    "title": "Ready for Your Perfect Smile?",
+    "subtitle": "Book your appointment today and experience the difference of quality dental care at Qadri's Clinic.",
+    "scheduleAppointment": "Schedule Appointment",
+    "meetDentists": "Meet Our Dentists"
+  },
+  "footer": {
+    "description": "Providing trusted dental care with a commitment to excellence. Experience seamless online booking and personalized treatment.",
+    "quickLinks": "Quick Links",
+    "contactUs": "Contact Us",
+    "officeHours": "Office Hours",
+    "copyright": "© {year} {clinic}. All rights reserved.",
+    "links": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "cookies": "Cookie Policy"
+    },
+    "labels": {
+      "phone": "Phone",
+      "email": "Email",
+      "location": "Location"
+    },
+    "noHours": "Hours not available"
+  },
+  "doctors": {
+    "list": {
+      "meta": {
+        "title": "Doctors – Clinic Admin"
+      },
+      "overview": {
+        "badge": "Care team directory",
+        "title": "Doctor roster overview",
+        "subtitle": "Track specialties, supported services, and the languages your providers speak — all in one place."
+      },
+      "actions": {
+        "add": "Add doctor",
+        "refresh": "Refresh data",
+        "manage": "Manage",
+        "edit": "Edit",
+        "remove": "Remove",
+        "create": "Create doctor",
+        "reset": "Reset filters",
+        "clear": "Clear filters",
+        "viewSchedule": "View schedule",
+        "editProfile": "Edit profile",
+        "delete": "Delete",
+        "bookWith": "Book with Dr. {name}",
+        "viewProfile": "View Profile"
+      },
+      "filters": {
+        "searchPlaceholder": "Search doctors, services, or languages",
+        "cardsView": "Cards",
+        "tableView": "Table",
+        "specialty": "Specialty",
+        "language": "Language",
+        "matchCount": "{count, plural, one {# match found} other {# matches found}}",
+        "activeCount": "{count, plural, one {# active filter} other {# active filters}}",
+        "clear": "Clear filters"
+      },
+      "metrics": {
+        "totalDoctors": {
+          "label": "Total doctors",
+          "caption": "Active profiles"
+        },
+        "specialties": {
+          "label": "Specialties",
+          "caption": "Distinct areas of care"
+        },
+        "services": {
+          "label": "Services covered",
+          "caption": "Clinic offerings supported"
+        }
+      },
+      "directory": {
+        "title": "Doctors directory",
+        "subtitle": "Profiles kept in sync with appointments and services"
+      },
+      "empty": {
+        "title": "No doctors match the current filters",
+        "subtitle": "Adjust your search terms or add a new doctor to the roster.",
+        "reset": "Reset filters",
+        "create": "Create doctor"
+      },
+      "labels": {
+        "specialtyNotSet": "Specialty not set",
+        "languagesPending": "Languages pending",
+        "addedOn": "Added {date}",
+        "serviceCount": "{count, plural, one {# service} other {# services}}",
+        "moreServices": "+{count} more",
+        "noEmail": "No email set"
+      },
+      "delete": {
+        "title": "Delete doctor",
+        "subtitle": "This action cannot be undone",
+        "prompt": "Are you sure you want to remove {name}? This will disconnect them from all services.",
+        "impact": "Removing a doctor hides them from bookings and availability screens.",
+        "confirmAction": "Delete doctor",
+        "unable": "Unable to delete doctor"
+      },
+      "status": {
+        "loading": "Loading our team...",
+        "emptyTitle": "No doctors available at the moment.",
+        "emptySubtitle": "Please check back later or contact us for more information."
+      },
+      "hero": {
+        "title": "Meet Our Expert Dentists",
+        "subtitle": "Experienced dental professionals dedicated to your oral health at Qadri's Clinic"
+      },
+      "featuresSection": {
+        "title": "Why Choose Our Team?",
+        "subtitle": "Our dentists bring expertise, compassion, and cutting-edge techniques to every appointment.",
+        "items": {
+          "certified": {
+            "title": "Certified Professionals",
+            "description": "Highly qualified with advanced certifications and continuous training"
+          },
+          "patientCare": {
+            "title": "Patient-Centered Care",
+            "description": "Compassionate approach focused on your comfort and wellbeing"
+          },
+          "modernTech": {
+            "title": "Modern Techniques",
+            "description": "Latest technology and procedures for optimal results"
+          }
+        }
+      },
+      "cta": {
+        "title": "Ready to Meet Your Dentist?",
+        "subtitle": "Schedule an appointment with one of our experienced dental professionals today.",
+        "button": "Book Your Appointment"
+      }
+    },
+    "detail": {
+      "loading": "Loading doctor information...",
+      "backToDoctors": "Back to Doctors",
+      "about": "About",
+      "specializations": "Specializations",
+      "languages": "Languages Spoken",
+      "bookAppointment": "Book Appointment with Dr. {name}",
+      "highlights": {
+        "title": "Professional Excellence",
+        "subtitle": "Committed to providing the highest quality dental care with modern techniques and personalized attention.",
+        "items": {
+          "certified": {
+            "title": "Board Certified",
+            "description": "Fully licensed and certified dental professional"
+          },
+          "patientCare": {
+            "title": "Compassionate Care",
+            "description": "Dedicated to patient comfort and satisfaction"
+          },
+          "modernTech": {
+            "title": "Advanced Technology",
+            "description": "Using the latest dental equipment and techniques"
+          }
+        }
+      },
+      "cta": {
+        "title": "Ready to Schedule with Dr. {name}?",
+        "subtitle": "Experience personalized dental care with our expert team.",
+        "scheduleAppointment": "Schedule Appointment",
+        "viewAllDoctors": "View All Doctors"
+      },
+      "errors": {
+        "invalidId": "Invalid doctor ID",
+        "notFound": "Doctor not found"
+      }
+    }
+  },
+  "notFound": {
+    "title": "This page is no longer available",
+    "description": "The link you followed may be broken or the page has moved. Use the helpful links below to keep exploring our dental services.",
+    "links": {
+      "home": {
+        "label": "Visit the homepage",
+        "description": "Return to our multilingual landing page"
+      },
+      "services": {
+        "label": "Explore dental services",
+        "description": "Review treatments, orthodontics, and cosmetic care"
+      },
+      "appointments": {
+        "label": "Manage appointments",
+        "description": "View or schedule visits with our dentists"
+      }
+    },
+    "cta": {
+      "title": "Still need assistance?",
+      "description": "Our care coordinators are happy to help with booking or account questions.",
+      "home": "Back to home",
+      "book": "Book an appointment"
+    },
+    "support": {
+      "phone": "Call us at {phone}",
+      "email": "Email us at {email}"
+    }
+  }
+}

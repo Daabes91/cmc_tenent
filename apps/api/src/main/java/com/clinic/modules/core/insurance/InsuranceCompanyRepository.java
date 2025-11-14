@@ -34,6 +34,11 @@ public interface InsuranceCompanyRepository extends JpaRepository<InsuranceCompa
     List<InsuranceCompanyEntity> findByIsActiveTrueOrderByDisplayOrderAsc();
 
     /**
+     * Find all active insurance companies for a tenant ordered by display order
+     */
+    List<InsuranceCompanyEntity> findByTenantIdAndIsActiveTrueOrderByDisplayOrderAsc(Long tenantId);
+
+    /**
      * Find all insurance companies ordered by display order
      */
     List<InsuranceCompanyEntity> findAllByOrderByDisplayOrderAsc();

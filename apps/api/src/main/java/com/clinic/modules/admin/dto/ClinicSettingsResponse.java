@@ -1,6 +1,7 @@
 package com.clinic.modules.admin.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 public record ClinicSettingsResponse(
@@ -36,7 +37,8 @@ public record ClinicSettingsResponse(
         Boolean emailEnabled,
         String heroMediaType,
         String heroImageUrl,
-        String heroVideoId
+        String heroVideoId,
+        WhyChoose whyChoose
 ) {
     public record WorkingHours(
             String monday,
@@ -53,5 +55,23 @@ public record ClinicSettingsResponse(
             String instagram,
             String twitter,
             String linkedin
+    ) {}
+
+    public record LocalizedText(
+            String en,
+            String ar
+    ) {}
+
+    public record WhyChooseFeature(
+            String key,
+            LocalizedText title,
+            LocalizedText description,
+            String icon
+    ) {}
+
+    public record WhyChoose(
+            LocalizedText title,
+            LocalizedText subtitle,
+            List<WhyChooseFeature> features
     ) {}
 }

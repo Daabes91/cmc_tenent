@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Currency;
+import java.util.List;
 import java.util.Locale;
 
 @Service
@@ -175,6 +177,51 @@ public class ClinicSettingsService {
             settings.setHeroVideoId(videoId);
         }
 
+        if (request.whyChoose() != null) {
+            var why = request.whyChoose();
+            if (why.title() != null) {
+                if (why.title().en() != null) {
+                    settings.setWhyChooseTitleEn(normalize(why.title().en()));
+                }
+                if (why.title().ar() != null) {
+                    settings.setWhyChooseTitleAr(normalize(why.title().ar()));
+                }
+            }
+            if (why.subtitle() != null) {
+                if (why.subtitle().en() != null) {
+                    settings.setWhyChooseSubtitleEn(normalize(why.subtitle().en()));
+                }
+                if (why.subtitle().ar() != null) {
+                    settings.setWhyChooseSubtitleAr(normalize(why.subtitle().ar()));
+                }
+            }
+            if (why.features() != null) {
+                List<ClinicSettingsEntity.WhyChooseFeatureConfig> featureConfigs = why.features().stream().map(feature -> {
+                    ClinicSettingsEntity.WhyChooseFeatureConfig config = new ClinicSettingsEntity.WhyChooseFeatureConfig();
+                    config.setKey(normalize(feature.key()));
+                    config.setIcon(normalize(feature.icon()));
+                    if (feature.title() != null) {
+                        if (feature.title().en() != null) {
+                            config.setTitleEn(normalize(feature.title().en()));
+                        }
+                        if (feature.title().ar() != null) {
+                            config.setTitleAr(normalize(feature.title().ar()));
+                        }
+                    }
+                    if (feature.description() != null) {
+                        if (feature.description().en() != null) {
+                            config.setDescriptionEn(normalize(feature.description().en()));
+                        }
+                        if (feature.description().ar() != null) {
+                            config.setDescriptionAr(normalize(feature.description().ar()));
+                        }
+                    }
+                    return config;
+                }).toList();
+                settings.setWhyChooseFeatures(featureConfigs);
+            }
+        }
+
         ClinicSettingsEntity saved = settingsRepository.save(settings);
         return mapToResponse(saved);
     }
@@ -206,6 +253,11 @@ public class ClinicSettingsService {
         settings.setEmailFrom(defaultEmailFrom);
         settings.setEmailFromName(defaultEmailFromName);
         settings.setEmailEnabled(defaultEmailEnabled);
+        settings.setWhyChooseTitleEn("Why Choose Qadri's Clinic?");
+        settings.setWhyChooseTitleAr("لماذا تختار عيادة قدري؟");
+        settings.setWhyChooseSubtitleEn("We combine cutting-edge technology with compassionate care to deliver exceptional dental experiences.");
+        settings.setWhyChooseSubtitleAr("نجمع بين أحدث التقنيات والرعاية الإنسانية لنقدم تجربة أسنان استثنائية.");
+        settings.setWhyChooseFeatures(defaultWhyChooseFeatures());
         return settingsRepository.save(settings);
     }
 
@@ -269,8 +321,81 @@ public class ClinicSettingsService {
                 resolvedEmailEnabled,
                 entity.getHeroMediaType(),
                 entity.getHeroImageUrl(),
-                entity.getHeroVideoId()
+                entity.getHeroVideoId(),
+                new ClinicSettingsResponse.WhyChoose(
+                        localizedText(entity.getWhyChooseTitleEn(), entity.getWhyChooseTitleAr()),
+                        localizedText(entity.getWhyChooseSubtitleEn(), entity.getWhyChooseSubtitleAr()),
+                        entity.getWhyChooseFeatures() == null
+                                ? List.of()
+                                : entity.getWhyChooseFeatures().stream()
+                                .map(feature -> new ClinicSettingsResponse.WhyChooseFeature(
+                                        feature.getKey(),
+                                        localizedText(feature.getTitleEn(), feature.getTitleAr()),
+                                        localizedText(feature.getDescriptionEn(), feature.getDescriptionAr()),
+                                        feature.getIcon()
+                                ))
+                                .toList()
+                )
         );
+    }
+
+    private ClinicSettingsResponse.LocalizedText localizedText(String en, String ar) {
+        return new ClinicSettingsResponse.LocalizedText(en, ar);
+    }
+
+    private List<ClinicSettingsEntity.WhyChooseFeatureConfig> defaultWhyChooseFeatures() {
+        List<ClinicSettingsEntity.WhyChooseFeatureConfig> defaults = new ArrayList<>();
+        defaults.add(createFeatureConfig(
+                "experts",
+                "shield-check",
+                "Expert Professionals",
+                "أطباء محترفون",
+                "Highly qualified dentists with years of specialized experience",
+                "أطباء أسنان مؤهلون يتمتعون بسنوات من الخبرة المتخصصة"
+        ));
+        defaults.add(createFeatureConfig(
+                "technology",
+                "beaker",
+                "Advanced Technology",
+                "تقنيات متقدمة",
+                "State-of-the-art equipment for precise diagnosis and treatment",
+                "أحدث الأجهزة للحصول على تشخيص وعلاج دقيق"
+        ));
+        defaults.add(createFeatureConfig(
+                "comfort",
+                "smile",
+                "Patient Comfort",
+                "راحة المرضى",
+                "Relaxing environment designed to ease dental anxiety",
+                "بيئة مريحة تساعد على تقليل القلق من علاج الأسنان"
+        ));
+        defaults.add(createFeatureConfig(
+                "affordable",
+                "wallet",
+                "Affordable Care",
+                "رعاية ميسورة",
+                "Flexible payment plans and insurance options available",
+                "خيارات دفع مرنة وتغطية تأمينية متاحة"
+        ));
+        return defaults;
+    }
+
+    private ClinicSettingsEntity.WhyChooseFeatureConfig createFeatureConfig(
+            String key,
+            String icon,
+            String titleEn,
+            String titleAr,
+            String descriptionEn,
+            String descriptionAr
+    ) {
+        ClinicSettingsEntity.WhyChooseFeatureConfig config = new ClinicSettingsEntity.WhyChooseFeatureConfig();
+        config.setKey(key);
+        config.setIcon(icon);
+        config.setTitleEn(titleEn);
+        config.setTitleAr(titleAr);
+        config.setDescriptionEn(descriptionEn);
+        config.setDescriptionAr(descriptionAr);
+        return config;
     }
 
     private String normalize(String value) {

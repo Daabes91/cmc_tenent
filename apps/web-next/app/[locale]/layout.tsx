@@ -4,6 +4,9 @@ import {NextIntlClientProvider} from "next-intl";
 import {setRequestLocale} from "next-intl/server";
 import {locales, type Locale} from "@/i18n/request";
 import {DirectionHandler} from "@/components/DirectionHandler";
+import { headers } from "next/headers";
+import { TENANT_HEADER } from "@/lib/tenant";
+import { applyTranslationOverrides, fetchTenantTranslationOverrides } from "@/lib/translations";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -25,7 +28,10 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
 
   setRequestLocale(locale);
 
-  const messages = (await import(`@/messages/${locale as Locale}.json`)).default;
+  const baseMessages = (await import(`@/messages/${locale as Locale}.json`)).default;
+  const tenantSlug = headers().get(TENANT_HEADER);
+  const overrides = await fetchTenantTranslationOverrides(locale, tenantSlug);
+  const messages = applyTranslationOverrides(baseMessages, overrides);
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>

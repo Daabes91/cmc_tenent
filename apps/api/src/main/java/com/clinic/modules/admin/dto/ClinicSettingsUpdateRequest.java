@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 public record ClinicSettingsUpdateRequest(
@@ -37,7 +38,8 @@ public record ClinicSettingsUpdateRequest(
         Boolean emailEnabled,
         String heroMediaType,
         String heroImageUrl,
-        String heroVideoId
+        String heroVideoId,
+        WhyChooseUpdate whyChoose
 ) {
     public record WorkingHoursUpdate(
             String monday,
@@ -54,5 +56,23 @@ public record ClinicSettingsUpdateRequest(
             String instagram,
             String twitter,
             String linkedin
+    ) {}
+
+    public record LocalizedTextUpdate(
+            String en,
+            String ar
+    ) {}
+
+    public record WhyChooseFeatureUpdate(
+            String key,
+            String icon,
+            LocalizedTextUpdate title,
+            LocalizedTextUpdate description
+    ) {}
+
+    public record WhyChooseUpdate(
+            LocalizedTextUpdate title,
+            LocalizedTextUpdate subtitle,
+            List<WhyChooseFeatureUpdate> features
     ) {}
 }

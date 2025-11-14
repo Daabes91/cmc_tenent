@@ -1,12 +1,12 @@
 'use client';
 
-import {useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import {useLocale, useTranslations} from 'next-intl';
 import {Link} from '@/navigation';
 import {api} from '@/lib/api';
-import type {Service, InsuranceCompany, HeroMedia} from '@/lib/types';
+import type {Service, InsuranceCompany, HeroMedia, WhyChooseContent, LocalizedText} from '@/lib/types';
 import {useLocalizedPageTitle} from '@/hooks/usePageTitle';
 import {YouTubeEmbed} from '@/components/YouTubeEmbed';
 import {HeroSectionErrorBoundary} from '@/components/HeroSectionErrorBoundary';
@@ -38,6 +38,7 @@ export default function Home() {
   const [heroMedia, setHeroMedia] = useState<HeroMedia>({ type: 'image' });
   const [loadingHeroMedia, setLoadingHeroMedia] = useState(true);
   const [heroMediaError, setHeroMediaError] = useState(false);
+  const [whySection, setWhySection] = useState<WhyChooseContent | null>(null);
   const hero = useTranslations('hero');
   const servicesT = useTranslations('services');
   const booking = useTranslations('booking');
@@ -47,6 +48,20 @@ export default function Home() {
   const common = useTranslations('common');
   const locale = useLocale();
   const isRTL = locale === 'ar';
+  const getLocalizedText = useCallback(
+    (text?: LocalizedText | null) => {
+      if (!text) {
+        return null;
+      }
+      const primary = locale === 'ar' ? text.ar : text.en;
+      if (primary && primary.trim().length > 0) {
+        return primary;
+      }
+      const fallback = locale === 'ar' ? text.en : text.ar;
+      return fallback && fallback.trim().length > 0 ? fallback : null;
+    },
+    [locale]
+  );
 
   // Default hero image URL
   const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1200&auto=format&fit=crop';
@@ -97,6 +112,10 @@ export default function Home() {
               setHeroMedia(cachedData);
               setLoadingHeroMedia(false);
               console.log('Using cached hero media settings');
+              const cachedWhy = sessionStorage.getItem('why-choose-section');
+              if (cachedWhy) {
+                setWhySection(JSON.parse(cachedWhy));
+              }
               return;
             }
           }
@@ -134,11 +153,13 @@ export default function Home() {
         }
         
         setHeroMedia(mediaConfig);
+        setWhySection(settings.whyChoose ?? null);
         
         // Cache the result
         if (typeof window !== 'undefined') {
           sessionStorage.setItem(cacheKey, JSON.stringify(mediaConfig));
           sessionStorage.setItem(`${cacheKey}-time`, Date.now().toString());
+          sessionStorage.setItem('why-choose-section', JSON.stringify(settings.whyChoose ?? null));
         }
       } catch (error) {
         console.error('Failed to load hero media settings:', {
@@ -153,6 +174,7 @@ export default function Home() {
           type: 'image',
           imageUrl: DEFAULT_HERO_IMAGE,
         });
+        setWhySection(null);
       } finally {
         setLoadingHeroMedia(false);
       }
@@ -258,48 +280,85 @@ export default function Home() {
     }
   ];
 
-  const whyFeatures = [
-    {
-      key: 'experts',
-      icon: (
-        <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-        </svg>
-      ),
-      title: why('features.experts.title'),
-      description: why('features.experts.description')
-    },
-    {
-      key: 'technology',
-      icon: (
-        <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-        </svg>
-      ),
-      title: why('features.technology.title'),
-      description: why('features.technology.description')
-    },
-    {
-      key: 'comfort',
-      icon: (
-        <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-      title: why('features.comfort.title'),
-      description: why('features.comfort.description')
-    },
-    {
-      key: 'affordable',
-      icon: (
-        <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-      title: why('features.affordable.title'),
-      description: why('features.affordable.description')
+  const fallbackWhyMap = useMemo(
+    () => ({
+      experts: {
+        title: why('features.experts.title'),
+        description: why('features.experts.description')
+      },
+      technology: {
+        title: why('features.technology.title'),
+        description: why('features.technology.description')
+      },
+      comfort: {
+        title: why('features.comfort.title'),
+        description: why('features.comfort.description')
+      },
+      affordable: {
+        title: why('features.affordable.title'),
+        description: why('features.affordable.description')
+      }
+    }),
+    [why]
+  );
+
+  const renderWhyIcon = useCallback((key: string) => {
+    switch (key) {
+      case 'technology':
+        return (
+          <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+          </svg>
+        );
+      case 'comfort':
+        return (
+          <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        );
+      case 'affordable':
+        return (
+          <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        );
+      case 'experts':
+      default:
+        return (
+          <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+          </svg>
+        );
     }
-  ];
+  }, []);
+
+  const fallbackWhyOrder = ['experts', 'technology', 'comfort', 'affordable'] as const;
+  const fallbackWhyEntry = fallbackWhyMap[fallbackWhyOrder[0]];
+
+  const derivedWhyFeatures = useMemo(() => {
+    if (whySection?.features && whySection.features.length > 0) {
+      return whySection.features.map((feature, index) => {
+        const key = feature.key ?? `feature-${index}`;
+        const fallbackEntry = fallbackWhyMap[key as keyof typeof fallbackWhyMap] ?? fallbackWhyEntry;
+        return {
+          key,
+          icon: renderWhyIcon(key),
+          title: getLocalizedText(feature.title) ?? fallbackEntry.title,
+          description: getLocalizedText(feature.description) ?? fallbackEntry.description
+        };
+      });
+    }
+
+    return fallbackWhyOrder.map((key) => ({
+      key,
+      icon: renderWhyIcon(key),
+      title: fallbackWhyMap[key].title,
+      description: fallbackWhyMap[key].description
+    }));
+  }, [whySection, renderWhyIcon, getLocalizedText, fallbackWhyMap, fallbackWhyEntry, fallbackWhyOrder]);
+
+  const whySectionTitle = getLocalizedText(whySection?.title) ?? why('title');
+  const whySectionSubtitle = getLocalizedText(whySection?.subtitle) ?? why('subtitle');
 
   return (
     <>
@@ -535,12 +594,12 @@ export default function Home() {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-cyan-100/30 to-transparent dark:from-cyan-900/20" />
         <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-3xl text-center">
-            <h2 className="text-4xl font-bold text-slate-900 dark:text-slate-100 md:text-5xl">{why('title')}</h2>
-            <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">{why('subtitle')}</p>
+            <h2 className="text-4xl font-bold text-slate-900 dark:text-slate-100 md:text-5xl">{whySectionTitle}</h2>
+            <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">{whySectionSubtitle}</p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {whyFeatures.map((feature) => (
+            {derivedWhyFeatures.map((feature) => (
               <div
                 key={feature.key}
                 className="p-6 text-center rounded-2xl border border-slate-100/70 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/60 shadow-sm dark:shadow-blue-900/30 backdrop-blur transition-colors"

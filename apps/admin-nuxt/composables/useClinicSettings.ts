@@ -2,6 +2,18 @@ import { computed, watch } from "vue";
 
 type ExchangeRatesMap = Record<string, number>;
 
+type LocalizedTextPayload = {
+  en?: string | null;
+  ar?: string | null;
+} | null;
+
+type WhyChooseFeaturePayload = {
+  key?: string | null;
+  icon?: string | null;
+  title?: LocalizedTextPayload;
+  description?: LocalizedTextPayload;
+} | null;
+
 type ClinicSettingsPayload = {
   id?: number;
   clinicName?: string | null;
@@ -49,6 +61,11 @@ type ClinicSettingsPayload = {
   heroMediaType?: string | null;
   heroImageUrl?: string | null;
   heroVideoId?: string | null;
+  whyChoose?: {
+    title?: LocalizedTextPayload;
+    subtitle?: LocalizedTextPayload;
+    features?: WhyChooseFeaturePayload[];
+  } | null;
 };
 
 type UseClinicSettingsOptions = {
@@ -175,6 +192,7 @@ export function useClinicSettings(options: UseClinicSettingsOptions = {}) {
     const heroMediaType = payload.heroMediaType?.trim() || 'image';
     const heroImageUrl = payload.heroImageUrl?.trim() || null;
     const heroVideoId = payload.heroVideoId?.trim() || null;
+    const whyChoose = payload.whyChoose ?? null;
 
     return {
       ...payload,
@@ -193,7 +211,8 @@ export function useClinicSettings(options: UseClinicSettingsOptions = {}) {
       emailEnabled,
       heroMediaType,
       heroImageUrl,
-      heroVideoId
+      heroVideoId,
+      whyChoose
     };
   });
 

@@ -765,6 +765,11 @@ const allNavigationItems = computed(() => [
     to: "/clinic-settings"
   },
   {
+    label: t("navigation.translations"),
+    icon: "i-lucide-languages",
+    to: "/translations"
+  },
+  {
     label: t("navigation.settings"),
     icon: "i-lucide-settings",
     to: "/settings"

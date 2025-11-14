@@ -665,6 +665,161 @@
                     @update:model-value="updateHeroMedia"
                   />
                 </div>
+            </div>
+          </div>
+
+            <!-- Why Choose Section -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
+              <div class="bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <UIcon name="i-lucide-star" class="h-5 w-5 text-white" />
+                  <div>
+                    <h2 class="text-lg font-semibold text-white">{{ t('clinicSettings.sections.whyChoose.title') }}</h2>
+                    <p class="text-sm text-cyan-100">{{ t('clinicSettings.sections.whyChoose.subtitle') }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="p-6 space-y-6">
+                <div v-if="loading" class="space-y-4">
+                  <USkeleton class="h-12 rounded-xl" />
+                  <USkeleton class="h-12 rounded-xl" />
+                  <USkeleton class="h-32 rounded-xl" />
+                </div>
+                <div v-else class="space-y-8">
+                  <div class="grid gap-6 md:grid-cols-2">
+                    <UFormGroup :label="t('clinicSettings.whyChoose.title.en.label')" :hint="t('clinicSettings.whyChoose.title.en.hint')">
+                      <UInput
+                        v-model="formData.whyChooseTitleEn"
+                        size="lg"
+                        :placeholder="t('clinicSettings.whyChoose.title.en.placeholder')"
+                        icon="i-lucide-type"
+                      />
+                    </UFormGroup>
+                    <UFormGroup :label="t('clinicSettings.whyChoose.title.ar.label')" :hint="t('clinicSettings.whyChoose.title.ar.hint')">
+                      <UInput
+                        v-model="formData.whyChooseTitleAr"
+                        size="lg"
+                        dir="rtl"
+                        :placeholder="t('clinicSettings.whyChoose.title.ar.placeholder')"
+                        icon="i-lucide-type"
+                      />
+                    </UFormGroup>
+                    <UFormGroup :label="t('clinicSettings.whyChoose.subtitle.en.label')">
+                      <UInput
+                        v-model="formData.whyChooseSubtitleEn"
+                        size="lg"
+                        :placeholder="t('clinicSettings.whyChoose.subtitle.en.placeholder')"
+                        icon="i-lucide-align-left"
+                      />
+                    </UFormGroup>
+                    <UFormGroup :label="t('clinicSettings.whyChoose.subtitle.ar.label')">
+                      <UInput
+                        v-model="formData.whyChooseSubtitleAr"
+                        size="lg"
+                        dir="rtl"
+                        :placeholder="t('clinicSettings.whyChoose.subtitle.ar.placeholder')"
+                        icon="i-lucide-align-right"
+                      />
+                    </UFormGroup>
+                  </div>
+
+                  <div class="space-y-4">
+                    <div
+                      v-for="(feature, index) in formData.whyChooseFeatures"
+                      :key="`why-feature-${index}`"
+                      class="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-slate-50/50 dark:bg-slate-800/40 p-5 space-y-4"
+                    >
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 text-white shadow-sm">
+                            <UIcon name="i-lucide-sparkles" class="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                              {{ t('clinicSettings.whyChoose.featureTitle', { number: index + 1 }) }}
+                            </p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                              {{ t('clinicSettings.whyChoose.featureHint') }}
+                            </p>
+                          </div>
+                        </div>
+                        <UButton
+                          v-if="formData.whyChooseFeatures.length > MIN_WHY_CHOOSE_FEATURES"
+                          variant="ghost"
+                          color="red"
+                          size="xs"
+                          icon="i-lucide-trash-2"
+                          @click="removeWhyChooseFeature(index)"
+                        >
+                          {{ t('clinicSettings.whyChoose.actions.removeFeature') }}
+                        </UButton>
+                      </div>
+
+                      <div class="grid gap-4 md:grid-cols-2">
+                        <UFormGroup :label="t('clinicSettings.whyChoose.fields.key.label')" :hint="t('clinicSettings.whyChoose.fields.key.hint')">
+                          <UInput
+                            v-model="formData.whyChooseFeatures[index].key"
+                            size="lg"
+                            :placeholder="t('clinicSettings.whyChoose.fields.key.placeholder')"
+                            icon="i-lucide-tag"
+                          />
+                        </UFormGroup>
+                        <UFormGroup :label="t('clinicSettings.whyChoose.fields.icon.label')" :hint="t('clinicSettings.whyChoose.fields.icon.hint')">
+                          <UInput
+                            v-model="formData.whyChooseFeatures[index].icon"
+                            size="lg"
+                            :placeholder="t('clinicSettings.whyChoose.fields.icon.placeholder')"
+                            icon="i-lucide-brush"
+                          />
+                        </UFormGroup>
+                        <UFormGroup :label="t('clinicSettings.whyChoose.fields.title.en')" >
+                          <UInput
+                            v-model="formData.whyChooseFeatures[index].titleEn"
+                            size="lg"
+                            :placeholder="t('clinicSettings.whyChoose.fields.title.placeholder')"
+                            icon="i-lucide-type"
+                          />
+                        </UFormGroup>
+                        <UFormGroup :label="t('clinicSettings.whyChoose.fields.title.ar')" >
+                          <UInput
+                            v-model="formData.whyChooseFeatures[index].titleAr"
+                            size="lg"
+                            dir="rtl"
+                            :placeholder="t('clinicSettings.whyChoose.fields.title.placeholder')"
+                            icon="i-lucide-type"
+                          />
+                        </UFormGroup>
+                        <UFormGroup :label="t('clinicSettings.whyChoose.fields.description.en')">
+                          <UTextarea
+                            v-model="formData.whyChooseFeatures[index].descriptionEn"
+                            :placeholder="t('clinicSettings.whyChoose.fields.description.placeholder')"
+                            class="min-h-[90px]"
+                          />
+                        </UFormGroup>
+                        <UFormGroup :label="t('clinicSettings.whyChoose.fields.description.ar')">
+                          <UTextarea
+                            v-model="formData.whyChooseFeatures[index].descriptionAr"
+                            dir="rtl"
+                            :placeholder="t('clinicSettings.whyChoose.fields.description.placeholder')"
+                            class="min-h-[90px]"
+                          />
+                        </UFormGroup>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex justify-end">
+                    <UButton
+                      variant="outline"
+                      color="blue"
+                      icon="i-lucide-plus"
+                      :disabled="formData.whyChooseFeatures.length >= MAX_WHY_CHOOSE_FEATURES"
+                      @click="addWhyChooseFeature"
+                    >
+                      {{ t('clinicSettings.whyChoose.actions.addFeature') }}
+                    </UButton>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -901,6 +1056,15 @@ interface SocialMedia {
   linkedin: string;
 }
 
+interface WhyChooseFeatureForm {
+  key: string;
+  icon: string;
+  titleEn: string;
+  titleAr: string;
+  descriptionEn: string;
+  descriptionAr: string;
+}
+
 interface ClinicSettingsForm {
   clinicName: string;
   phone: string;
@@ -932,10 +1096,20 @@ interface ClinicSettingsForm {
   heroMediaType: string;
   heroImageUrl: string;
   heroVideoId: string;
+  whyChooseTitleEn: string;
+  whyChooseTitleAr: string;
+  whyChooseSubtitleEn: string;
+  whyChooseSubtitleAr: string;
+  whyChooseFeatures: WhyChooseFeatureForm[];
 }
 
 const DEFAULT_CURRENCY = "AED";
 const DEFAULT_LOCALE = "en-US"; // Always use English (US) locale
+
+const DEFAULT_WHY_CHOOSE_TITLE_EN = "Why Choose Qadri's Clinic?";
+const DEFAULT_WHY_CHOOSE_TITLE_AR = "لماذا تختار عيادة قدري؟";
+const DEFAULT_WHY_CHOOSE_SUBTITLE_EN = "We combine cutting-edge technology with compassionate care to deliver exceptional dental experiences.";
+const DEFAULT_WHY_CHOOSE_SUBTITLE_AR = "نجمع بين أحدث التقنيات والرعاية الإنسانية لنقدم تجربة أسنان استثنائية.";
 
 const DEFAULT_EXCHANGE_RATES: Record<string, number> = {
   USD: 1.0,
@@ -948,6 +1122,43 @@ const DEFAULT_EXCHANGE_RATES: Record<string, number> = {
   EUR: 1.085,
   GBP: 1.267
 };
+
+function getDefaultWhyChooseFeatures(): WhyChooseFeatureForm[] {
+  return [
+    {
+      key: "experts",
+      icon: "shield-check",
+      titleEn: "Expert Professionals",
+      titleAr: "أطباء محترفون",
+      descriptionEn: "Highly qualified dentists with years of specialized experience",
+      descriptionAr: "أطباء أسنان مؤهلون يتمتعون بسنوات من الخبرة المتخصصة"
+    },
+    {
+      key: "technology",
+      icon: "beaker",
+      titleEn: "Advanced Technology",
+      titleAr: "تقنيات متقدمة",
+      descriptionEn: "State-of-the-art equipment for precise diagnosis and treatment",
+      descriptionAr: "أحدث الأجهزة للحصول على تشخيص وعلاج دقيق"
+    },
+    {
+      key: "comfort",
+      icon: "smile",
+      titleEn: "Patient Comfort",
+      titleAr: "راحة المرضى",
+      descriptionEn: "Relaxing environment designed to ease dental anxiety",
+      descriptionAr: "بيئة مريحة تساعد على تقليل القلق من علاج الأسنان"
+    },
+    {
+      key: "affordable",
+      icon: "wallet",
+      titleEn: "Affordable Care",
+      titleAr: "رعاية ميسورة",
+      descriptionEn: "Flexible payment plans and insurance options available",
+      descriptionAr: "خيارات دفع مرنة وتغطية تأمينية متاحة"
+    }
+  ];
+}
 
 const weekDays = computed(() => [
   { key: "monday", label: t('clinicSettings.weekDays.monday') },
@@ -1031,8 +1242,45 @@ const formData = ref<ClinicSettingsForm>({
   emailEnabled: false,
   heroMediaType: "image",
   heroImageUrl: "",
-  heroVideoId: ""
+  heroVideoId: "",
+  whyChooseTitleEn: DEFAULT_WHY_CHOOSE_TITLE_EN,
+  whyChooseTitleAr: DEFAULT_WHY_CHOOSE_TITLE_AR,
+  whyChooseSubtitleEn: DEFAULT_WHY_CHOOSE_SUBTITLE_EN,
+  whyChooseSubtitleAr: DEFAULT_WHY_CHOOSE_SUBTITLE_AR,
+  whyChooseFeatures: getDefaultWhyChooseFeatures()
 });
+
+const MIN_WHY_CHOOSE_FEATURES = 1;
+const MAX_WHY_CHOOSE_FEATURES = 8;
+
+const createEmptyWhyChooseFeature = (): WhyChooseFeatureForm => ({
+  key: "",
+  icon: "",
+  titleEn: "",
+  titleAr: "",
+  descriptionEn: "",
+  descriptionAr: ""
+});
+
+const mapWhyChooseFeaturesFromSettings = (features?: {
+  key?: string | null;
+  icon?: string | null;
+  title?: { en?: string | null; ar?: string | null } | null;
+  description?: { en?: string | null; ar?: string | null } | null;
+}[] | null): WhyChooseFeatureForm[] => {
+  if (!features || !features.length) {
+    return getDefaultWhyChooseFeatures();
+  }
+
+  return features.map((feature) => ({
+    key: feature.key || "",
+    icon: feature.icon || "",
+    titleEn: feature.title?.en || "",
+    titleAr: feature.title?.ar || "",
+    descriptionEn: feature.description?.en || "",
+    descriptionAr: feature.description?.ar || ""
+  }));
+};
 
 const saving = ref(false);
 
@@ -1111,7 +1359,12 @@ watch(
       emailEnabled: newSettings.emailEnabled ?? true,
       heroMediaType: newSettings.heroMediaType || "image",
       heroImageUrl: newSettings.heroImageUrl || "",
-      heroVideoId: newSettings.heroVideoId || ""
+      heroVideoId: newSettings.heroVideoId || "",
+      whyChooseTitleEn: newSettings.whyChoose?.title?.en || DEFAULT_WHY_CHOOSE_TITLE_EN,
+      whyChooseTitleAr: newSettings.whyChoose?.title?.ar || DEFAULT_WHY_CHOOSE_TITLE_AR,
+      whyChooseSubtitleEn: newSettings.whyChoose?.subtitle?.en || DEFAULT_WHY_CHOOSE_SUBTITLE_EN,
+      whyChooseSubtitleAr: newSettings.whyChoose?.subtitle?.ar || DEFAULT_WHY_CHOOSE_SUBTITLE_AR,
+      whyChooseFeatures: mapWhyChooseFeaturesFromSettings(newSettings.whyChoose?.features)
     };
   },
   { immediate: true }
@@ -1217,6 +1470,15 @@ async function saveSettings() {
   });
 
   try {
+    const {
+      whyChooseTitleEn,
+      whyChooseTitleAr,
+      whyChooseSubtitleEn,
+      whyChooseSubtitleAr,
+      whyChooseFeatures,
+      ...restFormData
+    } = formData.value;
+
     const feeValue = formData.value.virtualConsultationFee
       ? Number(formData.value.virtualConsultationFee)
       : null;
@@ -1230,8 +1492,38 @@ async function saveSettings() {
 
     const sanitize = (value: string) => value?.trim() || null;
 
+    const buildFeaturePayload = (feature: WhyChooseFeatureForm, index: number) => {
+      const key = sanitize(feature.key) || `feature-${index + 1}`;
+      return {
+        key,
+        icon: sanitize(feature.icon),
+        title: {
+          en: sanitize(feature.titleEn),
+          ar: sanitize(feature.titleAr)
+        },
+        description: {
+          en: sanitize(feature.descriptionEn),
+          ar: sanitize(feature.descriptionAr)
+        }
+      };
+    };
+
+    const sanitizedFeatures = (whyChooseFeatures || [])
+      .map((feature, index) => buildFeaturePayload(feature, index))
+      .filter(
+        feature =>
+          feature.title.en ||
+          feature.title.ar ||
+          feature.description.en ||
+          feature.description.ar
+      );
+
+    const fallbackFeatures = getDefaultWhyChooseFeatures().map((feature, index) =>
+      buildFeaturePayload(feature, index)
+    );
+
     const payload = {
-      ...formData.value,
+      ...restFormData,
       virtualConsultationFee: feeValue,
       virtualConsultationMeetingLink: formData.value.virtualConsultationMeetingLink.trim()
         ? formData.value.virtualConsultationMeetingLink.trim()
@@ -1249,7 +1541,18 @@ async function saveSettings() {
       emailEnabled: formData.value.emailEnabled,
       heroMediaType: formData.value.heroMediaType || "image",
       heroImageUrl: sanitize(formData.value.heroImageUrl),
-      heroVideoId: sanitize(formData.value.heroVideoId)
+      heroVideoId: sanitize(formData.value.heroVideoId),
+      whyChoose: {
+        title: {
+          en: sanitize(whyChooseTitleEn),
+          ar: sanitize(whyChooseTitleAr)
+        },
+        subtitle: {
+          en: sanitize(whyChooseSubtitleEn),
+          ar: sanitize(whyChooseSubtitleAr)
+        },
+        features: sanitizedFeatures.length ? sanitizedFeatures : fallbackFeatures
+      }
     };
 
     await request("/settings", {
@@ -1329,6 +1632,17 @@ function updateHeroMedia(value: { mediaType: string; imageUrl?: string | null; v
   formData.value.heroVideoId = value.videoId || '';
 }
 
+function addWhyChooseFeature() {
+  formData.value.whyChooseFeatures.push(createEmptyWhyChooseFeature());
+}
+
+function removeWhyChooseFeature(index: number) {
+  if (formData.value.whyChooseFeatures.length <= MIN_WHY_CHOOSE_FEATURES) {
+    return;
+  }
+  formData.value.whyChooseFeatures.splice(index, 1);
+}
+
 function resetForm() {
   const current = settings.value;
   if (!current) return;
@@ -1376,7 +1690,12 @@ function resetForm() {
     emailEnabled: current.emailEnabled ?? true,
     heroMediaType: current.heroMediaType || "image",
     heroImageUrl: current.heroImageUrl || "",
-    heroVideoId: current.heroVideoId || ""
+    heroVideoId: current.heroVideoId || "",
+    whyChooseTitleEn: current.whyChoose?.title?.en || DEFAULT_WHY_CHOOSE_TITLE_EN,
+    whyChooseTitleAr: current.whyChoose?.title?.ar || DEFAULT_WHY_CHOOSE_TITLE_AR,
+    whyChooseSubtitleEn: current.whyChoose?.subtitle?.en || DEFAULT_WHY_CHOOSE_SUBTITLE_EN,
+    whyChooseSubtitleAr: current.whyChoose?.subtitle?.ar || DEFAULT_WHY_CHOOSE_SUBTITLE_AR,
+    whyChooseFeatures: mapWhyChooseFeaturesFromSettings(current.whyChoose?.features)
   };
 }
 </script>

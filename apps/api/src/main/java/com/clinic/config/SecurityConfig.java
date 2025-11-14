@@ -120,6 +120,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/public/services/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/public/doctors/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/public/insurance-companies/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/public/translations/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/public/settings/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/public/blogs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/public/availability").permitAll()

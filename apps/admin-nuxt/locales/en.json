@@ -884,7 +884,74 @@
     "reports": "Reports",
     "staff": "Staff",
     "clinicSettings": "Clinic settings",
+    "translations": "Translations",
     "settings": "Settings"
+  },
+  "translationsPage": {
+    "header": {
+      "title": "Translations",
+      "subtitle": "Edit the wording that appears on your public site"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "save": "Save changes",
+      "add": "New key",
+      "addKey": "Add key",
+      "cancel": "Cancel"
+    },
+    "filters": {
+      "search": "Search keys",
+      "searchPlaceholder": "Search by key, namespace, or text…",
+      "namespace": "Namespace",
+      "allNamespaces": "All namespaces"
+    },
+    "table": {
+      "key": "Key",
+      "english": "English",
+      "arabic": "Arabic",
+      "status": "Status",
+      "placeholder": "Enter translation…"
+    },
+    "status": {
+      "modified": "Modified",
+      "complete": "Complete",
+      "pending": "Pending"
+    },
+    "namespace": {
+      "count": "{count} entries"
+    },
+    "empty": "No translations found. Add a key to get started.",
+    "addDialog": {
+      "title": "Add translation key",
+      "namespace": "Namespace",
+      "key": "Key"
+    },
+    "errors": {
+      "loadTitle": "Failed to load translations",
+      "generic": "Unable to load translations. Please try again."
+    },
+    "toasts": {
+      "addInvalid": {
+        "title": "Missing information",
+        "description": "Namespace and key are required."
+      },
+      "duplicate": {
+        "title": "Key already exists",
+        "description": "Choose a different namespace/key combination."
+      },
+      "saveSuccess": {
+        "title": "Translations saved",
+        "description": "Your changes are now live."
+      },
+      "saveError": {
+        "title": "Failed to save translations",
+        "description": "Please review your entries and try again."
+      },
+      "noChanges": {
+        "title": "No changes detected",
+        "description": "Update a translation before saving."
+      }
+    }
   },
   "doctors": {
     "list": {
@@ -3225,6 +3292,10 @@
       "heroMedia": {
         "title": "Hero Media",
         "subtitle": "Customize the hero section background on your landing page"
+      },
+      "whyChoose": {
+        "title": "Why Choose Section",
+        "subtitle": "Control the headline and benefit cards displayed on your marketing site"
       }
     },
     "form": {
@@ -3348,6 +3419,59 @@
           "label": "Enable transactional emails",
           "hint": "Turn off to temporarily pause all outgoing notifications."
         }
+      }
+    },
+    "whyChoose": {
+      "title": {
+        "en": {
+          "label": "Headline (English)",
+          "hint": "Displayed as the primary heading on your public site",
+          "placeholder": "Why Choose Our Clinic?"
+        },
+        "ar": {
+          "label": "Headline (Arabic)",
+          "hint": "يظهر كعنوان رئيسي باللغة العربية",
+          "placeholder": "لماذا تختار عيادتنا؟"
+        }
+      },
+      "subtitle": {
+        "en": {
+          "label": "Subtitle (English)",
+          "placeholder": "Describe your value proposition"
+        },
+        "ar": {
+          "label": "Subtitle (Arabic)",
+          "placeholder": "اكتب وصفًا موجزًا لقيمة العيادة",
+          "hint": ""
+        }
+      },
+      "fields": {
+        "key": {
+          "label": "Feature key",
+          "hint": "Used internally to keep track of each benefit card",
+          "placeholder": "experts"
+        },
+        "icon": {
+          "label": "Icon name",
+          "hint": "Optional Lucide icon (e.g., shield-check, smile, wallet)",
+          "placeholder": "shield-check"
+        },
+        "title": {
+          "en": "Title (English)",
+          "ar": "Title (Arabic)",
+          "placeholder": "Enter the feature title"
+        },
+        "description": {
+          "en": "Description (English)",
+          "ar": "Description (Arabic)",
+          "placeholder": "Short supporting copy for this benefit"
+        }
+      },
+      "featureTitle": "Benefit #{number}",
+      "featureHint": "Shown as a card on your public landing page",
+      "actions": {
+        "addFeature": "Add benefit card",
+        "removeFeature": "Remove card"
       }
     },
     "email": {

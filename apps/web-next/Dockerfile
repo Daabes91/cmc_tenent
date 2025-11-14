@@ -2,6 +2,7 @@
 
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_SERVER_API_URL
+ARG NEXT_SERVER_API_BASE_URL
 
 FROM node:20-alpine AS deps
 WORKDIR /app
@@ -12,8 +13,10 @@ RUN corepack enable && pnpm install --no-frozen-lockfile
 FROM node:20-alpine AS builder
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_SERVER_API_URL
+ARG NEXT_SERVER_API_BASE_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_SERVER_API_URL=${NEXT_SERVER_API_URL}
+ENV NEXT_SERVER_API_BASE_URL=${NEXT_SERVER_API_BASE_URL}
 ENV NODE_OPTIONS=--max-old-space-size=4096
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -23,8 +26,10 @@ RUN corepack enable && pnpm install --no-frozen-lockfile && npx prisma generate 
 FROM node:20-alpine AS runner
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_SERVER_API_URL
+ARG NEXT_SERVER_API_BASE_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_SERVER_API_URL=${NEXT_SERVER_API_URL}
+ENV NEXT_SERVER_API_BASE_URL=${NEXT_SERVER_API_BASE_URL}
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/.next ./.next

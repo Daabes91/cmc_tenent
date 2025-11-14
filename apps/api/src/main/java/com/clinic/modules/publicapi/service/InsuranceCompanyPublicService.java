@@ -2,6 +2,7 @@ package com.clinic.modules.publicapi.service;
 
 import com.clinic.modules.core.insurance.InsuranceCompanyEntity;
 import com.clinic.modules.core.insurance.InsuranceCompanyRepository;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 import com.clinic.modules.publicapi.dto.InsuranceCompanyPublicResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,14 +13,18 @@ import java.util.List;
 public class InsuranceCompanyPublicService {
 
     private final InsuranceCompanyRepository insuranceCompanyRepository;
+    private final TenantContextHolder tenantContextHolder;
 
-    public InsuranceCompanyPublicService(InsuranceCompanyRepository insuranceCompanyRepository) {
+    public InsuranceCompanyPublicService(InsuranceCompanyRepository insuranceCompanyRepository,
+                                         TenantContextHolder tenantContextHolder) {
         this.insuranceCompanyRepository = insuranceCompanyRepository;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     @Transactional(readOnly = true)
     public List<InsuranceCompanyPublicResponse> getActiveInsuranceCompanies(String locale) {
-        return insuranceCompanyRepository.findByIsActiveTrueOrderByDisplayOrderAsc()
+        Long tenantId = tenantContextHolder.requireTenantId();
+        return insuranceCompanyRepository.findByTenantIdAndIsActiveTrueOrderByDisplayOrderAsc(tenantId)
                 .stream()
                 .map(company -> mapToPublicResponse(company, locale))
                 .toList();

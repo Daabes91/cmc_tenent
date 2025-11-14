@@ -51,6 +51,10 @@ services:
       JWT_SAAS_MANAGER_AUDIENCE: saas-manager
       JWT_SAAS_MANAGER_PUBLIC_KEY: classpath:keys/staff_public.pem
       JWT_SAAS_MANAGER_PRIVATE_KEY: classpath:keys/staff_private.pem
+      SAAS_DEFAULT_ADMIN_ENABLED: ${SAAS_DEFAULT_ADMIN_ENABLED:-true}
+      SAAS_DEFAULT_ADMIN_EMAIL: ${SAAS_DEFAULT_ADMIN_EMAIL:-saas.admin@example.com}
+      SAAS_DEFAULT_ADMIN_FULL_NAME: ${SAAS_DEFAULT_ADMIN_FULL_NAME:-SAAS Platform Admin}
+      SAAS_DEFAULT_ADMIN_PASSWORD: ${SAAS_DEFAULT_ADMIN_PASSWORD:-saas-admin}
     depends_on:
       postgres:
         condition: service_healthy
@@ -72,11 +76,13 @@ services:
       args:
         NEXT_PUBLIC_API_URL: http://localhost:8080/public
         NEXT_SERVER_API_URL: http://api:8080/public
+        NEXT_SERVER_API_BASE_URL: http://api:8080
     container_name: clinic-web
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8080/public
       NEXT_SERVER_API_URL: http://api:8080/public
+      NEXT_SERVER_API_BASE_URL: http://api:8080
     depends_on:
       api:
         condition: service_healthy

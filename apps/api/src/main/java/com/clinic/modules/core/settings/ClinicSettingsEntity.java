@@ -7,7 +7,9 @@ import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Entity
@@ -152,6 +154,22 @@ public class ClinicSettingsEntity {
 
     @Column(name = "hero_video_id", length = 20)
     private String heroVideoId;
+
+    @Column(name = "why_choose_title_en", columnDefinition = "TEXT")
+    private String whyChooseTitleEn;
+
+    @Column(name = "why_choose_title_ar", columnDefinition = "TEXT")
+    private String whyChooseTitleAr;
+
+    @Column(name = "why_choose_subtitle_en", columnDefinition = "TEXT")
+    private String whyChooseSubtitleEn;
+
+    @Column(name = "why_choose_subtitle_ar", columnDefinition = "TEXT")
+    private String whyChooseSubtitleAr;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "why_choose_features", columnDefinition = "jsonb")
+    private List<WhyChooseFeatureConfig> whyChooseFeatures = new ArrayList<>();
 
     @Column(name = "updated_at")
     private Instant updatedAt;
@@ -522,5 +540,102 @@ public class ClinicSettingsEntity {
 
     public void setHeroVideoId(String heroVideoId) {
         this.heroVideoId = heroVideoId;
+    }
+
+    public String getWhyChooseTitleEn() {
+        return whyChooseTitleEn;
+    }
+
+    public void setWhyChooseTitleEn(String whyChooseTitleEn) {
+        this.whyChooseTitleEn = whyChooseTitleEn;
+    }
+
+    public String getWhyChooseTitleAr() {
+        return whyChooseTitleAr;
+    }
+
+    public void setWhyChooseTitleAr(String whyChooseTitleAr) {
+        this.whyChooseTitleAr = whyChooseTitleAr;
+    }
+
+    public String getWhyChooseSubtitleEn() {
+        return whyChooseSubtitleEn;
+    }
+
+    public void setWhyChooseSubtitleEn(String whyChooseSubtitleEn) {
+        this.whyChooseSubtitleEn = whyChooseSubtitleEn;
+    }
+
+    public String getWhyChooseSubtitleAr() {
+        return whyChooseSubtitleAr;
+    }
+
+    public void setWhyChooseSubtitleAr(String whyChooseSubtitleAr) {
+        this.whyChooseSubtitleAr = whyChooseSubtitleAr;
+    }
+
+    public List<WhyChooseFeatureConfig> getWhyChooseFeatures() {
+        return whyChooseFeatures;
+    }
+
+    public void setWhyChooseFeatures(List<WhyChooseFeatureConfig> whyChooseFeatures) {
+        this.whyChooseFeatures = whyChooseFeatures;
+    }
+
+    public static class WhyChooseFeatureConfig {
+        private String key;
+        private String icon;
+        private String titleEn;
+        private String titleAr;
+        private String descriptionEn;
+        private String descriptionAr;
+
+        public String getKey() {
+            return key;
+        }
+
+        public void setKey(String key) {
+            this.key = key;
+        }
+
+        public String getIcon() {
+            return icon;
+        }
+
+        public void setIcon(String icon) {
+            this.icon = icon;
+        }
+
+        public String getTitleEn() {
+            return titleEn;
+        }
+
+        public void setTitleEn(String titleEn) {
+            this.titleEn = titleEn;
+        }
+
+        public String getTitleAr() {
+            return titleAr;
+        }
+
+        public void setTitleAr(String titleAr) {
+            this.titleAr = titleAr;
+        }
+
+        public String getDescriptionEn() {
+            return descriptionEn;
+        }
+
+        public void setDescriptionEn(String descriptionEn) {
+            this.descriptionEn = descriptionEn;
+        }
+
+        public String getDescriptionAr() {
+            return descriptionAr;
+        }
+
+        public void setDescriptionAr(String descriptionAr) {
+            this.descriptionAr = descriptionAr;
+        }
     }
 }

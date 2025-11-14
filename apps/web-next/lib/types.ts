@@ -205,6 +205,24 @@ export interface ScheduledFollowUp {
 }
 
 // Clinic Settings types
+export interface LocalizedText {
+  en?: string | null;
+  ar?: string | null;
+}
+
+export interface WhyChooseFeatureContent {
+  key?: string | null;
+  icon?: string | null;
+  title?: LocalizedText | null;
+  description?: LocalizedText | null;
+}
+
+export interface WhyChooseContent {
+  title?: LocalizedText | null;
+  subtitle?: LocalizedText | null;
+  features?: WhyChooseFeatureContent[];
+}
+
 export interface ClinicSettings {
   id: number;
   clinicName: string;
@@ -237,6 +255,7 @@ export interface ClinicSettings {
   heroMediaType?: 'image' | 'video';
   heroImageUrl?: string | null;
   heroVideoId?: string | null;
+  whyChoose?: WhyChooseContent;
 }
 
 // Hero Media types

@@ -124,3 +124,10 @@ paypal:
   webhook-id: ${PAYPAL_WEBHOOK_ID:}
   environment: ${PAYPAL_ENVIRONMENT:sandbox}
   base-url: ${PAYPAL_BASE_URL:https://api-m.sandbox.paypal.com}
+
+saas:
+  default-admin:
+    enabled: ${SAAS_DEFAULT_ADMIN_ENABLED:true}
+    email: ${SAAS_DEFAULT_ADMIN_EMAIL:saas.admin@example.com}
+    full-name: ${SAAS_DEFAULT_ADMIN_FULL_NAME:SAAS Platform Admin}
+    password: ${SAAS_DEFAULT_ADMIN_PASSWORD:saas-admin}
