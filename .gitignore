@@ -9,6 +9,7 @@ out
 # Build artifacts
 dist
 build
+apps/api/bin/
 
 # Env files
 .env

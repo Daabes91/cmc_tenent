@@ -132,12 +132,12 @@ public class SecurityProperties {
             String clinicAddress
     ) {
         public Email() {
-            this("${SENDGRID_API_KEY}",
-                 "clinic.notifier@gmail.com",
-                 "Qadri's Clinic",
-                 true,
-                 "https://meet.google.com/abc-defg-hij",
-                 "123 Medical Center, Amman, Jordan");
+            this("",
+                 "",
+                 "",
+                 false,
+                 "",
+                 "");
         }
     }
 }
