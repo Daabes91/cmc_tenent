@@ -10,7 +10,7 @@ RUN apk add --no-cache tar xz gzip
 WORKDIR /app
 COPY pnpm-lock.yaml .
 COPY apps/web-next/package.json .
-RUN corepack prepare pnpm@10.22.0 --activate && pnpm install --no-frozen-lockfile
+RUN corepack enable && corepack prepare pnpm@10.22.0 --activate && pnpm install --no-frozen-lockfile
 
 FROM node:20-alpine AS builder
 ARG NEXT_PUBLIC_API_URL
@@ -18,7 +18,7 @@ ARG NEXT_SERVER_API_URL
 ARG NEXT_SERVER_API_BASE_URL
 ARG DATABASE_URL
 RUN apk add --no-cache tar xz gzip
-RUN corepack prepare pnpm@10.22.0 --activate
+RUN corepack enable && corepack prepare pnpm@10.22.0 --activate
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_SERVER_API_URL=${NEXT_SERVER_API_URL}
 ENV NEXT_SERVER_API_BASE_URL=${NEXT_SERVER_API_BASE_URL}
