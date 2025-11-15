@@ -77,12 +77,14 @@ services:
         NEXT_PUBLIC_API_URL: http://localhost:8080/public
         NEXT_SERVER_API_URL: http://api:8080/public
         NEXT_SERVER_API_BASE_URL: http://api:8080
+        DATABASE_URL: postgresql://clinic:clinic_password@postgres:5432/clinic_multi_tenant
     container_name: clinic-web
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8080/public
       NEXT_SERVER_API_URL: http://api:8080/public
       NEXT_SERVER_API_BASE_URL: http://api:8080
+      DATABASE_URL: postgresql://clinic:clinic_password@postgres:5432/clinic_multi_tenant
     depends_on:
       api:
         condition: service_healthy
