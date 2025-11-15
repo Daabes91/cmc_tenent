@@ -6,16 +6,19 @@ ARG NEXT_SERVER_API_BASE_URL
 ARG DATABASE_URL=postgresql://clinic:clinic_password@postgres:5432/clinic_multi_tenant
 
 FROM node:20-alpine AS deps
+RUN apk add --no-cache tar xz gzip
 WORKDIR /app
 COPY pnpm-lock.yaml .
 COPY apps/web-next/package.json .
-RUN corepack enable && pnpm install --no-frozen-lockfile
+RUN corepack prepare pnpm@10.22.0 --activate && pnpm install --no-frozen-lockfile
 
 FROM node:20-alpine AS builder
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_SERVER_API_URL
 ARG NEXT_SERVER_API_BASE_URL
 ARG DATABASE_URL
+RUN apk add --no-cache tar xz gzip
+RUN corepack prepare pnpm@10.22.0 --activate
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_SERVER_API_URL=${NEXT_SERVER_API_URL}
 ENV NEXT_SERVER_API_BASE_URL=${NEXT_SERVER_API_BASE_URL}
@@ -24,7 +27,7 @@ ENV NODE_OPTIONS=--max-old-space-size=4096
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY apps/web-next .
-RUN corepack enable && pnpm install --no-frozen-lockfile && npx prisma generate && pnpm run build
+RUN pnpm install --no-frozen-lockfile && npx prisma generate && pnpm run build
 
 FROM node:20-alpine AS runner
 ARG NEXT_PUBLIC_API_URL
