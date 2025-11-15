@@ -35,9 +35,9 @@ services:
       EMAIL_FROM: clinic.notifier@example.com
       EMAIL_FROM_NAME: Clinic
       EMAIL_ENABLED: "false"
-      PUBLIC_APP_ORIGIN: http://web:3001
-      ADMIN_APP_ORIGIN: http://admin:3000
-      SAAS_ADMIN_APP_ORIGIN: http://saas-admin:3002
+      PUBLIC_APP_ORIGIN: http://137.184.113.82:3001
+      ADMIN_APP_ORIGIN: http://137.184.113.82:3000
+      SAAS_ADMIN_APP_ORIGIN: http://137.184.113.82:3002
       ADMIN_IP_ALLOWLIST: 0.0.0.0/0,::/0
       JWT_PATIENT_ISSUER: https://api.example-clinic.com
       JWT_PATIENT_AUDIENCE: patient
@@ -74,14 +74,14 @@ services:
       context: .
       dockerfile: apps/web-next/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://localhost:8080/public
+        NEXT_PUBLIC_API_URL: http://137.184.113.82:8080/public
         NEXT_SERVER_API_URL: http://api:8080/public
         NEXT_SERVER_API_BASE_URL: http://api:8080
         DATABASE_URL: postgresql://clinic:clinic_password@postgres:5432/clinic_multi_tenant
     container_name: clinic-web
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8080/public
+      NEXT_PUBLIC_API_URL: http://137.184.113.82:8080/public
       NEXT_SERVER_API_URL: http://api:8080/public
       NEXT_SERVER_API_BASE_URL: http://api:8080
       DATABASE_URL: postgresql://clinic:clinic_password@postgres:5432/clinic_multi_tenant
@@ -98,12 +98,12 @@ services:
       context: .
       dockerfile: apps/admin-nuxt/Dockerfile
       args:
-        NUXT_PUBLIC_API_BASE: http://localhost:8080/admin
+        NUXT_PUBLIC_API_BASE: http://137.184.113.82:8080/admin
         NUXT_PRIVATE_API_BASE: http://api:8080/admin
     container_name: clinic-admin
     restart: unless-stopped
     environment:
-      NUXT_PUBLIC_API_BASE: http://localhost:8080/admin
+      NUXT_PUBLIC_API_BASE: http://137.184.113.82:8080/admin
       NUXT_PRIVATE_API_BASE: http://api:8080/admin
     depends_on:
       api:
@@ -118,19 +118,19 @@ services:
       context: ./apps/saas-admin-nuxt
       dockerfile: Dockerfile
       args:
-        NUXT_PUBLIC_API_BASE: http://localhost:8080
-        NUXT_PUBLIC_SAAS_API_BASE: http://localhost:8080/saas
+        NUXT_PUBLIC_API_BASE: http://137.184.113.82:8080
+        NUXT_PUBLIC_SAAS_API_BASE: http://137.184.113.82:8080/saas
         NUXT_PUBLIC_APP_NAME: SAAS Manager Panel
-        NUXT_PUBLIC_APP_URL: http://localhost:3002
+        NUXT_PUBLIC_APP_URL: http://137.184.113.82:3002
         NUXT_PUBLIC_ENABLE_ANALYTICS: "true"
         NUXT_PUBLIC_ENABLE_AUDIT_LOGS: "true"
     container_name: clinic-saas-admin
     restart: unless-stopped
     environment:
-      NUXT_PUBLIC_API_BASE: http://localhost:8080
-      NUXT_PUBLIC_SAAS_API_BASE: http://localhost:8080/saas
+      NUXT_PUBLIC_API_BASE: http://137.184.113.82:8080
+      NUXT_PUBLIC_SAAS_API_BASE: http://137.184.113.82:8080/saas
       NUXT_PUBLIC_APP_NAME: SAAS Manager Panel
-      NUXT_PUBLIC_APP_URL: http://localhost:3002
+      NUXT_PUBLIC_APP_URL: http://137.184.113.82:3002
       NUXT_PUBLIC_ENABLE_ANALYTICS: "true"
       NUXT_PUBLIC_ENABLE_AUDIT_LOGS: "true"
       NODE_ENV: production
