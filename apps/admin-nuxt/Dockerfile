@@ -5,7 +5,7 @@ ARG NUXT_PRIVATE_API_BASE
 
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY apps/admin-nuxt/package.json .
+COPY package.json .
 RUN corepack enable && pnpm install
 
 FROM node:20-alpine AS builder
@@ -16,7 +16,7 @@ ENV NUXT_PRIVATE_API_BASE=${NUXT_PRIVATE_API_BASE}
 ENV NODE_OPTIONS=--max-old-space-size=4096
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY apps/admin-nuxt .
+COPY . .
 RUN corepack enable && pnpm install --no-frozen-lockfile && pnpm run build
 
 FROM node:20-alpine AS runner
