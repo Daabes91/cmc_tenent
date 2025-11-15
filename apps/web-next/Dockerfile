@@ -8,8 +8,7 @@ ARG DATABASE_URL=postgresql://clinic:clinic_password@postgres:5432/clinic_multi_
 FROM node:20-alpine AS deps
 RUN apk add --no-cache tar xz gzip
 WORKDIR /app
-COPY pnpm-lock.yaml .
-COPY apps/web-next/package.json .
+COPY package.json .
 RUN corepack enable && corepack prepare pnpm@10.22.0 --activate && pnpm install --no-frozen-lockfile
 
 FROM node:20-alpine AS builder
@@ -26,7 +25,7 @@ ENV DATABASE_URL=${DATABASE_URL}
 ENV NODE_OPTIONS=--max-old-space-size=4096
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY apps/web-next .
+COPY . .
 RUN pnpm install --no-frozen-lockfile && npx prisma generate && pnpm run build
 
 FROM node:20-alpine AS runner
