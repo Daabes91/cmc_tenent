@@ -35,9 +35,9 @@ services:
       EMAIL_FROM: clinic.notifier@example.com
       EMAIL_FROM_NAME: Clinic
       EMAIL_ENABLED: "false"
-      PUBLIC_APP_ORIGIN: http://137.184.113.82:3001
-      ADMIN_APP_ORIGIN: http://137.184.113.82:3000
-      SAAS_ADMIN_APP_ORIGIN: http://137.184.113.82:3002
+      PUBLIC_APP_ORIGIN: "*"
+      ADMIN_APP_ORIGIN: "*"
+      SAAS_ADMIN_APP_ORIGIN: "*"
       ADMIN_IP_ALLOWLIST: 0.0.0.0/0,::/0
       JWT_PATIENT_ISSUER: https://api.example-clinic.com
       JWT_PATIENT_AUDIENCE: patient
