@@ -34,9 +34,10 @@ services:
 
     envs:
       # Database connection (auto-configured by DigitalOcean)
+      # Spring Boot requires JDBC URL format with sslmode parameter
       - key: SPRING_DATASOURCE_URL
         scope: RUN_TIME
-        value: ${dev-db-563984.DATABASE_URL}
+        value: jdbc:postgresql://${dev-db-563984.HOSTNAME}:${dev-db-563984.PORT}/${dev-db-563984.DATABASE}?sslmode=require
       - key: SPRING_DATASOURCE_USERNAME
         scope: RUN_TIME
         value: ${dev-db-563984.USERNAME}
