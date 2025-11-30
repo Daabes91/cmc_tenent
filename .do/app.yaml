@@ -1,249 +1,164 @@
-name: cmc-app
-region: fra
-# Force refresh of environment variables with base64-encoded JWT keys
+name: cmc-tenent
+region: nyc
+# DigitalOcean App Platform spec generated for multi-service deployment.
+# Fill in the TODO_* placeholders with your real values before deploying.
 
-features:
-- buildpack-stack=ubuntu-22
-
-# Database - Managed PostgreSQL
-databases:
-  - name: dev-db-563984
-    engine: PG
-    version: "17"
-
-# API Backend (Spring Boot)
 services:
-  - name: cmc-apps-api
-    dockerfile_path: apps/api/Dockerfile
+  - name: api
     source_dir: apps/api
-    git:
-      repo_clone_url: https://github.com/Daabes91/cmc.git
-      branch: main
-
+    dockerfile_path: Dockerfile
     http_port: 8080
-    instance_size_slug: apps-s-1vcpu-0.5gb
+    instance_size_slug: basic-xxs
     instance_count: 1
-
-    health_check:
-      http_path: /actuator/health
-      initial_delay_seconds: 60
-      period_seconds: 10
-      timeout_seconds: 5
-      success_threshold: 1
-      failure_threshold: 3
-
     envs:
-      # Database connection (auto-configured by DigitalOcean)
-      # Spring Boot requires JDBC URL format with sslmode parameter
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
       - key: SPRING_DATASOURCE_URL
-        scope: RUN_TIME
-        value: jdbc:postgresql://${dev-db-563984.HOSTNAME}:${dev-db-563984.PORT}/${dev-db-563984.DATABASE}?sslmode=require
+        value: ${DATABASE_JDBC_URL:-jdbc:postgresql://db-host:5432/clinic_multi_tenant}
+        scope: RUN_AND_BUILD_TIME
       - key: SPRING_DATASOURCE_USERNAME
-        scope: RUN_TIME
-        value: ${dev-db-563984.USERNAME}
+        value: ${DATABASE_USER:-clinic}
+        scope: RUN_AND_BUILD_TIME
       - key: SPRING_DATASOURCE_PASSWORD
-        scope: RUN_TIME
-        type: SECRET
-        value: ${dev-db-563984.PASSWORD}
-
-      # JWT Configuration (Patient)
-      - key: JWT_PATIENT_ISSUER
+        value: ${DATABASE_PASSWORD:-change-me}
         scope: RUN_AND_BUILD_TIME
-        value: "https://seashell-app-n6ulr.ondigitalocean.app"
-      - key: JWT_PATIENT_AUDIENCE
-        scope: RUN_AND_BUILD_TIME
-        value: "patient"
-      - key: JWT_PATIENT_PRIVATE_KEY
-        scope: RUN_AND_BUILD_TIME
-        value: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRQ2pXdDcwRmJnUWFaZWwKdnQ4VjhLc05OVXptaWpGdXord200WDhPY3UvYTRmOXBuMlh2djB1YmR5NmxKdnBxWEFSTmNNOCtLd05yZ2ZISQpEWGxRa1JMWGpMVnNRV0hQVHNpM2JNYUp6VkhTK0Rnc1BWRSt1eGhlWE40ak9JaTltZFF5cit1N0tnMld1eWd4Cm9WL3BqVjgyZXNZM2F4alduSVBSQmpNdWs0M0cvYTRrQ0JmVTB5dDFtakZSM0wzM2hadldmTSsyVE9uTmJYVHgKMnM1OW05OXpLZDY1MXhHcmtOQmwzM2xmNFRRVUdKNFBMbzM2WllHNDJSUk9hZnBwVkFUUEh1enNpVklsSGRWZAphR2pMWHlmZlVmZXhrRFN4cTRKbTliWEVNRzIwZ0R4MzV5WHpYWU1qaXU2SDlrU0p6eVMxZEU5YTUrRHlSZ1kxCkdwY0c3aVpyQWdNQkFBRUNnZ0VBQXVEUEdXN2JWTjkvYUFQbG5vcWtnT1RGMGYyajc0ZGpVSytvb0NLbHNXNFcKaXcvNUFyZDdCNlpPQnYxLzdEWUVQRENxSklPUnN5Z2VRNHhpQnJaNVA1MHl3bEZ1bHo1aGFseFV4c2o4YXk5NApPRXpzcktLVGQzQ1BwUUE0ZjhFYXpGTUhYL0tKMWNFbEJxYlZpVWhwZTFtTkI0T0pwdjhwa2pPK0VCMjQxUkl5CmlMSzFEWDd0RGttejZsWUNqczZjNVBLdVZTZmpTQzJYY2ExTHR0YkZCeVBrOWJEMGVDYWdLNjZzSE9NcS9oQUwKZ3BWZGJ3WGovQ0VtTFJwbVBJeW5UVDI3R3JXL1RuQTYxYWZMalFUbTBhL0ZiWkh1bXNzaUJFZDk5aWlMZFN1YwpZaGhSdnBlL2VON0JOWTdreFR1UlZxZTAxTWJ6b08vOTVOMU9KVkNmYlFLQmdRRGVZdXJzOC82enViNjBweUFwCnpOY2xCOVRrTEhseW5MY05PMndKNHREQ2kxWllmSmV3cW5iUUhreUNETWcrVFNzdmRrU3I2ekZscGVxOUFSdnoKZzNsbTJkdVM5bitBeTRQTTdNVEcrV3NLbEFGbUk3aXc2TFVCenZSaWJVcWcrRW1hdkI3bTJsNTJNZW81Q3UrawpicnViTVpvUDhBOXpVOGN3OTlnbCtnUU5Kd0tCZ1FDOEM4WTBXQ0lDQWJQdk8vZm9ZMFE1VU0wRDVUVVNwOXlDCnloeHQrazUwOXJLVVVnL3J6NTVmL0tFTG1OOGZVVDFMbXptUEpURHFWM09tU0hSMkhZRG5vWXA4Vm81a2JrR2YKdTYzT2pucFRJRTU3T0M5UWl6dUp5cTg0VXl2eFlSbkJGTHFQQk0wRklzdWltTEdZbXp2d0VkSW9tNW9FZ3llcwp1TVV0WjQydkhRS0JnUUNzRm11b3RSOFJ3TmljUHYrYW1SS2JhelkJNDRtUGNVb05pVUFQWGw4aFRHV2l6N2NxClZKN2dhYkhXcVVHRFJILzRtRktIbnRaNHpDMmIySEhpdklpRFdHNmJpUGdkbUY4RGd1eTY5R01xcW1GeXdvMjMKQ0R5Wmk2WjlUQW1HQ3R3YVN4eTJrNkNwWWZMWDlXaUFHOWc5UGVMMEZsWStia1FqMW9hQ3pMZTUzUUtCZ0NlRQpJZWFtRHA5MVZDYVY1NGJDTlhnRjdzOCt2MlJvT2dLU0RsOWVGbGFsOE9rU1JaNDhSdi9NeXRyeENSSS90QzNMCk5ORkw4M2VMWVJZMGE2VFdsbHdXcWs5dXNRV1IxZUNIUkFNQUZkeWFFV1A3YnBYeWJGU01iejNhM0lVZzdwU1EKa3BPellwSU51ZFUxV1R6RWdsZjBwc0U1MGFmWkYrRklBc2VEMTFaUkFvR0JBSVU0azA5Q3FSWVpSQWhJR3lJZgpZbWZFL1hkY0ZxbGtoSldraGw2ckRSb1dDMzNIR3pVTU5CS0g4cm5VNVBNWmh3Q2ZpVTNFcG80dWphTVgrSkthCk1vQzFrZWJrTHAvTDQ3dmNLYWp2dytvemxrRUJTUHBYeVFERWdVeldCRzJyaTI3SjQvbjJQcnJ4ZE5SVVpRa0cKeXBZeUZpK3pyTEl6R3o3TG1yM0h6SVl4Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K
-      - key: JWT_PATIENT_PUBLIC_KEY
-        scope: RUN_AND_BUILD_TIME
-        value: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFvMXJlOUJXNEVHbVhwYjdmRmZDcgpEVFZNNW9veGJzL3NKdUYvRG5MdjJ1SC9hWjlsNzc5TG0zY3VwU2I2YWx3RVRYRFBQaXNEYTRIeHlBMTVVSkVTCjE0eTFiRUZoejA3SXQyekdpYzFSMHZnNExEMVJQcnNZWGx6ZUl6aUl2Wm5VTXEvcnV5b05scnNvTWFGZjZZMWYKTm5yR04yc1kxcHlEMFFZekxwT054djJ1SkFnWDFOTXJkWm94VWR5OTk0V2IxbnpQdGt6cHpXMTA4ZHJPZlp2ZgpjeW5ldWRjUnE1RFFaZDk1WCtFMEZCaWVEeTZOK21XQnVOa1VUbW42YVZRRXp4N3M3SWxTSlIzVlhXaG95MThuCjMxSDNzWkEwc2F1Q1p2VzF4REJ0dElBOGQrY2w4MTJESTRydWgvWkVpYzhrdFhSUFd1Zmc4a1lHTlJxWEJ1NG0KYXdJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCg==
-
-      # JWT Configuration (Staff)
-      - key: JWT_STAFF_ISSUER
-        scope: RUN_AND_BUILD_TIME
-        value: "https://seashell-app-n6ulr.ondigitalocean.app"
-      - key: JWT_STAFF_AUDIENCE
-        scope: RUN_AND_BUILD_TIME
-        value: "staff"
-      - key: JWT_STAFF_PRIVATE_KEY
-        scope: RUN_AND_BUILD_TIME
-        value: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRREJYQTAwUERhN0k5Q1YKejBuMkVEQ3FxRGowQlkvM1JUK1RGaHdtanJoK1RoL1RPb2pHbjREeVFaNDgvYVpsTFB4ZGhTRG1kdkdBTGUxeQp6NmpSNjd4b1U4d3Rva2JYeFVuYjNndkNjQmdhWnJMM0YvTDdOV2lpM2V5LzZIMzByWk9JMFdUdGNyQnk3NjROClpUeTVoaXpIMWxxbG5zeHdJc0lQUU1nRU1xQ1YrNGhtY2VCUEZINExVZDkrOEpYcTByTHNlWFJvVnVOaXBKV3cKSDA4Y29KdmVEZ09iaE9QUDNrd25uU1VBVGFLTTNGRm90bTY5MlBtZXUreSsrY25iUXk5M1BqQ2YydkxMcittcgozYTdaRHVueDl3RFpjbXlzcnJOd05laUpEQitLNC9vdjdUeVZnZyswZysvSXp6WVorcnVPaWZ6d2kydzRaQndqCnd5TTYyWE5YQWdNQkFBRUNnZ0VBQXVNdnIwcXNPK1NGQmpldmtHVWRmNW1UZ0NhMUhQN1pFWWFRVlEyOGpqdWgKdzEyL0VuZy9UTFFvME1XdVBtODFpdVZQWUhjQTZaRWJWL2puT2RDZURQdHpYbkJyUTcyYnoyb095RHMwUzV0TgpBTjVJQlVoVU9scG1EQUpFeWVxWVVXcTV2eHlxQUkxanVWVFJzS2ppOGs1Wkp0cXE0dUhNcVdoUTZhbk5Oc1YyCjBmOFpOZ0ZJTDhwcnlrQzZacHlPSi9zRmcwMm1rMXdvVk15LzY2MnV0aWJwbjIrUks2WmtONzl2ZWNnTFpuZXUKeHgzT2h4UTViMkJCSU9lZVN6UllNRHVDaXVYdmNOclZ5U1Z3OUxSWjUrNWZaaWxKTzRjVVY5Z2NTMUUyQ1ppVQpLUE5ReGQ0bjVBRExkb0ZsaGIrWDZEUXJxTFVZVS8wS1FDeW1YTVJhUVFLQmdRRHdCQXVZLysrcXBKZDdkNVV2CjB3ZHk0dkJXSGtjMGFXL2cvUStGRHlodWZ6S3d3T2g2a3g1SUtodTNZKyswQWhYdWs1b3JlSDRlb1I4VzUwRDMKUXRLbm5qZnJ0dk81VjJlNGU3aWs3djBBL0g3R0JuaU5nMTlpQWNYYit4dzB2bElWaTUvaWl2TWQ1djhuVS9KTgppbUk4RWxxaXFHNXd1MHdQYTRZMjVLWlZoUUtCZ1FET1BKUXMzTXFlRzJpSjNtbzVuMlFwT2c1TzI3Zi9uK2NDCmt3cGVoSzMxOVhOeXJQV0o0TW5RMjhQbDk5OEVqaWRlUTRUUVN1bTMzbnFHQk40QWw3L2NjdW1rTVZLN2c3cnkKRUp2RS9rNURONm51VFpDeldnNTYza2FDUGF5WkpqZk1obkhlOXB3V05VWWt0MEQvemJ2OUdNT2VFQnkySmVReAp1SWFNWnUyZUt3S0JnUURWTVhLdnk1NnlQNU1DcTd6TGh6SlZuVGtIOWNzZnhnd0htQ0VCK3UzYUFJZ2hNcWtOCnY4SWxMYW9DNHZVWE9zY0tiUGVEWjNyM2IveXlsbVZCZkl5ck1NSFJVV2Y2R0taYjJ5R3U5MDJxWTUyai9qbDAKMGQyV3E2WjVlUHFiNnZYMGgxcFVtMEhLTE5ZMXM3NUZuQWNYL3VHZEcrbEZuMGkzWmJZSTZsN0pGUUtCZ0UxWQpCckgwYzhCcnd2N0JmTkR6WjlyV1BQdHlCMFZFc0p3VWpQVDVpVXdPcXljOG1qRUZMbXEzb0hZa1NXMHA2clc5CldKZk5JRzJtY0FqRzFvTWVaZ1BFekw2WkNNL3VEVFF1Nmx3c2l5bEdQT0owRUdwU3djOXVnTDdqWmxGaE5kZnMKSzlSVVpDRW9CWkJMY1lMOW94eStKczZtZUQ0UFk4OEp4dHZzMWZ4VkFvR0JBTk5aME00VGMrT1FPMlJWRmE3cwpRaURITUVNUDBRek9vRldyZlRLZzlVdTQzSndxSjlqWHJtbi9tektMckNWUm1GbCs3UFdUVVc4aHZZYSswTGJECmFPeTdCeExIUExlMzR6a05kWmJMYWdmbG1QTldnR3FJMGpXM0dVNzZiU2FRd2VVTVlSZEgyRkRpdGNLT3Zsd2gKQ2hBcHUvdFFJcHM3Vjc4NXU4ejFicFJ6Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K
-      - key: JWT_STAFF_PUBLIC_KEY
-        scope: RUN_AND_BUILD_TIME
-        value: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF3VndOTkR3MnV5UFFsYzlKOWhBdwpxcWc0OUFXUDkwVS9reFljSm82NGZrNGYwenFJeHArQThrR2VQUDJtWlN6OFhZVWc1bmJ4Z0MzdGNzK28wZXU4CmFGUE1MYUpHMThWSjI5NEx3bkFZR21heTl4ZnkrelZvb3Qzc3YraDk5SzJUaU5GazdYS3djdSt1RFdVOHVZWXMKeDlaYXBaN01jQ0xDRDBESUJES2dsZnVJWm5IZ1R4UitDMUhmZnZDVjZ0S3k3SGwwYUZiallxU1ZzQjlQSEtDYgozZzREbTRUano5NU1KNTBsQUUyaWpOeFJhTFp1dmRqNW5ydnN2dm5KMjBNdmR6NHduOXJ5eTYvcHE5MnUyUTdwCjhmY0EyWEpzcks2emNEWG9pUXdmaXVQNkwrMDhsWUlQdElQdnlNODJHZnE3am9uODhJdHNPR1FjSThNak90bHoKVndJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCg==
-
-      # CORS Origins (will update with actual URLs)
       - key: PUBLIC_APP_ORIGIN
-        scope: RUN_TIME
-        value: "https://cmc-apps-web-next.ondigitalocean.app"
+        value: https://your-web-domain
       - key: ADMIN_APP_ORIGIN
-        scope: RUN_TIME
-        value: "https://cmc-apps-admin-nuxt.ondigitalocean.app"
-
-      # Clinic Configuration
-      - key: CLINIC_TIMEZONE_ZONEID
-        scope: RUN_TIME
-        value: "Asia/Amman"
-
-      # Email (SendGrid)
+        value: https://your-admin-domain
+      - key: SAAS_ADMIN_APP_ORIGIN
+        value: https://your-saas-admin-domain
       - key: SENDGRID_API_KEY
-        scope: RUN_TIME
+        value: TODO_SENDGRID_API_KEY
         type: SECRET
-        value: EV[1:ADmAR1Yg1euCJ05TwdkP7J1vN1bnpjrW:xT37KtMo7RLnKgFDla8Un+GnVAlyHPH5n0cNq+2cZcdF7FeNlyMGwUpym0UbhwG1q/ugk/oauRwMvPEy45JCmScCtsiJpIh51PPaugzC8k6S+ddaGQ==]
       - key: EMAIL_FROM
-        scope: RUN_TIME
-        value: "clinic.notifier@gmail.com"
+        value: info@cliniqax.com
       - key: EMAIL_FROM_NAME
-        scope: RUN_TIME
-        value: "Clinic"
-      - key: GOOGLE_MEET_LINK
-        scope: RUN_TIME
-        value: "https://meet.google.com/abc-defg-hij"
-      - key: CLINIC_ADDRESS
-        scope: RUN_TIME
-        value: "123 Medical Center, Amman, Jordan"
-
-      # Cloudflare Images
+        value: Cliniqax
+      - key: EMAIL_ENABLED
+        value: "true"
+      - key: PAYPAL_CLIENT_ID
+        value: TODO_PAYPAL_CLIENT_ID
+        type: SECRET
+      - key: PAYPAL_CLIENT_SECRET
+        value: TODO_PAYPAL_CLIENT_SECRET
+        type: SECRET
+      - key: PAYPAL_WEBHOOK_ID
+        value: TODO_PAYPAL_WEBHOOK_ID
+        type: SECRET
+      - key: PAYPAL_ENVIRONMENT
+        value: sandbox
+      - key: PAYPAL_BASE_URL
+        value: https://api-m.sandbox.paypal.com
+      - key: PAYPAL_ENCRYPTION_KEY
+        value: TODO_PAYPAL_ENCRYPTION_KEY_32B
+        type: SECRET
+      - key: APP_BASE_URL
+        value: https://your-web-domain
+      - key: GOOGLE_CLIENT_ID
+        value: TODO_GOOGLE_CLIENT_ID
+        type: SECRET
+      - key: GOOGLE_CLIENT_SECRET
+        value: TODO_GOOGLE_CLIENT_SECRET
+        type: SECRET
+      - key: GOOGLE_REDIRECT_URI
+        value: https://your-web-domain/auth/google/callback
       - key: CLOUDFLARE_ACCOUNT_ID
-        scope: RUN_TIME
+        value: TODO_CLOUDFLARE_ACCOUNT_ID
         type: SECRET
-        value: EV[1:/9c+9CnIfBpohpbmDGGLDsSz0b2OAVIU:8Lf1oTQ7XPIlIooWLQODXXuKE01ERLS33wnI2d84TGfnXj8YMCfWcb6jHYc7Bkik]
       - key: CLOUDFLARE_API_TOKEN
-        scope: RUN_TIME
+        value: TODO_CLOUDFLARE_API_TOKEN
         type: SECRET
-        value: EV[1:ZLIWBso5+tTH9Rc9vL+k0bmEoVeEe+gD:z8+JYMM5hYRQGwrYKO/9IdVnE+g4oXo508nccgEtuhjrHgCiBDpao9lKSQ2g+ptqt9eOZBMifYo=]
-      - key: CLOUDFLARE_IMAGES_BASE_URL
-        scope: RUN_TIME
-        value: "https://api.cloudflare.com/client/v4"
-      - key: CLOUDFLARE_IMAGES_DELIVERY_URL
-        scope: RUN_TIME
-        value: "https://imagedelivery.net/K88oXEK4nwOFUDLZaSq1vg"
-      - key: CLOUDFLARE_MAX_FILE_SIZE_MB
-        scope: RUN_TIME
-        value: "10"
-      - key: CLOUDFLARE_IMAGE_QUALITY
-        scope: RUN_TIME
-        value: "85"
-      - key: CLOUDFLARE_AUTO_OPTIMIZE
-        scope: RUN_TIME
+      - key: CLOUDFLARE_BASE_URL
+        value: https://api.cloudflare.com/client/v4
+      - key: CLOUDFLARE_DELIVERY_URL
+        value: ""
+      - key: CLOUDFLARE_IMAGES_MOCK_MODE
         value: "true"
 
-      # PayPal
-      - key: PAYPAL_CLIENT_ID
-        scope: RUN_TIME
-        type: SECRET
-        value: EV[1:RkBRkaUYBEFXXoRUCfiKjk+xQgMnBDtx:sCqzG2t7gpDzHSmcNZWwBfm2iKOtDPY44AS5iChv5LlVc5GAFOvWvaYNE4jSuyX4sC/kvaTWjI9RN1yS6BHdKHKwXsq0pRjJ2qIiRTmXyvy7hq6oQM6XhGi+t3AlXzsP]
-      - key: PAYPAL_CLIENT_SECRET
-        scope: RUN_TIME
-        type: SECRET
-        value: EV[1:QAASex08NZjDmg2whU45WELAwgGzC028:EXBV7qEFnWbKbMV6qHwYmBnl0BcDgpsf6dKn6OcetesQDnUyQPT9KzWx9g2e7aJH9SmDZg0UORn2cifEh6ti3/UjtvFpDz1VNPVryQmIR54VVwITMkB3MvumJaYf+32z]
-      - key: PAYPAL_ENVIRONMENT
-        scope: RUN_TIME
-        value: "sandbox"
-      - key: PAYPAL_BASE_URL
-        scope: RUN_TIME
-        value: "https://api-m.sandbox.paypal.com"
-
-      # Rate Limiting
-      - key: RATE_LIMIT_PUBLIC_AUTH_CAPACITY
-        scope: RUN_TIME
-        value: "5"
-      - key: RATE_LIMIT_PUBLIC_AUTH_PERIOD
-        scope: RUN_TIME
-        value: "PT1M"
-
-      # IP Allowlist for Admin API
-      - key: ADMIN_IP_ALLOWLIST_PRIMARY
-        scope: RUN_AND_BUILD_TIME
-        value: "0.0.0.0/0"
-      - key: ADMIN_IP_ALLOWLIST_SECONDARY
-        scope: RUN_AND_BUILD_TIME
-        value: "::/0"
-
-  # Patient Web App (Next.js)
-  - name: cmc-apps-web-next
-    environment_slug: node-js
-    build_command: pnpm install --no-frozen-lockfile && pnpm run build
-    run_command: pnpm start
+  - name: web
     source_dir: apps/web-next
-    git:
-      repo_clone_url: https://github.com/Daabes91/cmc.git
-      branch: main
-
+    dockerfile_path: Dockerfile
     http_port: 3001
-    instance_size_slug: apps-s-1vcpu-0.5gb
+    instance_size_slug: basic-xxs
     instance_count: 1
-
-    health_check:
-      http_path: /web-app
-      port: 3001
-      initial_delay_seconds: 30
-      period_seconds: 10
-      timeout_seconds: 5
-      success_threshold: 1
-      failure_threshold: 3
-
     envs:
       - key: NEXT_PUBLIC_API_URL
+        value: https://your-api-domain/public
+      - key: NEXT_SERVER_API_URL
+        value: https://your-api-domain/public
+      - key: NEXT_SERVER_API_BASE_URL
+        value: https://your-api-domain
+      - key: DATABASE_URL
+        value: ${DATABASE_URL:-postgresql://user:password@db-host:5432/clinic_multi_tenant}
         scope: RUN_AND_BUILD_TIME
-        value: "https://${cmc-apps-api.PUBLIC_URL}/api/public"
-      - key: NODE_ENV
-        scope: RUN_AND_BUILD_TIME
-        value: "production"
 
-  # Admin Dashboard (Nuxt 3)
-  - name: cmc-apps-admin-nuxt
-    environment_slug: node-js
-    build_command: pnpm install --no-frozen-lockfile && pnpm run build
-    run_command: node .output/server/index.mjs
+  - name: admin
     source_dir: apps/admin-nuxt
-    git:
-      repo_clone_url: https://github.com/Daabes91/cmc.git
-      branch: main
-
+    dockerfile_path: Dockerfile
     http_port: 3000
-    instance_size_slug: apps-s-1vcpu-0.5gb
+    instance_size_slug: basic-xxs
     instance_count: 1
-
-    health_check:
-      http_path: /admin-panel
-      port: 3000
-      initial_delay_seconds: 30
-      period_seconds: 10
-      timeout_seconds: 5
-      success_threshold: 1
-      failure_threshold: 3
-
     envs:
       - key: NUXT_PUBLIC_API_BASE
-        scope: RUN_AND_BUILD_TIME
-        value: "https://${cmc-apps-api.PUBLIC_URL}/api/admin"
-      - key: NUXT_PUBLIC_PUBLIC_API_BASE
-        scope: RUN_AND_BUILD_TIME
-        value: "https://${cmc-apps-api.PUBLIC_URL}/api"
+        value: https://your-api-domain/admin
+      - key: NUXT_PRIVATE_API_BASE
+        value: https://your-api-domain/admin
       - key: NODE_ENV
-        scope: RUN_AND_BUILD_TIME
-        value: "production"
+        value: production
 
-# Ingress routing configuration
-ingress:
-  rules:
-  - component:
-      name: cmc-apps-admin-nuxt
-      preserve_path_prefix: true
-    match:
-      path:
-        prefix: /admin-panel
-  - component:
-      name: cmc-apps-web-next
-      preserve_path_prefix: true
-    match:
-      path:
-        prefix: /web-app
-  - component:
-      name: cmc-apps-api
-    match:
-      path:
-        prefix: /
+  - name: saas-admin
+    source_dir: apps/saas-admin-nuxt
+    dockerfile_path: Dockerfile
+    http_port: 3002
+    instance_size_slug: basic-xxs
+    instance_count: 1
+    envs:
+      - key: NUXT_PUBLIC_API_BASE
+        value: https://your-api-domain
+      - key: NUXT_PUBLIC_SAAS_API_BASE
+        value: https://your-api-domain/saas
+      - key: NUXT_PUBLIC_APP_NAME
+        value: SAAS Manager Panel
+      - key: NUXT_PUBLIC_APP_URL
+        value: https://your-saas-admin-domain
+      - key: NUXT_PUBLIC_ENABLE_ANALYTICS
+        value: "true"
+      - key: NUXT_PUBLIC_ENABLE_AUDIT_LOGS
+        value: "true"
+      - key: NODE_ENV
+        value: production
+
+  - name: saas-landing
+    source_dir: apps/saas-landing
+    dockerfile_path: Dockerfile
+    http_port: 3003
+    instance_size_slug: basic-xxs
+    instance_count: 1
+    envs:
+      - key: NEXT_PUBLIC_API_BASE_URL
+        value: https://your-api-domain
+      - key: NEXT_PUBLIC_APP_URL
+        value: https://your-landing-domain
+      - key: NEXT_PUBLIC_PAYPAL_CLIENT_ID
+        value: TODO_PAYPAL_CLIENT_ID
+        type: SECRET
+      - key: NEXT_PUBLIC_HERO_VIDEO_URL
+        value: https://www.youtube.com/embed/T8lXiW5x8_s?autoplay=1&mute=1&loop=1
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3003"
+
+routes:
+  - path: /
+    service: web
+  - path: /admin(/.*)?
+    service: admin
+    preserve_path_prefix: true
+  - path: /saas-admin(/.*)?
+    service: saas-admin
+    preserve_path_prefix: true
+  - path: /landing(/.*)?
+    service: saas-landing
+    preserve_path_prefix: true
