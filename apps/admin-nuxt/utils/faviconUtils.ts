@@ -6,7 +6,7 @@
 /**
  * Default favicon for admin panel
  */
-export const DEFAULT_ADMIN_FAVICON = '/admin-favicon.ico';
+export const DEFAULT_ADMIN_FAVICON = 'https://imagedelivery.net/K88oXEK4nwOFUDLZaSq1vg/6c79054b-5ecc-4a97-be03-441518f70200/public';
 
 /**
  * Get the appropriate MIME type for favicon link element

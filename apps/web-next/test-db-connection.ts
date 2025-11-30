@@ -1,10 +1,10 @@
 import { config } from 'dotenv'
-import { PrismaClient } from '@prisma/client'
+import { Pool } from 'pg'
 
 config({ path: '.env.local' })
 
-const prisma = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'],
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
 })
 
 async function main() {
@@ -12,13 +12,14 @@ async function main() {
   console.log('DATABASE_URL:', process.env.DATABASE_URL)
   
   try {
-    await prisma.$connect()
+    const client = await pool.connect()
     console.log('Connected successfully!')
     
-    const result = await prisma.$queryRaw`SELECT current_database(), current_user`
-    console.log('Query result:', result)
+    const result = await client.query('SELECT current_database(), current_user')
+    console.log('Query result:', result.rows)
     
-    await prisma.$disconnect()
+    client.release()
+    await pool.end()
   } catch (error) {
     console.error('Connection failed:', error)
     process.exit(1)

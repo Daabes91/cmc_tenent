@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-mint-500 to-mint-300 shadow-lg">
               <UIcon name="i-lucide-calendar-days" class="h-6 w-6 text-white" />
             </div>
             <div>
@@ -79,11 +79,10 @@
             v-if="viewMode === 'month'"
             :current-date="currentDate"
             :appointments="appointments"
-            :selected-date="selectedDate"
-            :mobile="isMobile"
             @date-click="selectDate"
-            @appointment-click="openAppointment"
-            @show-more="handleShowMore"
+          @appointment-click="handleExistingAppointmentClick"
+            @create-period="handlePeriodSelection"
+            :periods="periods"
           />
           
           <!-- Week View -->
@@ -91,9 +90,9 @@
             v-else-if="viewMode === 'week'"
             :current-date="currentDate"
             :appointments="appointments"
-            :selected-date="selectedDate"
             @date-click="selectDate"
-            @appointment-click="openAppointment"
+          @appointment-click="handleExistingAppointmentClick"
+            @create-appointment="handleAppointmentSelection"
           />
           
           <!-- Day View -->
@@ -101,8 +100,8 @@
             v-else-if="viewMode === 'day'"
             :current-date="currentDate"
             :appointments="appointments"
-            @time-slot-click="handleTimeSlotClick"
-            @appointment-click="openAppointment"
+            @create-appointment="handleAppointmentSelection"
+          @appointment-click="handleExistingAppointmentClick"
           />
         </div>
       </div>
@@ -130,18 +129,34 @@
     </div>
 
     <!-- Day Modal for Multiple Appointments -->
-    <CalendarDayModal
-      v-model="showDayModal"
-      :day="selectedDay"
-      @appointment-click="openAppointment"
-      @new-appointment="handleNewAppointmentFromModal"
+    <CalendarAppointmentModal
+      v-model="showAppointmentModal"
+      :selection="appointmentSelection"
+      :services="services"
+      :doctors="doctors"
+      :patients="patients"
+      :mode="appointmentModalMode"
+      :defaults="appointmentFormDefaults"
+      :submitting="creatingAppointment"
+      @submit="handleAppointmentSubmit"
+      @delete="handleAppointmentDelete"
+    />
+
+    <CalendarPeriodModal
+      v-model="showPeriodModal"
+      :selection="periodSelection"
+      :submitting="creatingPeriod"
+      @submit="handlePeriodSubmit"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { AppointmentAdmin } from "@/types/appointments";
+import type { AppointmentAdmin, AppointmentAdminDetail } from "@/types/appointments";
 import type { DoctorAdmin } from "@/types/doctors";
+import type { AdminServiceSummary } from "@/types/services";
+import type { PatientAdmin } from "@/types/patients";
+import type { CalendarAppointmentRequest, CalendarAppointmentPayload, CalendarPeriod, CalendarPeriodPayload } from "@/types/calendar";
 import { computed, ref, watch, onMounted, onUnmounted } from "vue";
 // Remove the explicit import since useAdminApi should be auto-imported
 
@@ -170,13 +185,51 @@ const allAppointments = ref<AppointmentAdmin[]>([]); // Store all appointments b
 const pending = ref(false);
 const selectedDoctorId = ref<number | null>(null);
 
+type MaybePaginated<T> = T[] | { content: T[] } | { data: T[] };
+
 // Fetch doctors for filtering
-const { data: doctorsData, pending: loadingDoctors } = await useAsyncData(
+const { data: doctorsData, pending: loadingDoctors } = await useAsyncData<MaybePaginated<DoctorAdmin>>(
   'calendar-doctors',
-  () => fetcher<DoctorAdmin[]>('/doctors', [])
+  () => fetcher<MaybePaginated<DoctorAdmin>>('/doctors?size=250', [])
 );
 
-const doctors = computed(() => doctorsData.value ?? []);
+const { data: servicesData } = await useAsyncData<MaybePaginated<AdminServiceSummary>>(
+  'calendar-services',
+  () => fetcher<MaybePaginated<AdminServiceSummary>>('/services?size=250', [])
+);
+
+const { data: patientsData } = await useAsyncData<MaybePaginated<PatientAdmin>>(
+  'calendar-patients',
+  () => fetcher<MaybePaginated<PatientAdmin>>('/patients?size=250', [])
+);
+
+const { data: periodData } = await useAsyncData(
+  'calendar-periods',
+  () => fetcher<CalendarPeriod[]>('/calendar/periods', [])
+);
+
+const extractItems = <T extends Record<string, any>>(value: any): T[] => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value as T[];
+  if (Array.isArray(value?.content)) return value.content as T[];
+  if (Array.isArray(value?.data)) return value.data as T[];
+  return [];
+};
+
+const doctors = computed(() => extractItems<DoctorAdmin>(doctorsData.value));
+const services = computed(() => extractItems<AdminServiceSummary>(servicesData.value));
+const patients = computed(() => extractItems<PatientAdmin>(patientsData.value));
+
+const periods = ref<CalendarPeriod[]>(periodData.value ?? []);
+
+watch(
+  () => periodData.value,
+  (value) => {
+    if (value) {
+      periods.value = value;
+    }
+  }
+);
 
 // Calendar page specific logic
 
@@ -204,49 +257,44 @@ watch(filteredAppointments, (newAppointments) => {
   appointments.value = newAppointments;
 }, { immediate: true });
 
-// Calendar page computed properties
-const appointmentsByDate = computed(() => {
-  const map = new Map<string, AppointmentAdmin[]>();
-  
-  appointments.value.forEach(appointment => {
-    const date = new Date(appointment.scheduledAt).toDateString();
-    if (!map.has(date)) {
-      map.set(date, []);
-    }
-    map.get(date)!.push(appointment);
-  });
-  
-  return map;
-});
-
-// Memoized calendar calculations
-const calendarMeta = computed(() => {
-  const year = currentDate.value.getFullYear();
-  const month = currentDate.value.getMonth();
-  
-  return {
-    year,
-    month,
-    firstDay: new Date(year, month, 1),
-    lastDay: new Date(year, month + 1, 0),
-    daysInMonth: new Date(year, month + 1, 0).getDate()
-  };
-});
-
-// Modal state
-const showDayModal = ref(false);
-const selectedDay = ref<any>(null);
-
-// Helper functions for calendar page
-const handleShowMore = (day: any) => {
-  selectedDay.value = day;
-  showDayModal.value = true;
+type AppointmentFormDefaults = {
+  appointmentId: number | null;
+  serviceId: number | null;
+  doctorId: number | null;
+  patientId: number | null;
+  notes: string;
 };
 
-const handleNewAppointmentFromModal = (date: Date) => {
-  const dateStr = date.toISOString().split('T')[0];
-  navigateTo(`/appointments/new?date=${dateStr}`);
+type AppointmentModalSubmitPayload = CalendarAppointmentPayload & {
+  start: Date;
+  end: Date;
+  appointmentId: number | null;
+  mode: "create" | "edit";
 };
+type PeriodModalSubmitPayload = CalendarPeriodPayload & { start: Date; end: Date };
+
+const appointmentSelection = ref<CalendarAppointmentRequest | null>(null);
+const showAppointmentModal = ref(false);
+const creatingAppointment = ref(false);
+const appointmentModalMode = ref<"create" | "edit">("create");
+const defaultAppointmentForm = (): AppointmentFormDefaults => ({
+  appointmentId: null,
+  serviceId: null,
+  doctorId: null,
+  patientId: null,
+  notes: ""
+});
+const appointmentFormDefaults = ref<AppointmentFormDefaults>(defaultAppointmentForm());
+const resetAppointmentModalState = () => {
+  showAppointmentModal.value = false;
+  appointmentSelection.value = null;
+  appointmentModalMode.value = "create";
+  appointmentFormDefaults.value = defaultAppointmentForm();
+};
+
+const periodSelection = ref<{ start: Date; end: Date } | null>(null);
+const showPeriodModal = ref(false);
+const creatingPeriod = ref(false);
 
 // Navigation functions
 const handleDateChange = (newDate: Date) => {
@@ -266,19 +314,47 @@ const handleViewModeChange = (mode: 'month' | 'week' | 'day') => {
   }
 };
 
-const handleTimeSlotClick = (date: Date, hour: number) => {
-  const appointmentDate = new Date(date);
-  appointmentDate.setHours(hour, 0, 0, 0);
-  const dateStr = appointmentDate.toISOString();
-  navigateTo(`/appointments/new?scheduledAt=${dateStr}`);
+const handleAppointmentSelection = (range: CalendarAppointmentRequest) => {
+  appointmentModalMode.value = "create";
+  appointmentFormDefaults.value = defaultAppointmentForm();
+  appointmentSelection.value = range;
+  showAppointmentModal.value = true;
+};
+
+const handlePeriodSelection = (range: { start: Date; end: Date }) => {
+  periodSelection.value = range;
+  showPeriodModal.value = true;
 };
 
 const selectDate = (date: Date) => {
   selectedDate.value = date;
 };
 
-const openAppointment = (appointment: AppointmentAdmin) => {
-  navigateTo(`/appointments/${appointment.id}`);
+const handleExistingAppointmentClick = async (appointment: AppointmentAdmin) => {
+  try {
+    const detail = await adminRequest<AppointmentAdminDetail>(`/appointments/${appointment.id}`);
+    const start = detail?.scheduledAt
+      ? new Date(detail.scheduledAt)
+      : new Date(appointment.scheduledAt * 1000);
+    const duration = detail?.slotDurationMinutes ?? appointment.slotDurationMinutes ?? 60;
+    const end = new Date(start.getTime() + duration * 60 * 1000);
+    appointmentSelection.value = { start, end };
+    appointmentModalMode.value = "edit";
+    appointmentFormDefaults.value = {
+      appointmentId: detail?.id ?? appointment.id,
+      serviceId: detail?.service?.id ?? null,
+      doctorId: detail?.doctor?.id ?? null,
+      patientId: detail?.patient?.id ?? null,
+      notes: detail?.notes ?? ""
+    };
+    showAppointmentModal.value = true;
+  } catch (error: any) {
+    toast.add({
+      title: "Unable to load appointment",
+      description: error?.data?.message ?? error?.message ?? "Please try again later.",
+      color: "red"
+    });
+  }
 };
 
 const handleDoctorFilterChange = (doctorId: number | null) => {
@@ -290,6 +366,246 @@ const handleDoctorFilterChange = (doctorId: number | null) => {
     } else {
       sessionStorage.removeItem('calendar-doctor-filter');
     }
+  }
+};
+
+const getServiceNameById = (serviceId: number | null) => {
+  if (!serviceId) return "Service";
+  const service = services.value.find((item) => item.id === serviceId);
+  return service?.nameEn || service?.nameAr || `Service #${serviceId}`;
+};
+
+const getDoctorNameById = (doctorId: number | null) => {
+  if (!doctorId) return "Doctor";
+  const doctor = doctors.value.find((item) => item.id === doctorId);
+  return doctor?.fullNameEn || doctor?.fullNameAr || `Doctor #${doctorId}`;
+};
+
+const getPatientNameById = (patientId: number | null) => {
+  if (!patientId) return "Patient";
+  const patient = patients.value.find((item) => item.id === patientId);
+  if (!patient) return `Patient #${patientId}`;
+  const fullName = `${patient.firstName ?? ""} ${patient.lastName ?? ""}`.trim();
+  return fullName || `Patient #${patientId}`;
+};
+
+const createOptimisticAppointment = (
+  payload: AppointmentModalSubmitPayload,
+  slotDurationMinutes: number,
+  tempId: number
+): AppointmentAdmin => ({
+  id: tempId,
+  patientName: getPatientNameById(payload.patientId),
+  doctorName: getDoctorNameById(payload.doctorId),
+  serviceName: getServiceNameById(payload.serviceId),
+  scheduledAt: Math.floor(payload.start.getTime() / 1000),
+  status: "scheduled",
+  bookingMode: "CLINIC_VISIT",
+  slotDurationMinutes,
+  paymentCollected: false,
+  patientAttended: null,
+  treatmentPlanId: null,
+  followUpVisitNumber: null,
+  paymentAmount: null,
+  paymentMethod: null,
+  paymentCurrency: null
+});
+
+const normalizeAppointmentDetail = (
+  detail: AppointmentAdminDetail | null,
+  fallback: AppointmentAdmin
+): AppointmentAdmin => {
+  if (!detail) return fallback;
+  const scheduledAtDate = detail.scheduledAt ? new Date(detail.scheduledAt) : new Date(fallback.scheduledAt * 1000);
+  return {
+    id: detail.id ?? fallback.id,
+    patientName: detail.patient?.name ?? fallback.patientName,
+    doctorName: detail.doctor?.name ?? fallback.doctorName,
+    serviceName: detail.service?.name ?? fallback.serviceName,
+    scheduledAt: Math.floor(scheduledAtDate.getTime() / 1000),
+    status: detail.status ?? fallback.status,
+    bookingMode: detail.bookingMode ?? fallback.bookingMode,
+    slotDurationMinutes: detail.slotDurationMinutes ?? fallback.slotDurationMinutes,
+    treatmentPlanId: detail.treatmentPlanId ?? fallback.treatmentPlanId ?? null,
+    followUpVisitNumber: detail.followUpVisitNumber ?? fallback.followUpVisitNumber ?? null,
+    paymentCollected: detail.paymentCollected ?? fallback.paymentCollected ?? false,
+    patientAttended: detail.patientAttended ?? fallback.patientAttended ?? null,
+    paymentAmount: detail.paymentAmount ?? fallback.paymentAmount ?? null,
+    paymentMethod: detail.paymentMethod ?? fallback.paymentMethod ?? null,
+    paymentCurrency: detail.paymentCurrency ?? fallback.paymentCurrency ?? null
+  };
+};
+
+const replaceAppointmentInState = (tempId: number, replacement: AppointmentAdmin | null) => {
+  const withoutTemp = allAppointments.value.filter((appointment) => appointment.id !== tempId);
+  allAppointments.value = replacement ? [...withoutTemp, replacement] : withoutTemp;
+};
+
+const appendAppointmentToState = (appointment: AppointmentAdmin) => {
+  allAppointments.value = [...allAppointments.value, appointment];
+};
+
+const replacePeriodInState = (tempId: string, replacement: CalendarPeriod | null) => {
+  const withoutTemp = periods.value.filter((period) => period.id !== tempId);
+  periods.value = replacement ? [...withoutTemp, replacement] : withoutTemp;
+};
+
+const normalizePeriod = (period: CalendarPeriod, fallbackId: string): CalendarPeriod => ({
+  ...period,
+  id: period.id ?? fallbackId
+});
+
+const handleAppointmentSubmit = async (payload: AppointmentModalSubmitPayload) => {
+  if (!payload.patientId || !payload.doctorId || !payload.serviceId) {
+    toast.add({
+      title: "Missing details",
+      description: "Please select patient, doctor, and service before scheduling.",
+      color: "red"
+    });
+    return;
+  }
+
+  creatingAppointment.value = true;
+  const slotDurationMinutes = Math.max(
+    30,
+    Math.round((payload.end.getTime() - payload.start.getTime()) / (1000 * 60))
+  );
+
+  const body = {
+    patientId: payload.patientId,
+    doctorId: payload.doctorId,
+    serviceId: payload.serviceId,
+    scheduledAt: payload.start.toISOString(),
+    slotDurationMinutes,
+    bookingMode: "CLINIC_VISIT",
+    notes: payload.notes?.trim() || null
+  };
+
+  if (payload.mode === "edit" && payload.appointmentId) {
+    try {
+      await adminRequest(`/appointments/${payload.appointmentId}`, {
+        method: "PUT",
+        body
+      });
+
+      const updatedDetail = await adminRequest<AppointmentAdminDetail>(`/appointments/${payload.appointmentId}`);
+      const fallbackAppointment =
+        allAppointments.value.find((appointment) => appointment.id === payload.appointmentId) ??
+        createOptimisticAppointment(payload, slotDurationMinutes, payload.appointmentId);
+      const normalizedAppointment = normalizeAppointmentDetail(updatedDetail, fallbackAppointment);
+      replaceAppointmentInState(payload.appointmentId, normalizedAppointment);
+      toast.add({
+        title: "Appointment updated",
+        description: `${normalizedAppointment.patientName} · ${payload.startTime} – ${payload.endTime}`,
+        color: "green"
+      });
+    } catch (error: any) {
+      toast.add({
+        title: "Unable to update appointment",
+        description: error?.message ?? "Please try again later.",
+        color: "red"
+      });
+    } finally {
+      creatingAppointment.value = false;
+      resetAppointmentModalState();
+    }
+    return;
+  }
+
+  const tempId = Date.now();
+  const optimisticAppointment = createOptimisticAppointment(payload, slotDurationMinutes, tempId);
+  appendAppointmentToState(optimisticAppointment);
+
+  try {
+    const response = await adminRequest<AppointmentAdminDetail>("/appointments", {
+      method: "POST",
+      body
+    });
+
+    const normalizedAppointment = normalizeAppointmentDetail(response, optimisticAppointment);
+    replaceAppointmentInState(tempId, normalizedAppointment);
+    toast.add({
+      title: "Appointment scheduled",
+      description: `${normalizedAppointment.patientName} · ${payload.startTime} – ${payload.endTime}`,
+      color: "green"
+    });
+  } catch (error: any) {
+    replaceAppointmentInState(tempId, null);
+    toast.add({
+      title: "Unable to schedule appointment",
+      description: error?.message ?? "Please try again later.",
+      color: "red"
+    });
+  } finally {
+    creatingAppointment.value = false;
+    resetAppointmentModalState();
+  }
+};
+
+const handleAppointmentDelete = async (appointmentId: number | null) => {
+  if (!appointmentId) return;
+  creatingAppointment.value = true;
+  try {
+    await adminRequest(`/appointments/${appointmentId}`, { method: "DELETE" });
+    replaceAppointmentInState(appointmentId, null);
+    toast.add({
+      title: "Appointment deleted",
+      description: "The appointment has been removed from the calendar.",
+      color: "green"
+    });
+  } catch (error: any) {
+    toast.add({
+      title: "Unable to delete appointment",
+      description: error?.data?.message ?? error?.message ?? "Please try again later.",
+      color: "red"
+    });
+  } finally {
+    creatingAppointment.value = false;
+    resetAppointmentModalState();
+  }
+};
+
+const handlePeriodSubmit = async (payload: PeriodModalSubmitPayload) => {
+  creatingPeriod.value = true;
+  const tempId = `temp-${Date.now()}`;
+  const optimisticPeriod: CalendarPeriod = {
+    id: tempId,
+    startDate: payload.startDate,
+    endDate: payload.endDate,
+    type: payload.type,
+    notes: payload.notes
+  };
+  periods.value = [...periods.value, optimisticPeriod];
+
+  try {
+    const createdPeriod = await adminRequest<CalendarPeriod>("/calendar/periods", {
+      method: "POST",
+      body: {
+        startDate: payload.startDate,
+        endDate: payload.endDate,
+        type: payload.type,
+        notes: payload.notes
+      }
+    });
+
+    const normalizedPeriod = createdPeriod ? normalizePeriod(createdPeriod, tempId) : optimisticPeriod;
+    replacePeriodInState(tempId, normalizedPeriod);
+    toast.add({
+      title: "Period saved",
+      description: `${payload.type} · ${payload.startDate} → ${payload.endDate}`,
+      color: "blue"
+    });
+  } catch (error: any) {
+    replacePeriodInState(tempId, null);
+    toast.add({
+      title: "Unable to save period",
+      description: error?.message ?? "Please try again later.",
+      color: "red"
+    });
+  } finally {
+    creatingPeriod.value = false;
+    showPeriodModal.value = false;
+    periodSelection.value = null;
   }
 };
 

@@ -182,25 +182,32 @@
   }
 
   .bg-primary-gradient {
-    background-image: linear-gradient(135deg, #13b0a9, #0d7377);
+    background-image: linear-gradient(135deg, #00a43c, #01652f);
   }
   .dark .bg-primary-gradient {
-    background-image: linear-gradient(135deg, #13b0a9, #0d7377);
+    background-image: linear-gradient(135deg, #00a43c, #01652f);
   }
 
   .bg-primary-gradient-soft {
     background-image: linear-gradient(
       135deg,
-      rgba(19, 176, 169, 0.14),
-      rgba(13, 115, 119, 0.14)
+      rgba(0, 164, 60, 0.14),
+      rgba(1, 101, 47, 0.14)
     );
   }
   .dark .bg-primary-gradient-soft {
     background-image: linear-gradient(
       135deg,
-      rgba(19, 176, 169, 0.22),
-      rgba(13, 115, 119, 0.22)
+      rgba(0, 164, 60, 0.22),
+      rgba(1, 101, 47, 0.22)
     );
+  }
+
+  .to-purple-600 {
+    --tw-gradient-to: #34b16d var(--tw-gradient-to-position);
+  }
+  .dark .to-purple-600 {
+    --tw-gradient-to: #34b16d var(--tw-gradient-to-position);
   }
 
   .dark .page-content .border-slate-200,

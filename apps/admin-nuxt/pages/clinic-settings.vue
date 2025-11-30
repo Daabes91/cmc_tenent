@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-mint-500 to-mint-400 shadow-lg">
               <UIcon name="i-lucide-settings" class="h-6 w-6 text-white" />
             </div>
             <div>
@@ -76,7 +76,7 @@
           <form @submit.prevent="saveSettings" class="space-y-6">
             <!-- Clinic Identity Section -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-              <div class="bg-gradient-to-r from-violet-500 to-purple-600 px-6 py-4">
+              <div class="bg-gradient-to-r from-mint-500 to-mint-400 px-6 py-4">
                 <div class="flex items-center gap-3">
                   <UIcon name="i-lucide-building-2" class="h-5 w-5 text-white" />
                   <div>
@@ -151,6 +151,19 @@
                       @upload-success="handleLogoUpload"
                       @upload-error="handleLogoError"
                     />
+                  </UFormGroup>
+
+                  <UFormGroup :label="t('clinicSettings.form.favicon.label')" :hint="t('clinicSettings.form.favicon.hint')">
+                    <ImageUpload
+                      v-model="formData.faviconUrl"
+                      :alt-text="t('clinicSettings.form.favicon.altText')"
+                      :disabled="saving"
+                      @upload-success="handleFaviconUpload"
+                      @upload-error="handleFaviconError"
+                    />
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                      {{ t('clinicSettings.form.favicon.helper') }}
+                    </p>
                   </UFormGroup>
 
                   <div class="grid gap-4 md:grid-cols-2">
@@ -481,72 +494,6 @@
               </div>
             </div>
 
-            <!-- Cloudflare Images Settings Section -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-              <div class="bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-4">
-                <div class="flex items-center gap-3">
-                  <UIcon name="i-lucide-cloud-upload" class="h-5 w-5 text-white" />
-                  <div>
-                    <h2 class="text-lg font-semibold text-white">{{ t('clinicSettings.sections.cloudflare.title') }}</h2>
-                    <p class="text-sm text-cyan-100">{{ t('clinicSettings.sections.cloudflare.subtitle') }}</p>
-                  </div>
-                </div>
-              </div>
-              <div class="p-6">
-                <div v-if="loading" class="space-y-4">
-                  <USkeleton class="h-12 rounded-xl" />
-                  <USkeleton class="h-12 rounded-xl" />
-                </div>
-                <div v-else class="space-y-6">
-                  <div class="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 border border-cyan-200 dark:border-cyan-800 rounded-xl p-4">
-                    <div class="flex items-start gap-3">
-                      <UIcon name="i-lucide-info" class="h-5 w-5 text-cyan-600 dark:text-cyan-400 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 class="font-semibold text-cyan-900 dark:text-cyan-100 mb-2">{{ t('clinicSettings.cloudflare.title') }}</h4>
-                        <p class="text-sm text-cyan-700 dark:text-cyan-300 mb-3">
-                          {{ t('clinicSettings.cloudflare.description') }}
-                        </p>
-                        <p class="text-xs text-cyan-600 dark:text-cyan-400">
-                          {{ t('clinicSettings.cloudflare.hint') }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="grid gap-4 md:grid-cols-1">
-                    <UFormGroup
-                      :label="t('clinicSettings.form.cloudflare.accountId.label')"
-                      :hint="t('clinicSettings.form.cloudflare.accountId.hint')"
-                    >
-                      <UInput
-                        v-model="formData.cloudflareAccountId"
-                        size="lg"
-                        :placeholder="t('clinicSettings.form.cloudflare.accountId.placeholder')"
-                        icon="i-lucide-key"
-                      />
-                    </UFormGroup>
-
-                    <UFormGroup
-                      :label="t('clinicSettings.form.cloudflare.apiToken.label')"
-                      :hint="t('clinicSettings.form.cloudflare.apiToken.hint')"
-                    >
-                      <UInput
-                        v-model="formData.cloudflareApiToken"
-                        type="password"
-                        size="lg"
-                        :placeholder="t('clinicSettings.form.cloudflare.apiToken.placeholder')"
-                        icon="i-lucide-lock"
-                      />
-                    </UFormGroup>
-                  </div>
-
-                  <div v-if="formData.cloudflareAccountId && formData.cloudflareApiToken" class="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3">
-                    <UIcon name="i-lucide-check-circle-2" class="h-4 w-4" />
-                    <span>{{ t('clinicSettings.cloudflare.configured') }}</span>
-                  </div>
-                </div>
-            </div>
-          </div>
 
             <!-- Email Delivery Section -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
@@ -825,7 +772,7 @@
 
             <!-- Operating Hours Section -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-              <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
+              <div class="bg-gradient-to-r from-mint-600 to-mint-400 px-6 py-4">
                 <div class="flex items-center gap-3">
                   <UIcon name="i-lucide-clock" class="h-5 w-5 text-white" />
                   <div>
@@ -957,9 +904,32 @@
             </div>
           </div>
 
+          <!-- Subscription Plan -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
+            <div class="bg-gradient-to-r from-emerald-600 to-mint-400 px-6 py-4">
+              <div class="flex items-center gap-3">
+                <UIcon name="i-lucide-credit-card" class="h-5 w-5 text-white" />
+                <div>
+                  <h3 class="text-lg font-semibold text-white">{{ t('billing.plan.title') }}</h3>
+                  <p class="text-sm text-emerald-100">{{ t('billing.plan.subtitle') }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <PlanCard
+                :plan="billingPlanData"
+                :loading="billingPlanLoading"
+    @upgrade="showUpgradeModal = true"
+    @cancel="showCancelModal = true"
+    @resume="handleResumePlan"
+    @update-payment="handleUpdatePaymentMethod"
+              />
+            </div>
+          </div>
+
           <!-- Operating Hours Summary -->
           <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
+            <div class="bg-gradient-to-r from-mint-600 to-mint-400 px-6 py-4">
               <div class="flex items-center gap-3">
                 <UIcon name="i-lucide-calendar-clock" class="h-5 w-5 text-white" />
                 <div>
@@ -1023,17 +993,48 @@
       </div>
     </div>
   </div>
+
+  <!-- Plan Upgrade Modal -->
+  <PlanUpgradeModal
+    v-model="showUpgradeModal"
+    :current-tier="currentPlanTier"
+    :available-tiers="availablePlanTiers"
+    :loading="upgradeLoading"
+    @confirm="handleUpgradeConfirm"
+  />
+
+  <!-- Cancel Confirmation Modal -->
+  <CancelConfirmationModal
+    v-model="showCancelModal"
+    :effective-date="formattedRenewalDate"
+    :loading="cancelLoading"
+    @confirm="handleCancelConfirm"
+  />
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useClinicSettings } from '../composables/useClinicSettings';
 import { useI18n } from 'vue-i18n';
+import { useBillingPlan } from '../composables/useBillingPlan';
+import { usePlanCatalog } from '../composables/usePlanCatalog';
 
 const { request } = useAdminApi();
 const toast = useToast();
 const { t } = useI18n();
 const { settings, pending: loading, error: loadError, refresh } = useClinicSettings();
+
+// Billing Plan Management
+const {
+  currentPlan: billingPlan,
+  isLoading: billingPlanLoading,
+  error: billingPlanError,
+  fetchPlanDetails,
+  upgradePlan,
+  cancelPlan: cancelBillingPlan,
+  updatePaymentMethod
+} = useBillingPlan();
+const { normalizedPlans: planCatalog, fallbackNormalized: fallbackPlanCatalog, fetchPlans: fetchPlanCatalog } = usePlanCatalog();
 
 useHead(() => ({
   title: t('clinicSettings.meta.title')
@@ -1078,6 +1079,8 @@ interface ClinicSettingsForm {
   locale: string;
   logoUrl: string;
   logoImageId: string;
+  faviconUrl: string;
+  faviconImageId: string;
   workingHours: WorkingHours;
   socialMedia: SocialMedia;
   virtualConsultationFee: string;
@@ -1087,8 +1090,6 @@ interface ClinicSettingsForm {
   paypalEnvironment: string;
   paypalClientId: string;
   paypalClientSecret: string;
-  cloudflareAccountId: string;
-  cloudflareApiToken: string;
   sendgridApiKey: string;
   emailFrom: string;
   emailFromName: string;
@@ -1121,6 +1122,39 @@ const DEFAULT_EXCHANGE_RATES: Record<string, number> = {
   KWD: 3.261,
   EUR: 1.085,
   GBP: 1.267
+};
+
+const DEFAULT_PLAN_PERKS = [
+  "Unlimited doctors and staff accounts",
+  "Priority chat & email support",
+  "Custom domains and branding",
+  "Audit-ready activity logs"
+];
+
+type PlanCardStatus = 'active' | 'past_due' | 'canceled' | 'pending';
+
+const normalizePlanStatus = (status?: string | null): PlanCardStatus => {
+  if (!status) return 'pending';
+
+  const normalized = status.toLowerCase().replace(/[\s-]+/g, '_');
+
+  if (normalized === 'cancelled') {
+    return 'canceled';
+  }
+
+  if (normalized === 'pending_change' || normalized === 'pending_cancellation' || normalized === 'pending_downgrade') {
+    return 'pending';
+  }
+
+  if (normalized === 'trial' || normalized === 'trialing') {
+    return 'active';
+  }
+
+  if (['active', 'past_due', 'canceled', 'pending'].includes(normalized as PlanCardStatus)) {
+    return normalized as PlanCardStatus;
+  }
+
+  return 'pending';
 };
 
 function getDefaultWhyChooseFeatures(): WhyChooseFeatureForm[] {
@@ -1212,6 +1246,8 @@ const formData = ref<ClinicSettingsForm>({
   locale: DEFAULT_LOCALE,
   logoUrl: "",
   logoImageId: "",
+  faviconUrl: "",
+  faviconImageId: "",
   workingHours: {
     monday: "",
     tuesday: "",
@@ -1234,8 +1270,6 @@ const formData = ref<ClinicSettingsForm>({
   paypalEnvironment: "sandbox",
   paypalClientId: "",
   paypalClientSecret: "",
-  cloudflareAccountId: "",
-  cloudflareApiToken: "",
   sendgridApiKey: "",
   emailFrom: "",
   emailFromName: "",
@@ -1248,6 +1282,78 @@ const formData = ref<ClinicSettingsForm>({
   whyChooseSubtitleEn: DEFAULT_WHY_CHOOSE_SUBTITLE_EN,
   whyChooseSubtitleAr: DEFAULT_WHY_CHOOSE_SUBTITLE_AR,
   whyChooseFeatures: getDefaultWhyChooseFeatures()
+});
+
+// Modal state
+const showUpgradeModal = ref(false);
+const showCancelModal = ref(false);
+const upgradeLoading = ref(false);
+const cancelLoading = ref(false);
+
+// Billing plan computed properties
+const billingPlanData = computed(() => {
+  if (!billingPlan.value) return null;
+  
+  return {
+    tenantId: billingPlan.value.tenantId,
+    planTier: billingPlan.value.planTier,
+    tierName: billingPlan.value.planTierName,
+    price: billingPlan.value.price,
+    currency: billingPlan.value.currency,
+    billingCycle: billingPlan.value.billingCycle as 'MONTHLY' | 'ANNUAL',
+    renewalDate: billingPlan.value.renewalDate || '',
+    paymentMethodMask: billingPlan.value.paymentMethodMask,
+    paymentMethodType: billingPlan.value.paymentMethodType,
+    status: normalizePlanStatus(billingPlan.value.status),
+    cancellationDate: billingPlan.value.cancellationDate,
+    cancellationEffectiveDate: billingPlan.value.cancellationEffectiveDate,
+    pendingPlanTier: billingPlan.value.pendingPlanTier,
+    pendingPlanEffectiveDate: billingPlan.value.pendingPlanEffectiveDate,
+    features: billingPlan.value.features
+  };
+});
+
+const currentPlanTier = computed(() => billingPlan.value?.planTierName || 'Basic');
+
+const formattedRenewalDate = computed(() => {
+  if (!billingPlan.value?.renewalDate) {
+    return t('billing.plan.notAvailable');
+  }
+  
+  try {
+    const date = new Date(billingPlan.value.renewalDate);
+    if (Number.isNaN(date.getTime())) {
+      return t('billing.plan.notAvailable');
+    }
+    return new Intl.DateTimeFormat(formData.value.locale || DEFAULT_LOCALE, {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    }).format(date);
+  } catch {
+    return t('billing.plan.notAvailable');
+  }
+});
+
+// Available plan tiers for upgrade
+const availablePlanTiers = computed(() => {
+  const currentTier = billingPlan.value?.planTier || 'BASIC';
+  const tiers = planCatalog.value.length ? planCatalog.value : fallbackPlanCatalog;
+  
+  // Filter out current tier and lower tiers
+  const tierOrder = ['BASIC', 'PROFESSIONAL', 'ENTERPRISE', 'CUSTOM'];
+  const currentIndex = tierOrder.indexOf(currentTier);
+  
+  return tiers.filter(tier => {
+    const tierIndex = tierOrder.indexOf(tier.value);
+    return tierIndex > currentIndex;
+  });
+});
+
+// Load plan details on mount
+onMounted(() => {
+  fetchPlanDetails();
+  fetchPlanCatalog();
 });
 
 const MIN_WHY_CHOOSE_FEATURES = 1;
@@ -1301,6 +1407,23 @@ const emailConfigComplete = computed(() => {
   return Boolean(apiKey && fromEmail && fromName);
 });
 
+const formatPlanDate = (input?: string | null) => {
+  if (!input) {
+    return t('clinicSettings.plan.notAvailable');
+  }
+
+  const date = new Date(input);
+  if (Number.isNaN(date.getTime())) {
+    return t('clinicSettings.plan.notAvailable');
+  }
+
+  return new Intl.DateTimeFormat(formData.value.locale || 'en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(date);
+};
+
 watch(
   emailConfigComplete,
   complete => {
@@ -1310,6 +1433,47 @@ watch(
   },
   { immediate: true }
 );
+
+// Plan management handlers
+async function handleUpgradeConfirm(targetTier: string, billingCycle: string) {
+  upgradeLoading.value = true;
+  try {
+    await upgradePlan(targetTier, billingCycle);
+    showUpgradeModal.value = false;
+  } catch (error) {
+    console.error('Upgrade failed:', error);
+  } finally {
+    upgradeLoading.value = false;
+  }
+}
+
+async function handleCancelConfirm(immediate: boolean, reason?: string) {
+  cancelLoading.value = true;
+  try {
+    await cancelBillingPlan(immediate, reason);
+    showCancelModal.value = false;
+  } catch (error) {
+    console.error('Cancellation failed:', error);
+  } finally {
+    cancelLoading.value = false;
+  }
+}
+
+async function handleUpdatePaymentMethod() {
+  try {
+    await updatePaymentMethod();
+  } catch (error) {
+    console.error('Payment method update failed:', error);
+  }
+}
+
+async function handleResumePlan() {
+  try {
+    await resumePlan();
+  } catch (error) {
+    console.error('Resume plan failed:', error);
+  }
+}
 
 watch(
   settings,
@@ -1329,6 +1493,8 @@ watch(
       locale: DEFAULT_LOCALE, // Always use English (US) locale
       logoUrl: newSettings.logoUrl || "",
       logoImageId: newSettings.logoImageId || "",
+      faviconUrl: newSettings.faviconUrl || "",
+      faviconImageId: newSettings.faviconImageId || "",
       workingHours: {
         monday: newSettings.workingHours?.monday || "",
         tuesday: newSettings.workingHours?.tuesday || "",
@@ -1351,8 +1517,6 @@ watch(
       paypalEnvironment: newSettings.paypalEnvironment || "sandbox",
       paypalClientId: newSettings.paypalClientId || "",
       paypalClientSecret: newSettings.paypalClientSecret || "",
-      cloudflareAccountId: newSettings.cloudflareAccountId || "",
-      cloudflareApiToken: newSettings.cloudflareApiToken || "",
       sendgridApiKey: newSettings.sendgridApiKey || "",
       emailFrom: newSettings.emailFrom || "",
       emailFromName: newSettings.emailFromName || "",
@@ -1524,6 +1688,10 @@ async function saveSettings() {
 
     const payload = {
       ...restFormData,
+      logoUrl: sanitize(formData.value.logoUrl),
+      logoImageId: sanitize(formData.value.logoImageId),
+      faviconUrl: sanitize(formData.value.faviconUrl),
+      faviconImageId: sanitize(formData.value.faviconImageId),
       virtualConsultationFee: feeValue,
       virtualConsultationMeetingLink: formData.value.virtualConsultationMeetingLink.trim()
         ? formData.value.virtualConsultationMeetingLink.trim()
@@ -1533,8 +1701,6 @@ async function saveSettings() {
       paypalEnvironment: paypalEnvironmentValue,
       paypalClientId: paypalClientIdValue,
       paypalClientSecret: paypalClientSecretValue,
-      cloudflareAccountId: formData.value.cloudflareAccountId.trim(),
-      cloudflareApiToken: formData.value.cloudflareApiToken.trim(),
       sendgridApiKey: sanitize(formData.value.sendgridApiKey),
       emailFrom: sanitize(formData.value.emailFrom),
       emailFromName: sanitize(formData.value.emailFromName),
@@ -1626,6 +1792,27 @@ function handleLogoError(error: string) {
   });
 }
 
+function handleFaviconUpload(data: { imageId: string; filename: string; publicUrl: string; variants: Record<string, string> }) {
+  formData.value.faviconUrl = data.publicUrl;
+  formData.value.faviconImageId = data.imageId;
+
+  toast.add({
+    title: t('clinicSettings.toasts.faviconSuccess.title'),
+    description: t('clinicSettings.toasts.faviconSuccess.description'),
+    color: "green",
+    icon: "i-lucide-check-circle"
+  });
+}
+
+function handleFaviconError(error: string) {
+  toast.add({
+    title: t('clinicSettings.toasts.faviconError.title'),
+    description: error,
+    color: "red",
+    icon: "i-lucide-alert-circle"
+  });
+}
+
 function updateHeroMedia(value: { mediaType: string; imageUrl?: string | null; videoId?: string | null }) {
   formData.value.heroMediaType = value.mediaType || 'image';
   formData.value.heroImageUrl = value.imageUrl || '';
@@ -1660,6 +1847,8 @@ function resetForm() {
     locale: DEFAULT_LOCALE, // Always use English (US) locale
     logoUrl: current.logoUrl || "",
     logoImageId: current.logoImageId || "",
+    faviconUrl: current.faviconUrl || "",
+    faviconImageId: current.faviconImageId || "",
     workingHours: {
       monday: current.workingHours?.monday || "",
       tuesday: current.workingHours?.tuesday || "",
@@ -1682,8 +1871,6 @@ function resetForm() {
     paypalEnvironment: current.paypalEnvironment || "sandbox",
     paypalClientId: current.paypalClientId || "",
     paypalClientSecret: current.paypalClientSecret || "",
-    cloudflareAccountId: current.cloudflareAccountId || "",
-    cloudflareApiToken: current.cloudflareApiToken || "",
     sendgridApiKey: current.sendgridApiKey || "",
     emailFrom: current.emailFrom || "",
     emailFromName: current.emailFromName || "",

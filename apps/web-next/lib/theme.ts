@@ -1,4 +1,4 @@
-import { prisma } from './prisma'
+import { dbQuery } from './db'
 import type { TenantTheme } from './theme-types'
 
 /**
@@ -32,19 +32,33 @@ import type { TenantTheme } from './theme-types'
  */
 export async function getTenantTheme(slug: string): Promise<TenantTheme | null> {
   try {
-    const tenant = await prisma.tenant.findUnique({
-      where: { slug },
-      include: { theme: true }
-    })
-    
-    if (!tenant || !tenant.theme) {
+    const result = await dbQuery<{
+      themeKey: string | null
+      themeId: string | null
+      themeName: string | null
+    }>(
+      `
+        SELECT th.key AS "themeKey",
+               th.id AS "themeId",
+               th.name AS "themeName"
+        FROM tenants t
+        LEFT JOIN "Theme" th ON th.id = t."themeId"
+        WHERE t.slug = $1
+        LIMIT 1
+      `,
+      [slug]
+    )
+
+    const row = result.rows[0]
+
+    if (!row || !row.themeId) {
       return null
     }
     
     return {
-      themeKey: tenant.theme.key,
-      themeId: tenant.theme.id,
-      themeName: tenant.theme.name
+      themeKey: row.themeKey ?? 'default',
+      themeId: row.themeId,
+      themeName: row.themeName ?? 'Default Theme'
     }
   } catch (error) {
     console.error(`Error fetching theme for tenant ${slug}:`, error)

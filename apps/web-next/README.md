@@ -56,6 +56,28 @@ cp .env.example .env
   - Values: `development`, `production`, `test`
   - Affects Prisma client caching and other optimizations
 
+#### Google OAuth Configuration
+
+- **`NEXT_PUBLIC_GOOGLE_CLIENT_ID`** (Optional)
+  - Google OAuth 2.0 Client ID for patient authentication
+  - Get from [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+  - Example: `123456789-abc.apps.googleusercontent.com`
+  - Safe to expose in frontend (public credential)
+
+- **`NEXT_PUBLIC_GOOGLE_REDIRECT_URI`** (Optional)
+  - OAuth callback URL where Google redirects after authentication
+  - Must match the redirect URI configured in Google Cloud Console
+  - Format: `https://yourdomain.com/auth/google/callback`
+  - Example: `http://localhost:3001/auth/google/callback` (development)
+
+- **`NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH`** (Optional)
+  - Feature flag to enable/disable Google OAuth authentication
+  - Values: `true`, `false`
+  - Default: `true`
+  - Set to `false` to hide Google OAuth buttons
+
+For complete Google OAuth setup instructions, see [Google OAuth Configuration Guide](../../.kiro/specs/patient-google-oauth/GOOGLE_OAUTH_CONFIGURATION.md).
+
 ### Tenant Resolution
 
 The application supports two methods of tenant identification:

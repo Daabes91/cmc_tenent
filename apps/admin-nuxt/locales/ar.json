@@ -151,18 +151,24 @@
     }
   },
   "auth": {
-    "login": {
-      "branding": {
-        "welcome": "مرحباً بك في",
-        "title": "إدارة العيادة",
-        "headlineLine1": "أدر عيادتك",
-        "headlineLine2": "بثقة كاملة",
-        "description": "بسّط إدارة المواعيد وتابع المرضى وطوّر عملك من مكان واحد.",
-        "features": {
-          "scheduling": {
-            "title": "جدولة ذكية",
-            "description": "إدارة تلقائية للمواعيد"
-          },
+  "login": {
+    "branding": {
+      "welcome": "مرحباً بك في",
+      "title": "إدارة العيادة",
+      "headlineLine1": "أدر عيادتك",
+      "headlineLine2": "بثقة كاملة",
+      "description": "بسّط إدارة المواعيد وتابع المرضى وطوّر عملك من مكان واحد.",
+      "tagline": "نظرة فورية",
+      "metrics": {
+        "sessions": "الجلسات",
+        "waitTime": "متوسط الانتظار",
+        "satisfaction": "الرضا"
+      },
+      "features": {
+        "scheduling": {
+          "title": "جدولة ذكية",
+          "description": "إدارة تلقائية للمواعيد"
+        },
           "records": {
             "title": "سجلات المرضى",
             "description": "قاعدة بيانات موحدة للمرضى"
@@ -202,6 +208,57 @@
       "needAccess": {
         "text": "هل تحتاج إلى صلاحية الوصول؟",
         "cta": "تواصل مع المسؤول لديك"
+      }
+    },
+    "forgotPassword": {
+      "mobileHeader": {
+        "title": "إعادة تعيين كلمة المرور",
+        "subtitle": "أدخل بياناتك لتلقي رابط إعادة التعيين"
+      },
+      "form": {
+        "title": "هل نسيت كلمة المرور؟",
+        "subtitle": "أدخل بريدك الإلكتروني ومعرّف العيادة لتلقي رابط إعادة تعيين كلمة المرور",
+        "tenantLabel": "معرّف العيادة",
+        "tenantPlaceholder": "مثال: smilecare",
+        "tenantHint": "أدخل معرّف العيادة كما هو مكوَّن (default، smilecare، إلخ).",
+        "emailLabel": "البريد الإلكتروني",
+        "emailPlaceholder": "you{at}clinic.com"
+      },
+      "submit": "إرسال رابط إعادة التعيين",
+      "backToLogin": "العودة إلى تسجيل الدخول",
+      "success": {
+        "title": "تحقق من بريدك الإلكتروني",
+        "description": "إذا كان هناك حساب مرتبط بهذا البريد، ستتلقى رابط إعادة تعيين كلمة المرور قريباً."
+      },
+      "errors": {
+        "emptyFields": "يرجى ملء جميع الحقول المطلوبة"
+      }
+    },
+    "resetPassword": {
+      "mobileHeader": {
+        "title": "تعيين كلمة مرور جديدة",
+        "subtitle": "أدخل كلمة المرور الجديدة"
+      },
+      "form": {
+        "title": "تعيين كلمة مرور جديدة",
+        "subtitle": "اختر كلمة مرور قوية لحسابك",
+        "passwordLabel": "كلمة المرور الجديدة",
+        "passwordPlaceholder": "أدخل كلمة المرور الجديدة",
+        "passwordHint": "يجب أن تكون 8 أحرف على الأقل",
+        "confirmPasswordLabel": "تأكيد كلمة المرور",
+        "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور الجديدة"
+      },
+      "submit": "إعادة تعيين كلمة المرور",
+      "requestNew": "طلب رابط إعادة تعيين جديد",
+      "success": {
+        "title": "تم إعادة تعيين كلمة المرور بنجاح",
+        "redirecting": "جارٍ التوجيه إلى صفحة تسجيل الدخول..."
+      },
+      "errors": {
+        "missingToken": "رمز إعادة التعيين غير صالح أو مفقود",
+        "invalidToken": "رابط إعادة التعيين غير صالح أو منتهي الصلاحية",
+        "passwordTooShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+        "passwordMismatch": "كلمات المرور غير متطابقة"
       }
     }
   },
@@ -731,12 +788,18 @@
     "weekView": {
       "allDay": "طوال اليوم",
       "timeSlot": "{time}",
+      "timeColumn": "الوقت",
+      "selectionHint": "انقر واسحب داخل عمود اليوم لتحديد فترة زمنية.",
       "noAppointments": "لا توجد مواعيد"
     },
     "dayView": {
       "hourSlot": "{hour}:00",
+      "selectionHint": "انقر واسحب لتحديد فترة زمنية.",
       "noAppointments": "لا توجد مواعيد مجدولة",
       "clickToSchedule": "انقر لجدولة موعد"
+    },
+    "monthView": {
+      "selectionHint": "انقر لفتح اليوم أو اسحب عبر الأيام لإنشاء فترة."
     },
     "filter": {
       "doctor": {
@@ -761,10 +824,219 @@
     "insuranceCompanies": "شركات التأمين",
     "blogs": "المدونة",
     "reports": "التقارير",
+    "finance": "المالية",
+    "financeExpenses": "المصروفات",
     "staff": "الموظفين",
     "clinicSettings": "إعدادات العيادة",
+    "billing": "الاشتراك والفوترة",
     "translations": "الترجمات",
     "settings": "الإعدادات"
+  },
+  "finance": {
+    "expenses": {
+      "meta": {
+        "title": "المصروفات"
+      },
+      "header": {
+        "title": "المصروفات",
+        "subtitle": "تتبع وإدارة مصروفات العيادة"
+      },
+      "actions": {
+        "refresh": "تحديث"
+      },
+      "filters": {
+        "title": "تصفية المصروفات",
+        "subtitle": "تضييق قائمة المصروفات",
+        "startDate": "تاريخ البداية",
+        "endDate": "تاريخ النهاية",
+        "category": "الفئة",
+        "allCategories": "جميع الفئات",
+        "clear": "مسح",
+        "apply": "تطبيق الفلاتر"
+      },
+      "list": {
+    "title": "قائمة المصروفات",
+    "count": "{count} مصروف",
+    "addNew": "مصروف جديد",
+    "manageCategories": "إدارة التصنيفات",
+    "error": {
+      "title": "فشل تحميل المصروفات",
+      "retry": "حاول مرة أخرى"
+        },
+        "empty": {
+          "title": "لا توجد مصروفات",
+          "subtitle": "ابدأ بتتبع مصروفات عيادتك",
+          "action": "إضافة أول مصروف"
+        }
+      },
+      "table": {
+        "date": "التاريخ",
+        "category": "الفئة",
+        "amount": "المبلغ",
+        "notes": "ملاحظات",
+        "actions": "الإجراءات",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "form": {
+        "create": {
+          "title": "مصروف جديد",
+          "subtitle": "تسجيل مصروف جديد للعيادة"
+        },
+        "edit": {
+          "title": "تعديل المصروف",
+          "subtitle": "تحديث تفاصيل المصروف"
+        },
+        "date": {
+          "label": "التاريخ",
+          "placeholder": "اختر التاريخ"
+        },
+        "category": {
+          "label": "الفئة",
+          "placeholder": "اختر الفئة"
+        },
+        "amount": {
+          "label": "المبلغ",
+          "placeholder": "0.00"
+        },
+        "notes": {
+          "label": "ملاحظات",
+          "placeholder": "ملاحظات اختيارية عن هذا المصروف"
+        },
+        "validation": {
+          "dateRequired": "التاريخ مطلوب",
+          "categoryRequired": "الفئة مطلوبة",
+          "amountPositive": "يجب أن يكون المبلغ أكبر من الصفر"
+        },
+        "actions": {
+          "cancel": "إلغاء",
+          "create": "إنشاء مصروف",
+          "update": "تحديث المصروف"
+        }
+      },
+      "confirm": {
+        "delete": "هل أنت متأكد من حذف هذا المصروف؟"
+      }
+    },
+    "categories": {
+      "meta": {
+        "title": "فئات المصروفات"
+      },
+      "header": {
+        "title": "فئات المصروفات",
+        "subtitle": "إدارة فئات المصروفات"
+      },
+      "title": "فئات المصروفات",
+      "subtitle": "تنظيم مصروفاتك",
+      "actions": {
+        "add": "فئة جديدة",
+        "edit": "تعديل",
+        "disable": "تعطيل",
+        "enable": "تفعيل",
+        "refresh": "تحديث"
+      },
+      "list": {
+        "title": "الفئات",
+        "count": "{count} فئة",
+        "error": {
+          "title": "فشل تحميل الفئات"
+        },
+        "empty": {
+          "title": "لا توجد فئات",
+          "subtitle": "ستظهر الفئات هنا"
+        }
+      },
+      "badges": {
+        "system": "نظام"
+      },
+      "status": {
+        "active": "نشط",
+        "inactive": "غير نشط"
+      },
+      "modal": {
+        "create": {
+          "title": "فئة جديدة",
+          "subtitle": "إنشاء فئة مصروفات مخصصة"
+        },
+        "edit": {
+          "title": "تعديل الفئة",
+          "subtitle": "تحديث اسم الفئة"
+        },
+        "form": {
+          "name": {
+            "label": "اسم الفئة",
+            "placeholder": "أدخل اسم الفئة"
+          }
+        },
+        "validation": {
+          "nameRequired": "اسم الفئة مطلوب"
+        },
+        "actions": {
+          "cancel": "إلغاء",
+          "create": "إنشاء فئة",
+          "update": "تحديث الفئة"
+        }
+      },
+      "confirm": {
+        "title": "تعطيل الفئة؟",
+        "message": "هل أنت متأكد من تعطيل \"{name}\"؟ ستبقى المصروفات الحالية دون تغيير.",
+        "cancel": "إلغاء",
+        "confirm": "تعطيل"
+      }
+    },
+    "summary": {
+      "meta": {
+        "title": "الملخص الشهري"
+      },
+      "header": {
+        "title": "الملخص الشهري",
+        "subtitle": "عرض ملخصات المصروفات حسب الشهر"
+      },
+      "selector": {
+        "title": "اختر الفترة",
+        "subtitle": "اختر الشهر والسنة",
+        "month": "الشهر",
+        "year": "السنة",
+        "load": "تحميل الملخص"
+      },
+      "total": {
+        "title": "إجمالي المصروفات",
+        "label": "الإجمالي للفترة"
+      },
+      "breakdown": {
+        "title": "التوزيع حسب الفئة",
+        "subtitle": "المصروفات حسب الفئة",
+        "table": {
+          "category": "الفئة",
+          "amount": "المبلغ",
+          "percentage": "النسبة المئوية",
+          "total": "الإجمالي"
+        }
+      },
+      "months": {
+        "january": "يناير",
+        "february": "فبراير",
+        "march": "مارس",
+        "april": "أبريل",
+        "may": "مايو",
+        "june": "يونيو",
+        "july": "يوليو",
+        "august": "أغسطس",
+        "september": "سبتمبر",
+        "october": "أكتوبر",
+        "november": "نوفمبر",
+        "december": "ديسمبر"
+      },
+      "loading": "جاري تحميل الملخص...",
+      "error": {
+        "title": "فشل تحميل الملخص",
+        "retry": "حاول مرة أخرى"
+      },
+      "empty": {
+        "title": "لا توجد مصروفات لهذه الفترة",
+        "subtitle": "لم يتم تسجيل أي مصروفات في الشهر المحدد"
+      }
+    }
   },
   "translationsPage": {
     "header": {
@@ -1341,26 +1613,36 @@
         "fields": {
           "firstName": "الاسم الأول",
           "lastName": "اسم العائلة",
-          "email": "البريد الإلكتروني",
-          "phone": "رقم الهاتف",
-          "dateOfBirth": "تاريخ الميلاد",
-          "profileImage": "صورة الملف الشخصي"
-        },
-        "placeholders": {
-          "firstName": "أدخل الاسم الأول",
-          "lastName": "أدخل اسم العائلة",
-          "email": "patient\\u0040example.com",
-          "phone": "+971 50 000 0000",
-          "profileImage": "https://example.com/profile.jpg"
-        },
-        "hints": {
-          "dateOfBirth": "اختياري – يساعد على تخصيص تذكيرات المرضى",
-          "profileImage": "قم بتحميل أو إدخال رابط لصورة المريض الشخصية"
-        },
-        "descriptions": {
-          "email": "البريد الإلكتروني ضروري لإرسال التذكيرات."
-        },
-        "image": {
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "dateOfBirth": "تاريخ الميلاد",
+      "profileImage": "صورة الملف الشخصي",
+      "notes": "ملاحظات داخلية",
+      "driveFolder": "مجلد Drive"
+    },
+    "placeholders": {
+      "firstName": "أدخل الاسم الأول",
+      "lastName": "أدخل اسم العائلة",
+      "email": "patient\\u0040example.com",
+      "phone": "+971 50 000 0000",
+      "profileImage": "https://example.com/profile.jpg",
+      "notes": "سجل الملاحظات أو التفضيلات الطبية للمريض",
+      "driveFolder": "ألصق رابط أو معرف مجلد Google Drive"
+    },
+    "hints": {
+      "dateOfBirth": "اختياري – يساعد على تخصيص تذكيرات المرضى",
+      "profileImage": "قم بتحميل أو إدخال رابط لصورة المريض الشخصية",
+      "notes": "مرئي لفريق العيادة فقط",
+      "driveFolder": "أضف رابط مجلد Drive لصور وسجل المريض (الصلاحيات يتم التحكم بها من Drive)."
+    },
+    "descriptions": {
+      "email": "البريد الإلكتروني ضروري لإرسال التذكيرات.",
+      "driveFolder": "ألصق رابط المجلد الذي تديره في Drive."
+    },
+    "actions": {
+      "openDriveFolder": "فتح مجلد Drive"
+    },
+    "image": {
           "alt": "صورة المريض الشخصية",
           "title": "معاينة صورة الملف الشخصي",
           "description": "ستظهر صورة المريض الشخصية بهذا الشكل"
@@ -1495,11 +1777,13 @@
         "viewHistory": "عرض السجل"
       },
       "validation": {
-        "firstNameRequired": "الاسم الأول مطلوب",
-        "lastNameRequired": "اسم العائلة مطلوب",
-        "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
-        "invalidUrl": "يرجى إدخال رابط صالح"
-      },
+    "firstNameRequired": "الاسم الأول مطلوب",
+    "lastNameRequired": "اسم العائلة مطلوب",
+    "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
+    "invalidUrl": "يرجى إدخال رابط صالح",
+    "invalidDriveFolder": "أدخل رابطاً أو معرف مجلد Google Drive صالحاً",
+    "notesTooLong": "يجب ألا تتجاوز الملاحظات 2000 حرف"
+  },
       "toasts": {
         "updateSuccess": {
           "title": "تم تحديث المريض",
@@ -2651,24 +2935,29 @@
       "loadError": "فشل في تحميل مؤشرات التقرير",
       "noData": "لا توجد بيانات متاحة"
     },
-    "metrics": {
-      "totalAppointments": {
-        "label": "إجمالي المواعيد",
-        "thisMonth": "محجوز هذا الشهر"
-      },
-      "totalPatients": {
-        "label": "إجمالي المرضى",
-        "newThisMonth": "جديد هذا الشهر"
-      },
-      "revenueThisMonth": {
-        "label": "إيرادات هذا الشهر",
-        "vsLastMonth": "مقارنة بالشهر الماضي"
-      },
-      "collectionHealth": {
-        "label": "صحة التحصيل",
-        "outstanding": "دفعات معلقة"
-      }
+  "metrics": {
+    "totalAppointments": {
+      "label": "إجمالي المواعيد",
+      "thisMonth": "محجوز هذا الشهر"
     },
+    "totalPatients": {
+      "label": "إجمالي المرضى",
+      "newThisMonth": "جديد هذا الشهر"
+    },
+    "revenueThisMonth": {
+      "label": "إيرادات هذا الشهر",
+      "vsLastMonth": "مقارنة بالشهر الماضي"
+    },
+    "expenses": {
+      "label": "المصروفات",
+      "topCategories": "أهم التصنيفات",
+      "empty": "لا توجد مصروفات في هذه الفترة"
+    },
+    "collectionHealth": {
+      "label": "صحة التحصيل",
+      "outstanding": "دفعات معلقة"
+    }
+  },
     "snapshots": {
       "period": {
         "title": "لقطة الفترة",
@@ -3076,6 +3365,10 @@
           "label": "المواعيد",
           "description": "جدولة وإدارة مواعيد المرضى"
         },
+        "calendar": {
+          "label": "التقويم",
+          "description": "عرض التقويم للمواعيد والتوفر"
+        },
         "patients": {
           "label": "المرضى",
           "description": "سجلات ومعلومات المرضى"
@@ -3084,9 +3377,17 @@
           "label": "الأطباء",
           "description": "ملفات الأطباء وجداولهم"
         },
+        "materials": {
+          "label": "المواد",
+          "description": "مخزون المواد والإمدادات الطبية"
+        },
         "services": {
           "label": "الخدمات",
           "description": "خدمات العيادة والتسعير"
+        },
+        "insuranceCompanies": {
+          "label": "شركات التأمين",
+          "description": "إدارة شركاء التأمين والعقود"
         },
         "treatmentPlans": {
           "label": "خطط العلاج",
@@ -3096,9 +3397,21 @@
           "label": "التقارير",
           "description": "التحليلات والتقارير"
         },
+        "billing": {
+          "label": "الفوترة",
+          "description": "إدارة الاشتراك والفوترة"
+        },
+        "translations": {
+          "label": "الترجمات",
+          "description": "إدارة الترجمات والمحتوى المحلي"
+        },
         "settings": {
           "label": "الإعدادات",
           "description": "تكوين العيادة"
+        },
+        "clinicSettings": {
+          "label": "إعدادات العيادة",
+          "description": "ملف العيادة والعلامة التجارية والإعدادات الافتراضية"
         },
         "staff": {
           "label": "إدارة الموظفين",
@@ -3151,13 +3464,13 @@
         "title": "إعدادات الدفع",
         "subtitle": "تكوين خيارات معالجة المدفوعات"
       },
+      "subscription": {
+        "title": "الخطة والفوترة",
+        "subtitle": "إدارة اشتراك SaaS الحالي"
+      },
       "hours": {
         "title": "ساعات التشغيل",
         "subtitle": "تحديد جدول عمل العيادة"
-      },
-      "cloudflare": {
-        "title": "صور Cloudflare",
-        "subtitle": "تسليم الوسائط عبر شبكة Cloudflare العالمية"
       },
       "email": {
         "title": "إعداد البريد الإلكتروني",
@@ -3186,6 +3499,12 @@
         "label": "شعار العيادة",
         "hint": "رفع شعار عيادتك للعلامة التجارية",
         "altText": "شعار العيادة"
+      },
+      "favicon": {
+        "label": "أيقونة التبويب",
+        "hint": "تظهر في تبويب المتصفح، يُفضل استخدام صورة مربعة",
+        "altText": "معاينة أيقونة التبويب",
+        "helper": "إذا تركته فارغًا سيتم استخدام الأيقونة الافتراضية."
       },
       "address": {
         "label": "العنوان",
@@ -3244,18 +3563,6 @@
         "label": "رابط الاجتماع الافتراضي",
         "hint": "الرابط الذي يتم تضمينه في رسائل التأكيد للزيارات الافتراضية.",
         "placeholder": "https://meet.google.com/your-meeting"
-      },
-      "cloudflare": {
-        "accountId": {
-          "label": "معرّف حساب Cloudflare",
-          "placeholder": "أدخل معرّف حساب Cloudflare",
-          "hint": "متوفر في رابط لوحة معلومات Cloudflare Images."
-        },
-        "apiToken": {
-          "label": "رمز واجهة برمجة التطبيقات لـ Cloudflare",
-          "placeholder": "أدخل رمز Cloudflare Images",
-          "hint": "أنشئ رمزاً بصلاحيات Images:Read وImages:Write."
-        }
       },
       "paypal": {
         "environment": {
@@ -3370,6 +3677,52 @@
       "addressNotProvided": "لم يتم توفير العنوان",
       "virtualMeetingLink": "رابط الاجتماع الافتراضي"
     },
+    "plan": {
+      "currentPlan": "الخطة الحالية",
+      "perMonth": "شهرياً",
+      "perYear": "سنوياً",
+      "nextBilling": "تاريخ الفوترة القادم",
+      "paymentMethod": "طريقة الدفع",
+      "planIncludes": "تشمل الخطة",
+      "notAvailable": "غير متوفر",
+      "expires": "تنتهي في {date}",
+      "status": {
+        "active": "مفعلة",
+        "canceled": "ملغاة"
+      },
+      "actions": {
+        "upgrade": "ترقية الخطة",
+        "cancel": "إلغاء الاشتراك",
+        "updatePayment": "تحديث البطاقة"
+      },
+      "modal": {
+        "cancelTitle": "إلغاء الاشتراك",
+        "cancelDescription": "سيبقى الحساب نشطاً حتى {date}. هل ترغب في الإلغاء؟",
+        "warning": "سيتم إيقاف الفوترة المستقبلية والتحويل إلى الخطة المجانية عند نهاية الدورة الحالية.",
+        "pointAccess": "يمكنك استخدام الميزات المدفوعة حتى نهاية فترة الفوترة الحالية.",
+        "pointData": "تظل بيانات العيادة محفوظة ويمكن إعادة التفعيل في أي وقت.",
+        "keep": "الاحتفاظ بالخطة",
+        "confirm": "تأكيد الإلغاء"
+      },
+      "toasts": {
+        "upgrade": {
+          "title": "فتح بوابة الفوترة",
+          "description": "سيتم فتح علامة تبويب آمنة لاختيار خطة مختلفة."
+        },
+        "paymentUpdate": {
+          "title": "تحديث طريقة الدفع",
+          "description": "سنفتح بوابة الدفع لتحديث تفاصيل البطاقة."
+        },
+        "cancelled": {
+          "title": "تم جدولة الإلغاء",
+          "description": "سيبقى الاشتراك فعالاً حتى {date}. يمكنك إعادة التفعيل لاحقاً."
+        },
+        "error": {
+          "title": "تعذر إلغاء الخطة",
+          "description": "حدث خطأ أثناء الإلغاء. حاول مرة أخرى."
+        }
+      }
+    },
     "schedule": {
       "title": "الجدول",
       "subtitle": "ساعات التشغيل الحالية",
@@ -3387,12 +3740,6 @@
       "currentEnvironment": "البيئة الحالية",
       "notConfigured": "غير مكون",
       "configured": "تم حفظ بيانات اعتماد PayPal."
-    },
-    "cloudflare": {
-      "title": "الاتصال بخدمة Cloudflare Images",
-      "description": "خزّن عمليات الرفع في Cloudflare Images للحصول على تسليم أسرع وأكثر أماناً عبر المنصة.",
-      "hint": "أدخل معرّف الحساب ورمز واجهة برمجة التطبيقات بصلاحيات Images من لوحة تحكم Cloudflare.",
-      "configured": "تم حفظ بيانات اعتماد Cloudflare Images."
     },
     "email": {
       "title": "البريد الإلكتروني التشغيلي",
@@ -3451,6 +3798,14 @@
       "logoError": {
         "title": "فشل الرفع",
         "description": "غير قادر على رفع الشعار. يرجى المحاولة مرة أخرى."
+      },
+      "faviconSuccess": {
+        "title": "تم تحديث الأيقونة",
+        "description": "تم رفع أيقونة التبويب بنجاح"
+      },
+      "faviconError": {
+        "title": "فشل رفع الأيقونة",
+        "description": "تعذر رفع أيقونة التبويب. يرجى المحاولة مرة أخرى."
       },
       "heroImageSuccess": {
         "title": "تم رفع صورة البطل",
@@ -3889,5 +4244,108 @@
   "currency": {
     "clinic": "عملة العيادة",
     "original": "الأصلي"
+  },
+  "billing": {
+    "plan": {
+      "title": "خطة الاشتراك",
+      "subtitle": "إدارة اشتراكك",
+      "currentPlan": "الخطة الحالية",
+      "subscriptionPlan": "خطة الاشتراك",
+      "nextRenewal": "التجديد التالي",
+      "paymentMethod": "طريقة الدفع",
+      "noPaymentMethod": "لا توجد طريقة دفع",
+      "update": "تحديث",
+      "upgradePlan": "ترقية الخطة",
+      "cancelSubscription": "إلغاء الاشتراك",
+      "helpText": "تحتاج مساعدة؟ اتصل بفريق الدعم",
+      "unknown": "غير معروف",
+      "priceUnavailable": "السعر غير متاح",
+      "month": "شهر",
+      "year": "سنة",
+      "monthly": "شهري",
+      "annual": "سنوي",
+      "noRenewalDate": "لا يوجد تاريخ تجديد",
+      "notAvailable": "غير متاح",
+      "status": {
+        "active": "نشط",
+        "past_due": "متأخر",
+        "canceled": "ملغى",
+        "pending": "قيد الانتظار"
+      },
+      "pendingChange": "تغيير معلق",
+      "pendingCancellation": "سيتم إلغاء اشتراكك في {date}",
+      "pendingDowngrade": "ستتغير خطتك إلى {tier} في {date}",
+      "modal": {
+        "upgradeTitle": "ترقية خطتك",
+        "upgradeDescription": "اختر الخطة التي تناسب احتياجاتك",
+        "currentPlan": "الخطة الحالية",
+        "selectNewPlan": "اختر خطتك الجديدة",
+        "billingCycle": "دورة الفوترة",
+        "billedMonthly": "يتم الدفع شهرياً",
+        "billedAnnually": "يتم الدفع سنوياً",
+        "save20": "وفر 20%",
+        "upgradeInfo": "ستتم إعادة توجيهك إلى PayPal لإكمال الترقية. ستكون خطتك الجديدة نشطة فوراً بعد الدفع.",
+        "cancelButton": "إلغاء",
+        "confirmUpgrade": "تأكيد الترقية",
+        "cancelTitle": "إلغاء الاشتراك",
+        "cancelSubtitle": "نأسف لرؤيتك تغادر",
+        "warningTitle": "مهم",
+        "warningMessage": "سيبقى اشتراكك نشطاً حتى {date}",
+        "whenToCancel": "متى تريد الإلغاء؟",
+        "endOfPeriod": "في نهاية فترة الفوترة",
+        "endOfPeriodDescription": "استمر في استخدام جميع الميزات حتى {date}",
+        "recommended": "موصى به",
+        "immediately": "فوراً",
+        "immediatelyDescription": "الإلغاء الآن وفقدان الوصول إلى جميع الميزات",
+        "reasonLabel": "سبب الإلغاء",
+        "optional": "اختياري",
+        "reasonPlaceholder": "ساعدنا على التحسين بإخبارنا لماذا تقوم بالإلغاء...",
+        "whatHappensNext": "ماذا سيحدث بعد ذلك؟",
+        "point1": "ستتلقى بريداً إلكترونياً للتأكيد",
+        "point2": "سيتم الاحتفاظ ببياناتك لمدة 30 يوماً",
+        "point3": "يمكنك إعادة التفعيل في أي وقت قبل الحذف",
+        "keepSubscription": "الاحتفاظ بالاشتراك",
+        "confirmCancel": "تأكيد الإلغاء"
+      }
+    },
+    "pendingPaymentTitle": "الدفع مطلوب",
+    "pastDueTitle": "الدفع متأخر",
+    "canceledTitle": "تم إلغاء الاشتراك",
+    "statusTitle": "حالة الفوترة",
+    "defaultMessage": "يرجى التحقق من حالة الفوترة الخاصة بك",
+    "completePayment": "إكمال الدفع",
+    "updatePayment": "تحديث طريقة الدفع",
+    "reactivate": "إعادة تفعيل الاشتراك",
+    "manageSubscription": "إدارة الاشتراك",
+    "suspensionCountdown": "سيتم تعليق حسابك خلال {days} أيام",
+    "needHelp": "تحتاج مساعدة؟",
+    "contactSupport": "اتصل بالدعم",
+    "paymentRequired": "الدفع مطلوب",
+    "contactSupportForPaymentLink": "يرجى الاتصال بالدعم للحصول على رابط الدفع",
+    "updateRequired": "التحديث مطلوب",
+    "contactSupportForPaymentUpdate": "يرجى الاتصال بالدعم لتحديث طريقة الدفع",
+    "reactivationRequired": "إعادة التفعيل مطلوبة",
+    "contactSupportForReactivation": "يرجى الاتصال بالدعم لإعادة تفعيل اشتراكك",
+    "errorCheckingStatus": "فشل في التحقق من حالة الفوترة. يرجى المحاولة مرة أخرى.",
+    "pending": {
+      "title": "أكمل الدفع",
+      "description": "تم إنشاء حساب عيادتك، ولكن لم يتم إكمال الدفع بعد.",
+      "instructions": "لتفعيل حسابك والوصول إلى جميع الميزات، يرجى إكمال عملية الدفع.",
+      "action": "أكمل الدفع الآن"
+    },
+    "pastDue": {
+      "title": "الدفع متأخر",
+      "description": "دفعتك متأخرة. يرجى تحديث طريقة الدفع الخاصة بك لمواصلة استخدام المنصة.",
+      "instructions": "قم بتحديث طريقة الدفع الخاصة بك من خلال PayPal لاستعادة الوصول الكامل إلى حسابك.",
+      "action": "تحديث طريقة الدفع",
+      "warning": "قد يتم تعليق حسابك إذا لم يتم استلام الدفع قريبًا."
+    },
+    "canceled": {
+      "title": "تم إلغاء الاشتراك",
+      "description": "تم إلغاء اشتراكك وتم تقييد الوصول إلى المنصة.",
+      "instructions": "لاستعادة الوصول إلى بوابة عيادتك، يمكنك إعادة تفعيل اشتراكك.",
+      "action": "إعادة تفعيل الاشتراك",
+      "dataRetention": "تم الاحتفاظ ببياناتك وستكون متاحة عند إعادة التفعيل."
+    }
   }
 }

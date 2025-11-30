@@ -5,7 +5,9 @@
     "loading": "Loading...",
     "loadingHours": "Loading hours...",
     "languageEnglish": "English",
-    "languageArabic": "Arabic"
+    "languageArabic": "Arabic",
+    "retry": "Try Again",
+    "dismiss": "Dismiss"
   },
   "nav": {
     "home": "Home",
@@ -123,6 +125,40 @@
     }
   },
   "auth": {
+    "google": {
+      "signin": "Continue with Google",
+      "signup": "Sign up with Google",
+      "redirecting": "Redirecting to Google...",
+      "divider": "or",
+      "errors": {
+        "tenantContext": "Tenant context not found. Please refresh the page and try again.",
+        "initiation": "Failed to initiate Google authentication",
+        "cancelled": "Google sign-in was cancelled",
+        "generic": "An error occurred during Google authentication. Please try again."
+      },
+      "callback": {
+        "processing": {
+          "title": "Completing Sign In",
+          "message": "Please wait while we verify your Google account..."
+        },
+        "error": {
+          "title": "Authentication Failed",
+          "redirect": "Redirecting you back to the login page..."
+        },
+        "errors": {
+          "cancelled": "You cancelled the Google sign-in. Please try again if you'd like to continue.",
+          "oauthError": "Google authentication error: {error}",
+          "missingParams": "Invalid authentication response. Please try signing in again.",
+          "tenantContext": "Clinic information not found. Please return to the home page and try again.",
+          "invalidState": "Invalid authentication request. This may be due to an expired session. Please try again.",
+          "invalidRequest": "Invalid authentication request. Please try again.",
+          "tenantNotFound": "Clinic not found. Please verify you're accessing the correct clinic website.",
+          "googleUnavailable": "Google authentication service is temporarily unavailable. Please try again later.",
+          "network": "Network error. Please check your connection and try again.",
+          "generic": "An unexpected error occurred. Please try again or contact support if the problem persists."
+        }
+      }
+    },
     "login": {
       "title": "Welcome Back",
       "subtitle": "Sign in to manage your appointments and access your dental records",
@@ -652,6 +688,38 @@
     "support": {
       "phone": "Call us at {phone}",
       "email": "Email us at {email}"
+    }
+  },
+  "settings": {
+    "title": "Account Settings",
+    "subtitle": "Manage your account preferences and linked authentication methods",
+    "loading": "Loading settings...",
+    "errors": {
+      "loadFailed": "Failed to load account information. Please try again.",
+      "linkFailed": "Failed to link Google account. Please try again."
+    },
+    "linkedAccounts": {
+      "title": "Linked Accounts",
+      "subtitle": "Manage how you sign in to your account",
+      "email": {
+        "title": "Email & Password",
+        "notSet": "No password set"
+      },
+      "google": {
+        "title": "Google Account",
+        "connected": "Connected with Google",
+        "notConnected": "Sign in with your Google account",
+        "link": "Link Google Account",
+        "linking": "Linking..."
+      },
+      "status": {
+        "connected": "Connected",
+        "notSet": "Not Set"
+      },
+      "info": {
+        "title": "Why link accounts?",
+        "description": "Linking your Google account allows you to sign in using either your email/password or Google. You can use whichever method is most convenient for you."
+      }
     }
   }
 }

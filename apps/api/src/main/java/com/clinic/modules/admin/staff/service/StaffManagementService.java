@@ -320,12 +320,18 @@ public class StaffManagementService {
                 .orElseGet(() -> new StaffPermissions(staffId));
 
         permissions.setAppointmentsPermissions(permissionsDto.appointments());
+        permissions.setCalendarPermissions(permissionsDto.calendar());
         permissions.setPatientsPermissions(permissionsDto.patients());
         permissions.setDoctorsPermissions(permissionsDto.doctors());
+        permissions.setMaterialsPermissions(permissionsDto.materials());
         permissions.setServicesPermissions(permissionsDto.services());
+        permissions.setInsuranceCompaniesPermissions(permissionsDto.insuranceCompanies());
         permissions.setTreatmentPlansPermissions(permissionsDto.treatmentPlans());
         permissions.setReportsPermissions(permissionsDto.reports());
+        permissions.setBillingPermissions(permissionsDto.billing());
+        permissions.setTranslationsPermissions(permissionsDto.translations());
         permissions.setSettingsPermissions(permissionsDto.settings());
+        permissions.setClinicSettingsPermissions(permissionsDto.clinicSettings());
         permissions.setStaffPermissions(permissionsDto.staff());
         permissions.setBlogsPermissions(permissionsDto.blogs());
 
@@ -337,12 +343,18 @@ public class StaffManagementService {
     private StaffPermissions createPermissionsFromDto(Long staffUserId, ModulePermissionsDto dto) {
         StaffPermissions permissions = new StaffPermissions(staffUserId);
         permissions.setAppointmentsPermissions(dto.appointments());
+        permissions.setCalendarPermissions(dto.calendar());
         permissions.setPatientsPermissions(dto.patients());
         permissions.setDoctorsPermissions(dto.doctors());
+        permissions.setMaterialsPermissions(dto.materials());
         permissions.setServicesPermissions(dto.services());
+        permissions.setInsuranceCompaniesPermissions(dto.insuranceCompanies());
         permissions.setTreatmentPlansPermissions(dto.treatmentPlans());
         permissions.setReportsPermissions(dto.reports());
+        permissions.setBillingPermissions(dto.billing());
+        permissions.setTranslationsPermissions(dto.translations());
         permissions.setSettingsPermissions(dto.settings());
+        permissions.setClinicSettingsPermissions(dto.clinicSettings());
         permissions.setStaffPermissions(dto.staff());
         permissions.setBlogsPermissions(dto.blogs());
         return permissions;
@@ -407,12 +419,18 @@ public class StaffManagementService {
     private ModulePermissionsDto mapToModulePermissionsDto(StaffPermissions permissions) {
         return new ModulePermissionsDto(
                 permissions.getAppointmentsPermissions(),
+                permissions.getCalendarPermissions(),
                 permissions.getPatientsPermissions(),
                 permissions.getDoctorsPermissions(),
+                permissions.getMaterialsPermissions(),
                 permissions.getServicesPermissions(),
+                permissions.getInsuranceCompaniesPermissions(),
                 permissions.getTreatmentPlansPermissions(),
                 permissions.getReportsPermissions(),
+                permissions.getBillingPermissions(),
+                permissions.getTranslationsPermissions(),
                 permissions.getSettingsPermissions(),
+                permissions.getClinicSettingsPermissions(),
                 permissions.getStaffPermissions(),
                 permissions.getBlogsPermissions()
         );

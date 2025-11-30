@@ -3,6 +3,7 @@ package com.clinic.modules.saas.service;
 import com.clinic.modules.admin.staff.model.*;
 import com.clinic.modules.admin.staff.repository.StaffPermissionsRepository;
 import com.clinic.modules.admin.staff.repository.StaffUserRepository;
+import com.clinic.modules.core.finance.TenantCreatedEvent;
 import com.clinic.modules.core.tenant.TenantEntity;
 import com.clinic.modules.core.tenant.TenantRepository;
 import com.clinic.modules.saas.dto.*;
@@ -10,6 +11,7 @@ import com.clinic.modules.saas.exception.ConflictException;
 import com.clinic.modules.saas.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,18 +36,24 @@ public class TenantManagementService {
     private final TenantRepository tenantRepository;
     private final StaffUserRepository staffUserRepository;
     private final StaffPermissionsRepository staffPermissionsRepository;
+    private final com.clinic.modules.saas.repository.SubscriptionRepository subscriptionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ApplicationEventPublisher eventPublisher;
     private final SecureRandom secureRandom;
 
     public TenantManagementService(
             TenantRepository tenantRepository,
             StaffUserRepository staffUserRepository,
             StaffPermissionsRepository staffPermissionsRepository,
-            PasswordEncoder passwordEncoder) {
+            com.clinic.modules.saas.repository.SubscriptionRepository subscriptionRepository,
+            PasswordEncoder passwordEncoder,
+            ApplicationEventPublisher eventPublisher) {
         this.tenantRepository = tenantRepository;
         this.staffUserRepository = staffUserRepository;
         this.staffPermissionsRepository = staffPermissionsRepository;
+        this.subscriptionRepository = subscriptionRepository;
         this.passwordEncoder = passwordEncoder;
+        this.eventPublisher = eventPublisher;
         this.secureRandom = new SecureRandom();
     }
 
@@ -103,7 +111,12 @@ public class TenantManagementService {
         log.info("Tenant creation completed successfully - tenantId: {}, slug: {}, adminEmail: {}, passwordGenerated: [MASKED]", 
                 tenant.getId(), tenant.getSlug(), adminEmail);
 
-        // 6. Return response with credentials (password is only returned once!)
+        // 6. Publish tenant created event for downstream processing (e.g., category seeding)
+        TenantCreatedEvent event = new TenantCreatedEvent(this, tenant.getId(), tenant.getSlug());
+        eventPublisher.publishEvent(event);
+        log.debug("TenantCreatedEvent published - tenantId: {}, slug: {}", tenant.getId(), tenant.getSlug());
+
+        // 7. Return response with credentials (password is only returned once!)
         AdminCredentials adminCredentials = new AdminCredentials(adminEmail, rawPassword);
 
         return new TenantCreateResponse(
@@ -180,19 +193,41 @@ public class TenantManagementService {
     }
 
     /**
-     * List all tenants with pagination, optional status filter, and optional inclusion of soft-deleted tenants.
+     * List all tenants with pagination, optional status filter, billing status filter, plan tier filter, and optional inclusion of soft-deleted tenants.
      *
      * @param pageable Pagination parameters
      * @param includeDeleted Whether to include soft-deleted tenants
      * @param status Optional status filter (null for all statuses)
+     * @param billingStatus Optional billing status filter (null for all billing statuses)
+     * @param planTier Optional plan tier filter (null for all plan tiers)
      * @return Paginated list of tenants
      */
     @Transactional(readOnly = true)
-    public TenantListResponse listTenants(Pageable pageable, boolean includeDeleted, com.clinic.modules.core.tenant.TenantStatus status) {
-        log.debug("Tenant list requested - page: {}, size: {}, includeDeleted: {}, status: {}",
-                pageable.getPageNumber(), pageable.getPageSize(), includeDeleted, status);
+    public TenantListResponse listTenants(Pageable pageable, boolean includeDeleted, com.clinic.modules.core.tenant.TenantStatus status, String billingStatus, String planTier) {
+        log.debug("Tenant list requested - page: {}, size: {}, includeDeleted: {}, status: {}, billingStatus: {}, planTier: {}",
+                pageable.getPageNumber(), pageable.getPageSize(), includeDeleted, status, billingStatus, planTier);
 
-        Page<TenantEntity> page = tenantRepository.findAllWithFilters(includeDeleted, status, pageable);
+        Page<TenantEntity> page;
+        
+        // Parse filters
+        com.clinic.modules.core.tenant.BillingStatus billingStatusEnum = null;
+        if (billingStatus != null && !billingStatus.isBlank()) {
+            billingStatusEnum = com.clinic.modules.core.tenant.BillingStatus.valueOf(billingStatus);
+        }
+        
+        com.clinic.modules.saas.model.PlanTier planTierEnum = null;
+        if (planTier != null && !planTier.isBlank()) {
+            planTierEnum = com.clinic.modules.saas.model.PlanTier.valueOf(planTier);
+        }
+        
+        // Apply filters
+        if (planTierEnum != null) {
+            page = tenantRepository.findAllWithFiltersAndPlanTier(includeDeleted, status, billingStatusEnum, planTierEnum, pageable);
+        } else if (billingStatusEnum != null) {
+            page = tenantRepository.findAllWithFiltersAndBillingStatus(includeDeleted, status, billingStatusEnum, pageable);
+        } else {
+            page = tenantRepository.findAllWithFilters(includeDeleted, status, pageable);
+        }
 
         log.debug("Tenant list retrieved - totalElements: {}, totalPages: {}, currentPage: {}",
                 page.getTotalElements(), page.getTotalPages(), page.getNumber());
@@ -284,15 +319,95 @@ public class TenantManagementService {
     }
 
     /**
+     * Get subscription details for a tenant.
+     *
+     * @param tenantId Tenant ID
+     * @return Subscription response
+     * @throws NotFoundException if tenant or subscription not found
+     */
+    @Transactional(readOnly = true)
+    public SubscriptionResponse getTenantSubscription(Long tenantId) {
+        log.debug("Subscription retrieval requested - tenantId: {}", tenantId);
+
+        // Verify tenant exists
+        TenantEntity tenant = tenantRepository.findByIdAndNotDeleted(tenantId)
+                .orElseThrow(() -> {
+                    log.warn("Subscription retrieval failed - tenant not found: tenantId: {}", tenantId);
+                    return new NotFoundException("Tenant with ID " + tenantId + " not found");
+                });
+
+        // Find subscription
+        com.clinic.modules.saas.model.SubscriptionEntity subscription = 
+                subscriptionRepository.findByTenantId(tenantId)
+                .orElseThrow(() -> {
+                    log.warn("Subscription retrieval failed - subscription not found: tenantId: {}", tenantId);
+                    return new NotFoundException("Subscription not found for tenant ID " + tenantId);
+                });
+
+        log.debug("Subscription retrieved successfully - tenantId: {}, subscriptionId: {}, status: {}",
+                tenantId, subscription.getId(), subscription.getStatus());
+
+        return new SubscriptionResponse(
+                subscription.getId(),
+                tenantId,
+                subscription.getProvider(),
+                subscription.getPaypalSubscriptionId(),
+                subscription.getStatus(),
+                subscription.getCurrentPeriodStart(),
+                subscription.getCurrentPeriodEnd(),
+                subscription.getCreatedAt(),
+                subscription.getUpdatedAt()
+        );
+    }
+
+    /**
+     * Manually override billing status for a tenant.
+     * This action is logged for audit purposes.
+     *
+     * @param tenantId Tenant ID
+     * @param request Override request with new billing status and reason
+     * @throws NotFoundException if tenant not found
+     */
+    @Transactional
+    public void updateBillingStatus(Long tenantId, BillingStatusOverrideRequest request) {
+        log.info("Billing status override initiated - tenantId: {}, newStatus: {}, reason: {}",
+                tenantId, request.getBillingStatus(), request.getReason());
+
+        // Retrieve tenant
+        TenantEntity tenant = tenantRepository.findByIdAndNotDeleted(tenantId)
+                .orElseThrow(() -> {
+                    log.warn("Billing status override failed - tenant not found: tenantId: {}", tenantId);
+                    return new NotFoundException("Tenant with ID " + tenantId + " not found");
+                });
+
+        com.clinic.modules.core.tenant.BillingStatus oldStatus = tenant.getBillingStatus();
+        com.clinic.modules.core.tenant.BillingStatus newStatus = 
+                com.clinic.modules.core.tenant.BillingStatus.valueOf(request.getBillingStatus());
+
+        tenant.setBillingStatus(newStatus);
+        tenantRepository.save(tenant);
+
+        log.info("Billing status overridden successfully - tenantId: {}, oldStatus: {}, newStatus: {}, reason: {}",
+                tenantId, oldStatus, newStatus, request.getReason());
+    }
+
+    /**
      * Map TenantEntity to TenantResponse DTO.
      */
     private TenantResponse mapToTenantResponse(TenantEntity tenant) {
+        // Get plan tier from subscription if available
+        com.clinic.modules.saas.model.PlanTier planTier = subscriptionRepository.findByTenantId(tenant.getId())
+                .map(com.clinic.modules.saas.model.SubscriptionEntity::getPlanTier)
+                .orElse(null);
+        
         return new TenantResponse(
                 tenant.getId(),
                 tenant.getSlug(),
                 tenant.getName(),
                 tenant.getCustomDomain(),
                 tenant.getStatus(),
+                tenant.getBillingStatus(),
+                planTier,
                 tenant.getCreatedAt(),
                 tenant.getUpdatedAt(),
                 tenant.getDeletedAt()

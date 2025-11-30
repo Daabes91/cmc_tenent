@@ -33,6 +33,9 @@ public record ReportMetrics(
         // Multi-currency support
         Map<String, BigDecimal> revenueThisMonthByCurrency,
         Map<String, BigDecimal> revenueLastMonthByCurrency,
-        Map<String, List<RevenuePoint>> revenueTrendByCurrency
+        Map<String, List<RevenuePoint>> revenueTrendByCurrency,
+        // Expense data
+        BigDecimal totalExpenses,
+        List<CategoryExpense> expensesByCategory
 ) {
 }

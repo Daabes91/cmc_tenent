@@ -15,7 +15,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.Base64;
 
 
 
@@ -64,6 +66,11 @@ public class ImageUploadService {
         validateFile(file);
 
         try {
+            if (cloudflareProperties.isMockMode()) {
+                log.warn("Cloudflare mockMode enabled - returning data URI instead of uploading");
+                return createMockUploadResponse(file);
+            }
+
             CloudflareCredentials credentials = getCloudflareCredentials();
 
             String uploadUrl = String.format("%s/accounts/%s/images/v1",
@@ -95,6 +102,12 @@ public class ImageUploadService {
             }
 
         } catch (Exception e) {
+            // Fall back only if mock mode is enabled; otherwise surface the error
+            if (cloudflareProperties.isMockMode() && isAuthOrConnectivityError(e)) {
+                log.warn("Cloudflare upload failed (auth/connectivity). Mock mode enabled, returning mock upload: {}", e.getMessage());
+                return createMockUploadResponse(file);
+            }
+
             log.error("Error uploading image to Cloudflare", e);
             throw new ImageUploadException("Failed to upload image: " + e.getMessage(), e);
         }
@@ -143,6 +156,10 @@ public class ImageUploadService {
      * @return Map of variant names to URLs
      */
     public Map<String, String> getImageVariants(String imageId) {
+        if (cloudflareProperties.isMockMode()) {
+            return Collections.emptyMap();
+        }
+
         Map<String, String> variants = new HashMap<>();
         String baseUrl = cloudflareProperties.getDeliveryUrl();
         int quality = cloudflareProperties.getImageQuality();
@@ -172,6 +189,10 @@ public class ImageUploadService {
      * @return true if the API is reachable, false otherwise
      */
     public boolean testConnectivity() {
+        if (cloudflareProperties.isMockMode()) {
+            return true;
+        }
+
         try {
             String testUrl = String.format("%s/accounts/%s/images/v1",
                     cloudflareProperties.getBaseUrl(),
@@ -336,6 +357,44 @@ public class ImageUploadService {
         return new ImageUploadResponse(id, filename, publicUrl, imageVariants);
     }
 
+    private ImageUploadResponse createMockUploadResponse(MultipartFile file) throws ImageUploadException {
+        try {
+            byte[] bytes = file.getBytes();
+            String mimeType = Optional.ofNullable(file.getContentType())
+                    .filter(ct -> ct.startsWith("image/"))
+                    .orElse("image/png");
+            String base64 = Base64.getEncoder().encodeToString(bytes);
+            String dataUri = "data:" + mimeType + ";base64," + base64;
+            String id = UUID.randomUUID().toString();
+            Map<String, String> variants = Map.of("public", dataUri);
+            return new ImageUploadResponse(id, file.getOriginalFilename(), dataUri, variants);
+        } catch (IOException e) {
+            throw new ImageUploadException("Failed to create mock upload response", e);
+        }
+    }
+
+    private boolean isAuthOrConnectivityError(Exception e) {
+        String msg = e.getMessage() != null ? e.getMessage().toLowerCase(Locale.ROOT) : "";
+        return msg.contains("unable to authenticate") ||
+                msg.contains("unauthorized") ||
+                msg.contains("forbidden") ||
+                msg.contains("connect timed out") ||
+                msg.contains("i/o error");
+    }
+
+    private String normalize(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private String mask(String value) {
+        if (value == null || value.length() < 6) {
+            return "****";
+        }
+        return "****" + value.substring(value.length() - 4);
+    }
+
 
 
     /**
@@ -362,33 +421,23 @@ public class ImageUploadService {
     ) {}
 
     /**
-     * Get Cloudflare credentials from database settings, falling back to environment variables.
+     * Get Cloudflare credentials from global configuration (single set for all tenants).
      */
     private CloudflareCredentials getCloudflareCredentials() throws ImageUploadException {
-        Long tenantId = tenantContextHolder.requireTenantId();
-        var settingsOpt = settingsRepository.findByTenantId(tenantId);
-        if (settingsOpt.isPresent()) {
-            var settings = settingsOpt.get();
-            String dbAccountId = settings.getCloudflareAccountId();
-            String dbApiToken = settings.getCloudflareApiToken();
-
-            if (dbAccountId != null && !dbAccountId.isBlank() &&
-                dbApiToken != null && !dbApiToken.isBlank()) {
-                log.debug("Using Cloudflare credentials from database settings");
-                return new CloudflareCredentials(dbAccountId, dbApiToken);
-            }
-        }
-
-        String envAccountId = cloudflareProperties.getAccountId();
-        String envApiToken = cloudflareProperties.getApiToken();
+        String envAccountId = normalize(cloudflareProperties.getAccountId());
+        String envApiToken = normalize(cloudflareProperties.getApiToken());
 
         if (envAccountId == null || envAccountId.isBlank() ||
             envApiToken == null || envApiToken.isBlank()) {
             throw new ImageUploadException(
-                "Cloudflare credentials not configured. Please add them in Settings or contact administrator.");
+                "Cloudflare credentials not configured. Please set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN (or SECURITY_CLOUDFLARE_IMAGES_* equivalents).");
         }
 
-        log.debug("Using Cloudflare credentials from environment variables");
+        log.info("Using global Cloudflare credentials (account suffix: {}, baseUrl: {}, deliveryUrl: {}, mockMode: {})",
+                mask(envAccountId),
+                cloudflareProperties.getBaseUrl(),
+                cloudflareProperties.getDeliveryUrl(),
+                cloudflareProperties.isMockMode());
         return new CloudflareCredentials(envAccountId, envApiToken);
     }
 

@@ -1,349 +1,292 @@
 <template>
-  <div class="calendar-grid" :class="{ 'rtl': isRTL }">
-    <!-- Day Headers -->
-    <div class="grid grid-cols-7 gap-2 mb-4">
-      <div 
-        v-for="day in dayHeaders" 
-        :key="day"
-        class="text-center font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 py-2"
-        :class="mobile ? 'text-xs' : 'text-xs'"
-      >
-        {{ mobile ? day.slice(0, 2) : day }}
-      </div>
+  <div class="space-y-5">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        {{ monthLabel }}
+      </p>
+      <p class="text-2xl font-semibold text-slate-900 dark:text-white">{{ monthRangeLabel }}</p>
+      <p class="text-sm text-slate-500 dark:text-slate-300">{{ t('calendar.monthView.selectionHint') || defaultHint }}</p>
     </div>
 
-    <!-- Calendar Days Grid -->
-    <div class="grid grid-cols-7 gap-2">
-      <div
-        v-for="day in calendarDays"
-        :key="`${day.date.getFullYear()}-${day.date.getMonth()}-${day.date.getDate()}`"
-        class="calendar-day aspect-square border border-slate-200/60 dark:border-slate-700/60 rounded-lg p-2 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-500/50 touch-manipulation"
-        :class="[
-          mobile ? 'min-h-[80px]' : 'min-h-[120px]',
-          day.isCurrentMonth 
-            ? 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50' 
-            : 'bg-slate-50 dark:bg-slate-900/50 text-slate-400',
-          day.isToday && 'ring-2 ring-violet-500/50 bg-violet-50 dark:bg-violet-900/20',
-          day.isSelected && 'ring-2 ring-blue-500/50 bg-blue-50 dark:bg-blue-900/20'
-        ]"
-        :tabindex="day.isCurrentMonth ? 0 : -1"
-        :aria-label="getDateAriaLabel(day)"
-        @click="handleDateClick(day.date)"
-        @keydown.enter="handleDateClick(day.date)"
-        @keydown.space.prevent="handleDateClick(day.date)"
-      >
-        <!-- Date Number -->
-        <div class="flex items-center justify-between mb-2">
-          <span 
-            class="font-medium"
-            :class="[
-              mobile ? 'text-xs' : 'text-sm',
-              day.isCurrentMonth ? 'text-slate-900 dark:text-white' : 'text-slate-400',
-              day.isToday && 'text-violet-600 dark:text-violet-400 font-bold'
-            ]"
-          >
-            {{ day.date.getDate() }}
-          </span>
-          <div v-if="day.events.length > 0" class="flex items-center gap-1">
-            <!-- Multiple status dots for different appointment types -->
-            <div class="flex items-center gap-0.5">
-              <div 
-                v-for="(event, idx) in day.events.slice(0, 3)" 
-                :key="idx"
-                class="w-1.5 h-1.5 rounded-full"
-                :class="getStatusDotClass(event.appointment.status)"
-              ></div>
-              <div 
-                v-if="day.events.length > 3"
-                class="w-1.5 h-1.5 rounded-full bg-slate-400"
-              ></div>
-            </div>
-            <span class="font-medium" :class="mobile ? 'text-xs' : 'text-xs'" style="color: rgb(100 116 139);">{{ day.events.length }}</span>
-          </div>
-        </div>
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div class="grid grid-cols-7 border-b border-slate-100 bg-slate-50/80 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
+        <div v-for="weekday in weekdayLabels" :key="weekday" class="text-center">{{ weekday }}</div>
+      </div>
 
-        <!-- Appointment Events -->
-        <div class="space-y-1 overflow-hidden">
-          <CalendarEvent
-            v-for="(event, index) in day.events.slice(0, mobile ? 2 : maxEventsPerDay)"
-            :key="event.id"
-            :event="event"
-            :compact="true"
-            :mobile="mobile"
-            @click="handleEventClick"
-          />
-          
-          <!-- More events indicator -->
-          <div 
-            v-if="day.events.length > (mobile ? 2 : maxEventsPerDay)"
-            class="text-slate-500 dark:text-slate-400 text-center py-1 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 touch-manipulation"
-            :class="mobile ? 'text-xs' : 'text-xs'"
-            @click.stop="showMoreEvents(day)"
-          >
-            +{{ day.events.length - (mobile ? 2 : maxEventsPerDay) }} {{ mobile ? '+' : t('calendar.moreEvents') }}
+      <div class="grid grid-cols-7 gap-px bg-slate-100/80 dark:bg-slate-700/80">
+        <button
+          v-for="day in calendarDays"
+          :key="day.key"
+          type="button"
+          class="relative min-h-[130px] rounded-none border-0 bg-white px-3 py-2 text-left transition dark:bg-slate-900/30"
+          :class="[
+            day.isCurrentMonth ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500',
+            day.isToday ? 'ring-1 ring-violet-500/50' : '',
+            isDaySelected(day.key) ? 'bg-violet-50/60 dark:bg-violet-900/20 ring-2 ring-violet-400/70' : ''
+          ]"
+          @pointerdown.prevent="(event) => handlePointerDown(event, day.date)"
+          @pointerenter="() => handlePointerEnter(day.date)"
+          @dblclick.stop="emit('date-click', day.date)"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold">
+              {{ day.date.getDate() }}
+            </span>
+            <span v-if="day.appointments.length" class="text-xs font-semibold text-slate-400 dark:text-slate-300">
+              {{ day.appointments.length }}
+            </span>
           </div>
-        </div>
+
+          <div class="mt-2 space-y-1">
+            <button
+              v-for="appointment in day.previewAppointments"
+              :key="appointment.id"
+              class="block w-full truncate rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 transition hover:bg-violet-100 hover:text-violet-900 dark:bg-slate-800/70 dark:text-slate-200 dark:hover:bg-violet-900/30"
+              @click.stop="emit('appointment-click', appointment)"
+            >
+              {{ formatAppointmentTitle(appointment) }}
+            </button>
+            <p v-if="day.appointments.length > day.previewAppointments.length" class="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+              +{{ day.appointments.length - day.previewAppointments.length }} more
+            </p>
+          </div>
+
+          <div class="mt-3 space-y-1">
+            <div
+              v-for="annotation in day.periods"
+              :key="annotation.id"
+              class="flex items-center gap-2 rounded-lg px-2 py-1 text-[11px] font-semibold"
+              :class="annotation.style.bg"
+            >
+              <span class="h-2 w-2 rounded-full" :class="annotation.style.dot"></span>
+              <span>{{ annotation.type }}</span>
+            </div>
+          </div>
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { AppointmentAdmin } from "@/types/appointments";
-import { computed } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import type { AppointmentAdmin } from '@/types/appointments';
+import type { CalendarPeriod } from '@/types/calendar';
 
-// Props
 interface CalendarGridProps {
   currentDate: Date;
   appointments: AppointmentAdmin[];
-  selectedDate?: Date | null;
-  maxEventsPerDay?: number;
-  mobile?: boolean;
+  periods?: CalendarPeriod[];
 }
 
 const props = withDefaults(defineProps<CalendarGridProps>(), {
-  selectedDate: null,
-  maxEventsPerDay: 3,
-  mobile: false
+  periods: () => []
 });
 
-// Emits
 const emit = defineEmits<{
-  dateClick: [date: Date];
-  appointmentClick: [appointment: AppointmentAdmin];
-  showMore: [day: CalendarDay];
+  'appointment-click': [appointment: AppointmentAdmin];
+  'date-click': [date: Date];
+  'create-period': [payload: { start: Date; end: Date }];
 }>();
 
-// Composables
 const { t, locale } = useI18n();
 
-// Calendar data structures
-interface CalendarEvent {
-  id: string;
-  date: Date;
-  appointment: AppointmentAdmin;
-  displayText: string;
-  statusColor: string;
-  timeSlot: string;
-}
+const defaultHint = 'Drag across days to block periods, doctor vacations, or clinic closures.';
+const selecting = ref(false);
+const selectionRange = ref<{ start: Date; end: Date } | null>(null);
+const hasDragged = ref(false);
 
-interface CalendarDay {
+const weekdayLabels = computed(() => {
+  const baseDate = new Date(2020, 5, 1);
+  return Array.from({ length: 7 }, (_, index) =>
+    new Intl.DateTimeFormat(locale.value, { weekday: 'short' }).format(
+      new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + index)
+    )
+  );
+});
+
+const calendarDays = computed(() => {
+  const results: Array<CalendarDay> = [];
+  const firstOfMonth = new Date(props.currentDate);
+  firstOfMonth.setDate(1);
+  firstOfMonth.setHours(0, 0, 0, 0);
+  const firstWeekday = (firstOfMonth.getDay() + 6) % 7; // Monday start grid
+  const gridStart = new Date(firstOfMonth);
+  gridStart.setDate(firstOfMonth.getDate() - firstWeekday);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  for (let index = 0; index < 42; index++) {
+    const date = new Date(gridStart);
+    date.setDate(gridStart.getDate() + index);
+    const key = getDateKey(date);
+    const appointments = appointmentsByDay.value.get(key) ?? [];
+    const previewAppointments = appointments.slice(0, 2);
+    results.push({
+      key,
+      date,
+      isCurrentMonth: date.getMonth() === props.currentDate.getMonth(),
+      isToday: date.getTime() === today.getTime(),
+      appointments,
+      previewAppointments,
+      periods: buildPeriodAnnotations(date)
+    });
+  }
+
+  return results;
+});
+
+const appointmentsByDay = computed(() => {
+  const map = new Map<string, AppointmentAdmin[]>();
+  props.appointments.forEach((appointment) => {
+    const date = parseAppointmentDate(appointment.scheduledAt);
+    const key = getDateKey(date);
+    if (!map.has(key)) {
+      map.set(key, []);
+    }
+    map.get(key)!.push(appointment);
+  });
+  return map;
+});
+
+const periodColors: Record<string, { bg: string; dot: string }> = {
+  'Clinic closed': { bg: 'bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-200', dot: 'bg-rose-500' },
+  'Doctor vacation': { bg: 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-200', dot: 'bg-amber-500' },
+  Campaign: { bg: 'bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-200', dot: 'bg-sky-500' }
+};
+
+const buildPeriodAnnotations = (date: Date) => {
+  const annotations: Array<{ id: string; type: string; style: { bg: string; dot: string } }> = [];
+  props.periods.forEach((period) => {
+    const start = new Date(period.startDate);
+    const end = new Date(period.endDate);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    const current = new Date(date);
+    current.setHours(0, 0, 0, 0);
+    if (current >= start && current <= end) {
+      const styles = periodColors[period.type] ?? { bg: 'bg-slate-100 text-slate-600', dot: 'bg-slate-400' };
+      annotations.push({ id: `${period.id}-${current.toISOString()}`, type: period.type, style: styles });
+    }
+  });
+  return annotations;
+};
+
+const monthLabel = computed(() =>
+  new Intl.DateTimeFormat(locale.value, { month: 'long', year: 'numeric' }).format(props.currentDate)
+);
+
+const monthRangeLabel = computed(() => {
+  const formatter = new Intl.DateTimeFormat(locale.value, { month: 'long' });
+  const monthName = formatter.format(props.currentDate);
+  return `${monthName} ${props.currentDate.getFullYear()}`;
+});
+
+const normalizedSelection = computed(() => {
+  if (!selectionRange.value) return null;
+  const start = startOfDay(selectionRange.value.start);
+  const end = startOfDay(selectionRange.value.end);
+  return start <= end
+    ? { start, end }
+    : { start: end, end: start };
+});
+
+const selectedKeys = computed(() => {
+  const range = normalizedSelection.value;
+  if (!range) return new Set<string>();
+  const keys = new Set<string>();
+  const cursor = new Date(range.start);
+  while (cursor <= range.end) {
+    keys.add(getDateKey(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return keys;
+});
+
+const isDaySelected = (key: string) => selectedKeys.value.has(key);
+
+const handlePointerDown = (event: PointerEvent, date: Date) => {
+  if (event.button !== 0) return;
+  selecting.value = true;
+  hasDragged.value = false;
+  const normalized = startOfDay(date);
+  selectionRange.value = { start: normalized, end: normalized };
+};
+
+const handlePointerEnter = (date: Date) => {
+  if (!selecting.value || !selectionRange.value) return;
+  const normalized = startOfDay(date);
+  if (selectionRange.value.end.getTime() !== normalized.getTime()) {
+    hasDragged.value = true;
+  }
+  selectionRange.value.end = normalized;
+};
+
+const handlePointerUp = () => {
+  if (!selecting.value || !selectionRange.value) return;
+  const range = normalizedSelection.value;
+  if (!range) {
+    resetSelection();
+    return;
+  }
+  if (!hasDragged.value) {
+    emit('date-click', new Date(range.start));
+  } else {
+    emit('create-period', { start: new Date(range.start), end: new Date(range.end) });
+  }
+  resetSelection();
+};
+
+const resetSelection = () => {
+  selectionRange.value = null;
+  selecting.value = false;
+  hasDragged.value = false;
+};
+
+const formatAppointmentTitle = (appointment: AppointmentAdmin) => `${appointment.patientName || 'Patient'} · ${appointment.serviceName}`;
+
+const parseAppointmentDate = (scheduledAt: number | string | Date) => {
+  if (scheduledAt instanceof Date) return scheduledAt;
+  if (typeof scheduledAt === 'number') {
+    return new Date(scheduledAt * 1000);
+  }
+  const timestamp = Number(scheduledAt);
+  if (!Number.isNaN(timestamp)) {
+    return new Date(timestamp * 1000);
+  }
+  return new Date(scheduledAt);
+};
+
+const getDateKey = (date: Date) => date.toISOString().split('T')[0];
+
+const startOfDay = (date: Date) => {
+  const copy = new Date(date);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+};
+
+type CalendarDay = {
+  key: string;
   date: Date;
   isCurrentMonth: boolean;
   isToday: boolean;
-  isSelected: boolean;
-  events: CalendarEvent[];
-  hasEvents: boolean;
-}
+  appointments: AppointmentAdmin[];
+  previewAppointments: AppointmentAdmin[];
+  periods: Array<{ id: string; type: string; style: { bg: string; dot: string } }>;
+};
 
-// Computed properties
-const isRTL = computed(() => locale.value === 'ar');
-
-const dayHeaders = computed(() => {
-  const formatter = new Intl.DateTimeFormat(locale.value, { weekday: 'short' });
-  const days = [];
-  
-  // Start from Sunday (0) to Saturday (6)
-  for (let i = 0; i < 7; i++) {
-    // Create a date for each day of the week
-    const date = new Date(2024, 0, 7 + i); // January 7, 2024 is a Sunday
-    days.push(formatter.format(date));
+watch(
+  () => props.currentDate,
+  () => {
+    resetSelection();
   }
-  
-  return isRTL.value ? days.reverse() : days;
+);
+
+onMounted(() => {
+  window.addEventListener('pointerup', handlePointerUp);
 });
 
-const calendarDays = computed((): CalendarDay[] => {
-  const year = props.currentDate.getFullYear();
-  const month = props.currentDate.getMonth();
-  
-  // Get first day of the month and calculate starting date
-  const firstDay = new Date(year, month, 1);
-  const startDate = new Date(firstDay);
-  
-  // Adjust for RTL (Arabic) - start from Saturday instead of Sunday
-  const dayOffset = isRTL.value ? (firstDay.getDay() + 1) % 7 : firstDay.getDay();
-  startDate.setDate(startDate.getDate() - dayOffset);
-  
-  const days: CalendarDay[] = [];
-  const today = new Date();
-  
-  // Generate 42 days (6 weeks)
-  for (let i = 0; i < 42; i++) {
-    const date = new Date(startDate);
-    date.setDate(startDate.getDate() + i);
-    
-    const isCurrentMonth = date.getMonth() === month;
-    const isToday = date.toDateString() === today.toDateString();
-    const isSelected = props.selectedDate?.toDateString() === date.toDateString();
-    
-    // Get events for this date
-    const dayEvents = getEventsForDate(date);
-    
-    days.push({
-      date,
-      isCurrentMonth,
-      isToday,
-      isSelected,
-      events: dayEvents,
-      hasEvents: dayEvents.length > 0
-    });
-  }
-  
-  return days;
+onBeforeUnmount(() => {
+  window.removeEventListener('pointerup', handlePointerUp);
 });
-
-// Helper functions
-const getEventsForDate = (date: Date): CalendarEvent[] => {
-  const events = props.appointments
-    .filter(appointment => {
-      // Convert Unix timestamp (seconds) to milliseconds for JavaScript Date
-      const appointmentDate = new Date(appointment.scheduledAt * 1000);
-      return appointmentDate.toDateString() === date.toDateString();
-    })
-    .map(appointment => ({
-      id: appointment.id.toString(),
-      date,
-      appointment,
-      displayText: appointment.patientName || 'Unknown Patient',
-      statusColor: getStatusColor(appointment.status),
-      timeSlot: formatTime(appointment.scheduledAt)
-    }))
-    .sort((a, b) => (a.appointment.scheduledAt - b.appointment.scheduledAt));
-    
-  return events;
-};
-
-const getStatusColor = (status: string): string => {
-  const colors = {
-    'SCHEDULED': 'blue',
-    'CONFIRMED': 'green',
-    'COMPLETED': 'purple',
-    'CANCELLED': 'red'
-  };
-  return colors[status as keyof typeof colors] || 'gray';
-};
-
-// Use the new appointment time composable for consistent time handling
-const { formatForList } = useAppointmentTime();
-
-const formatTime = (timestamp: number): string => {
-  // Use the appointment time composable for consistent formatting
-  // Convert Unix timestamp (seconds) to milliseconds for the composable
-  const formatted = formatForList(timestamp * 1000);
-  if (formatted === "Not scheduled" || formatted === "Invalid date") return "—";
-  
-  // Extract just the time part for calendar display
-  try {
-    const parts = formatted.split(',');
-    if (parts.length >= 2) {
-      // Extract time and timezone: "2:30 PM EET"
-      const timePart = parts[parts.length - 1].trim();
-      return timePart;
-    }
-    return formatted;
-  } catch (error) {
-    console.warn('Error extracting time part for calendar:', error);
-    return formatted;
-  }
-};
-
-const getStatusDotClass = (status: string): string => {
-  const statusLower = status.toLowerCase();
-  
-  switch (statusLower) {
-    case 'scheduled':
-      return 'bg-blue-500';
-    case 'confirmed':
-      return 'bg-green-500';
-    case 'completed':
-      return 'bg-purple-500';
-    case 'cancelled':
-      return 'bg-red-500';
-    default:
-      return 'bg-slate-500';
-  }
-};
-
-const getDateAriaLabel = (day: CalendarDay): string => {
-  const formatter = new Intl.DateTimeFormat(locale.value, {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
-  });
-  
-  const dateStr = formatter.format(day.date);
-  const eventCount = day.events.length;
-  
-  if (eventCount === 0) {
-    return `${dateStr}, no appointments`;
-  } else if (eventCount === 1) {
-    return `${dateStr}, 1 appointment`;
-  } else {
-    return `${dateStr}, ${eventCount} appointments`;
-  }
-};
-
-// Event handlers
-const handleDateClick = (date: Date) => {
-  emit('dateClick', date);
-};
-
-const handleEventClick = (event: CalendarEvent) => {
-  emit('appointmentClick', event.appointment);
-};
-
-const showMoreEvents = (day: CalendarDay) => {
-  emit('showMore', day);
-};
 </script>
-
-<style scoped>
-.calendar-grid.rtl {
-  direction: rtl;
-}
-
-.calendar-grid.rtl .grid {
-  direction: ltr; /* Keep grid layout LTR for proper alignment */
-}
-
-.calendar-grid.rtl .calendar-day {
-  direction: rtl;
-}
-
-.calendar-grid.rtl .flex {
-  direction: rtl;
-}
-
-.calendar-day {
-  min-height: 120px;
-}
-
-/* RTL-specific adjustments */
-.calendar-grid.rtl .space-y-1 > * + * {
-  margin-top: 0.25rem;
-  margin-right: 0;
-}
-
-.calendar-grid.rtl .gap-1 {
-  gap: 0.25rem;
-}
-
-.calendar-grid.rtl .gap-0\.5 {
-  gap: 0.125rem;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .calendar-day {
-    min-height: 80px;
-  }
-}
-
-@media (max-width: 640px) {
-  .calendar-day {
-    min-height: 60px;
-  }
-}
-</style>

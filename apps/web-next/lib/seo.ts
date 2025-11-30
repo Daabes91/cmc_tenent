@@ -71,6 +71,7 @@ interface SeoDefaults {
   description: string;
   keywords: string[];
   socialImage: string;
+  faviconUrl: string;
 }
 
 async function getSeoDefaults(): Promise<SeoDefaults> {
@@ -80,12 +81,17 @@ async function getSeoDefaults(): Promise<SeoDefaults> {
   const keywords = Array.from(new Set([...DEFAULT_KEYWORDS, clinicName]));
   const socialImage =
     ensureAbsoluteUrl(clinicSettings?.logoUrl) || FALLBACK_SOCIAL_IMAGE;
+  const faviconUrl =
+    ensureAbsoluteUrl(clinicSettings?.faviconUrl) ||
+    ensureAbsoluteUrl('/favicon.ico') ||
+    '/favicon.ico';
 
   return {
     clinicName,
     description,
     keywords,
     socialImage,
+    faviconUrl,
   };
 }
 
@@ -146,6 +152,10 @@ export async function buildLocalizedMetadata({
       description: metaDescription,
       images: [socialImage],
     },
+    icons: {
+      icon: seoDefaults.faviconUrl,
+      apple: seoDefaults.faviconUrl,
+    },
   };
 }
 
@@ -193,8 +203,8 @@ export async function buildRootMetadata(): Promise<Metadata> {
       images: [seoDefaults.socialImage],
     },
     icons: {
-      icon: '/favicon.ico',
-      apple: '/favicon.ico',
+      icon: seoDefaults.faviconUrl,
+      apple: seoDefaults.faviconUrl,
     },
     robots: {
       index: true,

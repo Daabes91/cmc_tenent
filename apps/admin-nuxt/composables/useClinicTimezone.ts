@@ -19,14 +19,13 @@ export function useClinicTimezone() {
   const config = useRuntimeConfig()
   const resolvePublicApiBase = () => {
     const explicit = config.public.publicApiBase
-    if (explicit && explicit !== "http://localhost:8080") {
-      return explicit
-    }
     const adminBase = useApiBase() || ""
-    if (!adminBase) {
-      return ""
-    }
-    return adminBase.replace(/\/admin\/?$/, "")
+    const baseCandidate = explicit || adminBase
+    if (!baseCandidate) return ""
+
+    const normalized = baseCandidate.replace(/\/+$/, "")
+    if (normalized.endsWith("/public")) return normalized
+    return `${normalized}/public`
   }
   const publicApiBase = resolvePublicApiBase()
 
@@ -47,7 +46,7 @@ export function useClinicTimezone() {
       if (!publicApiBase) {
         throw new Error("Missing public API base URL")
       }
-      const response = await $fetch<TimezoneInfo>(`${publicApiBase}/public/settings/timezone`)
+      const response = await $fetch<TimezoneInfo>(`${publicApiBase}/settings/timezone`)
       clinicTimezone.value = response
       return response
     } catch (err) {

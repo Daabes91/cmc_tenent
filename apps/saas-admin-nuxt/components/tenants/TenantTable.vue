@@ -13,6 +13,12 @@
             Status
           </th>
           <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+            Billing
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+            Plan
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
             Created
           </th>
           <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
@@ -49,6 +55,32 @@
             >
               {{ tenant.status }}
             </UBadge>
+          </td>
+          <td class="px-4 py-4">
+            <UBadge
+              :color="getBillingStatusColor(tenant.billingStatus)"
+              variant="subtle"
+              size="sm"
+            >
+              <div class="flex items-center gap-1.5">
+                <UIcon :name="getBillingStatusIcon(tenant.billingStatus)" class="w-3 h-3" />
+                <span>{{ formatBillingStatus(tenant.billingStatus) }}</span>
+              </div>
+            </UBadge>
+          </td>
+          <td class="px-4 py-4">
+            <UBadge
+              v-if="tenant.planTier"
+              :color="getPlanTierColor(tenant.planTier)"
+              variant="subtle"
+              size="sm"
+            >
+              <div class="flex items-center gap-1.5">
+                <UIcon :name="getPlanTierIcon(tenant.planTier)" class="w-3 h-3" />
+                <span>{{ formatPlanTier(tenant.planTier) }}</span>
+              </div>
+            </UBadge>
+            <span v-else class="text-sm text-slate-400 dark:text-slate-500">-</span>
           </td>
           <td class="px-4 py-4">
             <div class="text-sm text-slate-600 dark:text-slate-300">
@@ -115,5 +147,79 @@ const formatDate = (timestamp: number | string) => {
     month: 'short',
     day: 'numeric'
   }).format(date)
+}
+
+const getBillingStatusColor = (status: string) => {
+  switch (status) {
+    case 'ACTIVE':
+      return 'green'
+    case 'PENDING_PAYMENT':
+      return 'yellow'
+    case 'PAST_DUE':
+      return 'orange'
+    case 'SUSPENDED':
+      return 'blue'
+    case 'CANCELED':
+      return 'red'
+    default:
+      return 'gray'
+  }
+}
+
+const getBillingStatusIcon = (status: string) => {
+  switch (status) {
+    case 'ACTIVE':
+      return 'i-heroicons-check-circle'
+    case 'PENDING_PAYMENT':
+      return 'i-heroicons-clock'
+    case 'PAST_DUE':
+      return 'i-heroicons-exclamation-triangle'
+    case 'SUSPENDED':
+      return 'i-heroicons-pause-circle'
+    case 'CANCELED':
+      return 'i-heroicons-x-circle'
+    default:
+      return 'i-heroicons-question-mark-circle'
+  }
+}
+
+const formatBillingStatus = (status: string) => {
+  return status.split('_').map(word => 
+    word.charAt(0) + word.slice(1).toLowerCase()
+  ).join(' ')
+}
+
+const getPlanTierColor = (planTier: string) => {
+  switch (planTier) {
+    case 'BASIC':
+      return 'blue'
+    case 'PROFESSIONAL':
+      return 'purple'
+    case 'ENTERPRISE':
+      return 'amber'
+    case 'CUSTOM':
+      return 'pink'
+    default:
+      return 'gray'
+  }
+}
+
+const getPlanTierIcon = (planTier: string) => {
+  switch (planTier) {
+    case 'BASIC':
+      return 'i-heroicons-star'
+    case 'PROFESSIONAL':
+      return 'i-heroicons-sparkles'
+    case 'ENTERPRISE':
+      return 'i-heroicons-building-office'
+    case 'CUSTOM':
+      return 'i-heroicons-cog-6-tooth'
+    default:
+      return 'i-heroicons-question-mark-circle'
+  }
+}
+
+const formatPlanTier = (planTier: string) => {
+  return planTier.charAt(0) + planTier.slice(1).toLowerCase()
 }
 </script>

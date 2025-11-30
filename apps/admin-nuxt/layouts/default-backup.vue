@@ -16,7 +16,13 @@
               :alt="clinicName"
               class="h-full w-full object-cover"
             />
-            <span v-else>🦷</span>
+            <img
+              v-else
+              src="https://imagedelivery.net/K88oXEK4nwOFUDLZaSq1vg/6c79054b-5ecc-4a97-be03-441518f70200/public"
+              :alt="clinicName || 'Clinic logo'"
+              class="h-full w-full object-cover"
+              loading="lazy"
+            />
             <div class="pointer-events-none absolute -inset-0.5 rounded-xl bg-white/60 opacity-40 blur-md dark:bg-white/20"></div>
           </div>
           <div class="flex-1">
@@ -62,10 +68,10 @@
         </nav>
 
         <div class="border-t border-slate-200/60 p-5 dark:border-white/10">
-          <div class="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-gradient-to-br from-violet-50 via-white to-slate-50 p-5 shadow-lg shadow-slate-200/50 transition-colors duration-300 dark:border-white/10 dark:bg-white/5 dark:from-white/5 dark:via-white/5 dark:to-white/5 dark:shadow-black/20">
+          <div class="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-gradient-to-br from-mint-50 via-white to-slate-50 p-5 shadow-lg shadow-slate-200/50 transition-colors duration-300 dark:border-white/10 dark:bg-white/5 dark:from-white/5 dark:via-white/5 dark:to-white/5 dark:shadow-black/20">
             <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-violet-400/30 blur-2xl dark:bg-violet-500/30"></div>
             <div class="relative flex items-start gap-3">
-              <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white shadow-lg shadow-violet-500/40">
+              <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-mint-500 to-mint-400 text-white shadow-lg shadow-mint-500/40">
                 <UIcon name="i-lucide-life-buoy" class="h-5 w-5" />
               </div>
               <div class="flex-1">
@@ -255,7 +261,7 @@
                 icon="i-lucide-calendar-plus"
                 color="violet"
                 size="md"
-                class="hidden items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-500/40 transition-all duration-200 hover:shadow-violet-500/60 sm:inline-flex"
+                class="hidden items-center gap-2 rounded-xl bg-gradient-to-r from-mint-500 to-mint-400 text-white shadow-lg shadow-mint-500/40 transition-all duration-200 hover:shadow-mint-500/60 sm:inline-flex"
                 @click="navigateTo('/appointments/new')"
               >
                 {{ t("layout.header.newBooking") }}
@@ -266,7 +272,7 @@
                   <UAvatar
                     size="sm"
                     icon="i-lucide-user"
-                    :ui="{ rounded: 'rounded-lg', background: 'bg-gradient-to-br from-violet-500 to-violet-700' }"
+                    :ui="{ rounded: 'rounded-lg', background: 'bg-gradient-to-br from-mint-500 to-mint-400' }"
                     class="ring-2 ring-violet-500/30 dark:ring-white/20"
                   />
                   <div class="hidden flex-col items-start lg:flex">
@@ -295,7 +301,13 @@
                       :alt="clinicName"
                       class="h-full w-full object-cover"
                     />
-                    <span v-else>🦷</span>
+                    <img
+                      v-else
+                      src="https://imagedelivery.net/K88oXEK4nwOFUDLZaSq1vg/6c79054b-5ecc-4a97-be03-441518f70200/public"
+                      :alt="clinicName || 'Clinic logo'"
+                      class="h-full w-full object-cover"
+                      loading="lazy"
+                    />
                   </div>
                   <div>
                     <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ clinicName }}</span>
@@ -579,7 +591,7 @@ const clinicLogo = computed(() => clinicSettings.value?.logoUrl?.trim() || "");
 const navUi = computed(() => ({
   wrapper: "space-y-1.5",
   base: "group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
-  active: "bg-gradient-to-r from-violet-500 to-violet-700 text-white shadow-lg shadow-violet-600/40 ring-1 ring-white/20",
+  active: "bg-gradient-to-r from-mint-500 to-mint-400 text-white shadow-lg shadow-mint-600/40 ring-1 ring-white/20",
   inactive: isDark.value
     ? "text-slate-300 hover:bg-white/5 hover:text-white"
     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",

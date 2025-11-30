@@ -4,8 +4,13 @@
     <div class="hidden w-1/2 bg-primary-gradient lg:flex lg:flex-col lg:justify-between p-12">
       <div>
           <div class="flex items-center gap-3">
-            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm text-2xl">
-              🦷
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-md shadow-slate-900/10">
+              <img
+                src="https://imagedelivery.net/K88oXEK4nwOFUDLZaSq1vg/6c79054b-5ecc-4a97-be03-441518f70200/public"
+                alt="Clinic logo"
+                class="h-8 w-8"
+                loading="lazy"
+              />
             </div>
             <div class="text-white">
               <p class="text-sm font-medium opacity-90">{{ t('auth.login.branding.welcome') }}</p>
@@ -23,30 +28,42 @@
             {{ t('auth.login.branding.description') }}
           </p>
         </div>
-        
-        <div class="grid gap-4">
-          <div class="flex items-start gap-3 rounded-lg bg-white/10 p-4 backdrop-blur-sm">
-            <UIcon name="i-lucide-calendar-check" class="h-6 w-6 text-violet-200 mt-0.5" />
-            <div class="text-white">
-              <p class="font-semibold">{{ t('auth.login.branding.features.scheduling.title') }}</p>
-              <p class="text-sm text-violet-100">{{ t('auth.login.branding.features.scheduling.description') }}</p>
-            </div>
-          </div>
-          <div class="flex items-start gap-3 rounded-lg bg-white/10 p-4 backdrop-blur-sm">
-            <UIcon name="i-lucide-users" class="h-6 w-6 text-violet-200 mt-0.5" />
-            <div class="text-white">
-              <p class="font-semibold">{{ t('auth.login.branding.features.records.title') }}</p>
-              <p class="text-sm text-violet-100">{{ t('auth.login.branding.features.records.description') }}</p>
-            </div>
-          </div>
-          <div class="flex items-start gap-3 rounded-lg bg-white/10 p-4 backdrop-blur-sm">
-            <UIcon name="i-lucide-bar-chart-3" class="h-6 w-6 text-violet-200 mt-0.5" />
-            <div class="text-white">
-              <p class="font-semibold">{{ t('auth.login.branding.features.analytics.title') }}</p>
-              <p class="text-sm text-violet-100">{{ t('auth.login.branding.features.analytics.description') }}</p>
+
+        <!-- Hero Mockup -->
+        <div class="relative rounded-4xl overflow-hidden border border-white/60 shadow-2xl shadow-slate-900/40 bg-gradient-to-br from-white/10 via-white/5 to-white/0 backdrop-blur-xl p-4">
+          <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.18),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(59,130,246,0.2),transparent_25%),radial-gradient(circle_at_20%_80%,rgba(94,234,212,0.18),transparent_30%)]"></div>
+          <div class="relative rounded-3xl overflow-hidden ring-1 ring-white/20">
+            <img
+              src="https://imagedelivery.net/K88oXEK4nwOFUDLZaSq1vg/11137b81-cbbd-4b24-daac-4b1ea5499a00/public?auto=format&fit=crop&w=1800&q=80"
+              alt="Dashboard preview"
+              class="w-full h-full object-cover"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/65 via-slate-900/35 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-6 space-y-3 text-white">
+              <div class="flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-blue-100">
+                <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                {{ t('auth.login.branding.tagline') }}
+              </div>
+              <p class="text-2xl font-bold leading-tight">Data-rich overview, crafted for clinic teams.</p>
+              <div class="grid grid-cols-3 gap-3 text-sm">
+                <div class="rounded-2xl bg-white/10 px-3 py-2">
+                  <p class="text-blue-100 text-xs">{{ t('auth.login.branding.metrics.sessions') }}</p>
+                  <p class="text-lg font-semibold">+18%</p>
+                </div>
+                <div class="rounded-2xl bg-white/10 px-3 py-2">
+                  <p class="text-blue-100 text-xs">{{ t('auth.login.branding.metrics.waitTime') }}</p>
+                  <p class="text-lg font-semibold">12m</p>
+                </div>
+                <div class="rounded-2xl bg-white/10 px-3 py-2">
+                  <p class="text-blue-100 text-xs">{{ t('auth.login.branding.metrics.satisfaction') }}</p>
+                  <p class="text-lg font-semibold">4.8★</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
       </div>
       
       <div class="flex items-center gap-4 text-sm text-violet-200">
@@ -75,8 +92,13 @@
       <div class="w-full max-w-md space-y-8">
         <!-- Mobile Header -->
         <div class="text-center lg:hidden">
-          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary-gradient text-3xl shadow-lg shadow-violet-500/30">
-            🦷
+          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-white shadow-lg shadow-violet-500/30">
+            <img
+              src="https://imagedelivery.net/K88oXEK4nwOFUDLZaSq1vg/6c79054b-5ecc-4a97-be03-441518f70200/public"
+              alt="Clinic logo"
+              class="h-9 w-9"
+              loading="lazy"
+            />
           </div>
           <h1 class="mt-4 text-2xl font-bold text-gray-900 dark:text-white">{{ t('auth.login.mobileHeader.title') }}</h1>
           <p class="mt-2 text-sm text-slate-600 dark:text-gray-400">{{ t('auth.login.mobileHeader.subtitle') }}</p>
@@ -176,39 +198,12 @@
               </div>
               </UFormGroup>
 
-              <UFormGroup
-                :label="t('auth.login.form.twoFactorLabel')"
-                name="twoFactorCode"
-                :hint="t('auth.login.form.twoFactorHint')"
-              >
-                <div class="relative">
-                  <input
-                    id="two-factor-input"
-                    name="twoFactorCode"
-                    type="text"
-                    inputmode="numeric"
-                    autocomplete="one-time-code"
-                    :placeholder="t('auth.login.form.twoFactorPlaceholder')"
-                    maxlength="6"
-                    pattern="[0-9]*"
-                    class="block w-full transition-all duration-200 border border-slate-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 placeholder:text-slate-400 dark:placeholder:text-gray-500 disabled:bg-slate-50 dark:disabled:bg-gray-800 disabled:cursor-not-allowed form-input rounded-lg h-11 text-base py-2.5 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white ring-1 ring-inset ring-gray-300 dark:ring-gray-600 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 pl-16 pr-3.5 tracking-[0.3em]"
-                    v-model="form.twoFactorCode"
-                    @input="onTwoFactorInput"
-                  />
-                  <span class="absolute inset-y-0 start-0 flex items-center pointer-events-none px-3.5 rounded-s-lg bg-primary-gradient-soft">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 dark:bg-gray-800/90 shadow-inner">
-                      <UIcon name="i-lucide-shield-check" class="h-4 w-4 text-primary-600 dark:text-primary-300" aria-hidden="true" />
-                    </span>
-                  </span>
-                </div>
-              </UFormGroup>
-
               <div class="flex items-center justify-between text-sm">
                 <label class="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" class="rounded border-slate-300 dark:border-gray-600 text-primary-600 dark:text-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 dark:bg-gray-700" />
                   <span class="text-slate-700 dark:text-gray-300">{{ t('auth.login.rememberMe') }}</span>
                 </label>
-                <NuxtLink to="#" class="font-medium text-primary-600 dark:text-primary-300 hover:text-primary-700 dark:hover:text-primary-200 transition-colors">
+                <NuxtLink to="/forgot-password" class="font-medium text-primary-600 dark:text-primary-300 hover:text-primary-700 dark:hover:text-primary-200 transition-colors">
                   {{ t('auth.login.forgotPassword') }}
                 </NuxtLink>
               </div>

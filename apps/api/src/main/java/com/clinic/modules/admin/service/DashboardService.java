@@ -1,7 +1,10 @@
 package com.clinic.modules.admin.service;
 
+import com.clinic.modules.admin.dto.CategoryExpense;
 import com.clinic.modules.admin.dto.DashboardSummaryResponse;
 import com.clinic.modules.admin.dto.TeamOnCallResponse;
+import com.clinic.modules.core.finance.CategoryExpenseAggregation;
+import com.clinic.modules.core.finance.FinanceAggregationService;
 import com.clinic.modules.core.appointment.AppointmentRepository;
 import com.clinic.modules.core.appointment.AppointmentStatus;
 import com.clinic.modules.core.doctor.DoctorAvailabilityEntity;
@@ -32,6 +35,7 @@ public class DashboardService {
     private final TreatmentPlanPaymentRepository treatmentPlanPaymentRepository;
     private final DoctorRepository doctorRepository;
     private final DoctorAvailabilityRepository doctorAvailabilityRepository;
+    private final FinanceAggregationService financeAggregationService;
     private final TenantContextHolder tenantContextHolder;
 
     public DashboardService(AppointmentRepository appointmentRepository,
@@ -40,6 +44,7 @@ public class DashboardService {
                             TreatmentPlanPaymentRepository treatmentPlanPaymentRepository,
                             DoctorRepository doctorRepository,
                             DoctorAvailabilityRepository doctorAvailabilityRepository,
+                            FinanceAggregationService financeAggregationService,
                             TenantContextHolder tenantContextHolder) {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
@@ -47,6 +52,7 @@ public class DashboardService {
         this.treatmentPlanPaymentRepository = treatmentPlanPaymentRepository;
         this.doctorRepository = doctorRepository;
         this.doctorAvailabilityRepository = doctorAvailabilityRepository;
+        this.financeAggregationService = financeAggregationService;
         this.tenantContextHolder = tenantContextHolder;
     }
 
@@ -86,11 +92,42 @@ public class DashboardService {
         Instant sevenDaysAgo = today.minusDays(7).atStartOfDay(zoneId).toInstant();
         long newPatients = patientRepository.countByTenantIdAndCreatedAtAfter(tenantId, sevenDaysAgo);
 
+        // Get expense data for current month
+        LocalDate firstDayOfMonthLocal = firstDayOfMonth;
+        LocalDate lastDayOfMonth = today.withDayOfMonth(today.lengthOfMonth());
+        
+        BigDecimal totalExpensesCurrentMonth = financeAggregationService.getTotalExpenses(
+                tenantId,
+                firstDayOfMonthLocal,
+                lastDayOfMonth
+        );
+
+        List<CategoryExpenseAggregation> expenseAggregations = financeAggregationService.getExpensesByCategory(
+                tenantId,
+                firstDayOfMonthLocal,
+                lastDayOfMonth
+        );
+
+        // Convert CategoryExpenseAggregation to CategoryExpense DTO
+        List<CategoryExpense> expensesByCategoryCurrentMonth = expenseAggregations.stream()
+                .map(agg -> new CategoryExpense(agg.getCategoryName(), agg.getTotalAmount()))
+                .toList();
+
+        // Calculate net result (income - expenses)
+        // If income data is available (revenueMonthToDate), calculate net result
+        BigDecimal netResult = null;
+        if (totalRevenue != null && totalExpensesCurrentMonth != null) {
+            netResult = totalRevenue.subtract(totalExpensesCurrentMonth);
+        }
+
         return new DashboardSummaryResponse(
                 appointmentsToday,
                 pendingConfirmations,
                 revenueMonthToDate,
-                newPatients
+                newPatients,
+                totalExpensesCurrentMonth,
+                expensesByCategoryCurrentMonth,
+                netResult
         );
     }
 

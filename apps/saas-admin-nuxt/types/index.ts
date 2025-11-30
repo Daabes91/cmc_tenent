@@ -13,9 +13,23 @@ export interface Tenant {
   name: string
   customDomain: string | null
   status: 'ACTIVE' | 'INACTIVE'
+  billingStatus: 'PENDING_PAYMENT' | 'ACTIVE' | 'PAST_DUE' | 'SUSPENDED' | 'CANCELED'
+  planTier: 'BASIC' | 'PROFESSIONAL' | 'ENTERPRISE' | 'CUSTOM' | null
   createdAt: string | number  // Can be ISO string or Unix timestamp
   updatedAt: string | number  // Can be ISO string or Unix timestamp
   deletedAt: string | number | null  // Can be ISO string or Unix timestamp
+}
+
+export interface Subscription {
+  id: number
+  tenantId: number
+  provider: string
+  paypalSubscriptionId: string
+  status: string
+  currentPeriodStart: string | null
+  currentPeriodEnd: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export interface TenantMetrics {
@@ -122,4 +136,35 @@ export interface AuditLogFilters {
   tenantId?: number
   page?: number
   size?: number
+}
+
+export interface PayPalPlanConfig {
+  tier: string
+  monthlyPlanId?: string
+  annualPlanId?: string
+  displayName?: string
+  description?: string
+  currency?: string
+  monthlyPrice?: number
+  annualPrice?: number
+  features?: string[]
+}
+
+export interface PayPalConfigResponse {
+  id: number | null
+  clientId: string
+  planId: string | null
+  webhookId: string | null
+  sandboxMode: boolean
+  maskedClientSecret: string
+  planConfigs: PayPalPlanConfig[]
+}
+
+export interface PayPalConfigRequest {
+  clientId: string
+  clientSecret?: string
+  webhookId?: string
+  sandboxMode: boolean
+  planId?: string
+  planConfigs: PayPalPlanConfig[]
 }

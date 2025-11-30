@@ -12,6 +12,8 @@ interface TenantListState {
   pageSize: number
   search: string
   status: string
+  billingStatus: string
+  planTier: string
   sortBy: string
   sortDirection: 'asc' | 'desc'
 }
@@ -34,6 +36,8 @@ export const useTenantManagement = () => {
     pageSize: Number(route.query.size) || 20,
     search: (route.query.search as string) || '',
     status: (route.query.status as string) || '',
+    billingStatus: (route.query.billingStatus as string) || '',
+    planTier: (route.query.planTier as string) || '',
     sortBy: (route.query.sortBy as string) || 'createdAt',
     sortDirection: (route.query.sortDirection as 'asc' | 'desc') || 'desc'
   })
@@ -46,6 +50,8 @@ export const useTenantManagement = () => {
     if (state.pageSize !== 20) query.size = String(state.pageSize)
     if (state.search) query.search = state.search
     if (state.status) query.status = state.status
+    if (state.billingStatus) query.billingStatus = state.billingStatus
+    if (state.planTier) query.planTier = state.planTier
     if (state.sortBy !== 'createdAt') query.sortBy = state.sortBy
     if (state.sortDirection !== 'desc') query.sortDirection = state.sortDirection
 
@@ -63,6 +69,8 @@ export const useTenantManagement = () => {
         size: state.pageSize,
         search: state.search || undefined,
         status: state.status || undefined,
+        billingStatus: state.billingStatus || undefined,
+        planTier: state.planTier || undefined,
         sortBy: state.sortBy,
         sortDirection: state.sortDirection
       }
@@ -106,6 +114,22 @@ export const useTenantManagement = () => {
   // Set status filter
   const setStatus = (value: string) => {
     state.status = value
+    state.page = 1 // Reset to first page on filter change
+    syncUrlParams()
+    fetchTenants()
+  }
+
+  // Set billing status filter
+  const setBillingStatus = (value: string) => {
+    state.billingStatus = value
+    state.page = 1 // Reset to first page on filter change
+    syncUrlParams()
+    fetchTenants()
+  }
+
+  // Set plan tier filter
+  const setPlanTier = (value: string) => {
+    state.planTier = value
     state.page = 1 // Reset to first page on filter change
     syncUrlParams()
     fetchTenants()
@@ -159,6 +183,8 @@ export const useTenantManagement = () => {
     fetchTenants,
     setSearch,
     setStatus,
+    setBillingStatus,
+    setPlanTier,
     setSort,
     setPage,
     setPageSize,

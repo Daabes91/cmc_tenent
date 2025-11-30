@@ -1,10 +1,13 @@
 package com.clinic.modules.admin.service;
 
 import com.clinic.modules.admin.dto.CategoryBreakdown;
+import com.clinic.modules.admin.dto.CategoryExpense;
 import com.clinic.modules.admin.dto.ReportMetrics;
 import com.clinic.modules.admin.dto.RevenuePoint;
 import com.clinic.modules.admin.dto.TimeSeriesPoint;
 import com.clinic.modules.admin.util.DateRange;
+import com.clinic.modules.core.finance.CategoryExpenseAggregation;
+import com.clinic.modules.core.finance.FinanceAggregationService;
 import com.clinic.modules.core.appointment.AppointmentEntity;
 import com.clinic.modules.core.appointment.AppointmentRepository;
 import com.clinic.modules.core.appointment.AppointmentStatus;
@@ -48,6 +51,7 @@ public class ReportService {
     private final FollowUpVisitRepository followUpVisitRepository;
     private final PaymentRepository paymentRepository;
     private final TreatmentPlanPaymentRepository treatmentPlanPaymentRepository;
+    private final FinanceAggregationService financeAggregationService;
     private final TenantContextHolder tenantContextHolder;
 
     public ReportService(AppointmentRepository appointmentRepository,
@@ -57,6 +61,7 @@ public class ReportService {
                          FollowUpVisitRepository followUpVisitRepository,
                          PaymentRepository paymentRepository,
                          TreatmentPlanPaymentRepository treatmentPlanPaymentRepository,
+                         FinanceAggregationService financeAggregationService,
                          TenantContextHolder tenantContextHolder) {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
@@ -65,6 +70,7 @@ public class ReportService {
         this.followUpVisitRepository = followUpVisitRepository;
         this.paymentRepository = paymentRepository;
         this.treatmentPlanPaymentRepository = treatmentPlanPaymentRepository;
+        this.financeAggregationService = financeAggregationService;
         this.tenantContextHolder = tenantContextHolder;
     }
 
@@ -362,6 +368,24 @@ public class ReportService {
         long followUpVisitsThisMonth = followUpVisitRepository.countByTenantIdAndVisitDateBetween(tenantId, startOfMonth, startOfNextMonth);
         long activeTreatmentPlans = treatmentPlanRepository.countByTenantIdAndStatus(tenantId, TreatmentPlanStatus.IN_PROGRESS);
 
+        // Get expense data for the date range
+        BigDecimal totalExpenses = financeAggregationService.getTotalExpenses(
+                tenantId,
+                dateRange.getStartDate(),
+                dateRange.getEndDate()
+        );
+
+        List<CategoryExpenseAggregation> expenseAggregations = financeAggregationService.getExpensesByCategory(
+                tenantId,
+                dateRange.getStartDate(),
+                dateRange.getEndDate()
+        );
+
+        // Convert CategoryExpenseAggregation to CategoryExpense DTO
+        List<CategoryExpense> expensesByCategory = expenseAggregations.stream()
+                .map(agg -> new CategoryExpense(agg.getCategoryName(), agg.getTotalAmount()))
+                .toList();
+
         return new ReportMetrics(
                 totalAppointments,
                 todayAppointments,
@@ -391,7 +415,10 @@ public class ReportService {
                 // Multi-currency support
                 revenueThisMonthByCurrency,
                 revenueLastMonthByCurrency,
-                revenueTrendByCurrency
+                revenueTrendByCurrency,
+                // Expense data
+                totalExpenses,
+                expensesByCategory
         );
     }
 

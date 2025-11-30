@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-mint-500 to-mint-400 shadow-lg">
               <UIcon name="i-lucide-layout-dashboard" class="h-6 w-6 text-white" />
             </div>
             <div>
@@ -23,7 +23,7 @@
               {{ t('dashboard.actions.refresh') }}
             </UButton>
             <UButton 
-              color="violet" 
+              color="primary" 
               icon="i-lucide-calendar-plus"
               @click="navigateTo('/appointments/new')"
             >
@@ -50,7 +50,7 @@
               @click="refreshData"
             />
             <UButton 
-              color="violet" 
+              color="primary" 
               size="sm"
               icon="i-lucide-plus"
               :class="getTouchTargetClass()"
@@ -67,8 +67,8 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/60 hover:shadow-md transition-all duration-200 touch-manipulation">
           <div class="flex items-center gap-3 mb-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-900/20">
-              <UIcon name="i-lucide-calendar-check" class="h-5 w-5 text-violet-600 dark:text-violet-400" />
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-mint-50 dark:bg-mint-900/20">
+              <UIcon name="i-lucide-calendar-check" class="h-5 w-5 text-mint-600 dark:text-mint-400" />
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide truncate">{{ t('dashboard.metrics.todayAppointments.label') }}</p>
@@ -120,12 +120,12 @@
 
       <!-- Load Factor Card - Mobile Optimized -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden mb-6 sm:mb-8">
-        <div class="bg-gradient-to-r from-violet-500 to-purple-600 px-4 sm:px-6 py-4">
+        <div class="bg-gradient-to-r from-mint-500 to-mint-400 px-4 sm:px-6 py-4">
           <div class="flex items-center gap-3">
             <UIcon name="i-lucide-activity" class="h-5 w-5 text-white" />
             <div class="min-w-0 flex-1">
               <h2 class="text-lg font-semibold text-white truncate">{{ t("dashboard.hero.loadFactor.label") }}</h2>
-              <p class="text-sm text-violet-100 hidden sm:block">{{ t('dashboard.loadFactor.subtitle') }}</p>
+              <p class="text-sm text-mint-100 hidden sm:block">{{ t('dashboard.loadFactor.subtitle') }}</p>
             </div>
           </div>
         </div>
@@ -136,7 +136,7 @@
           </div>
           <div class="h-3 w-full overflow-hidden rounded-full bg-slate-200/80 dark:bg-slate-700/60 mb-4">
             <div
-              class="h-full rounded-full bg-gradient-to-r from-violet-400 via-violet-500 to-violet-600 transition-all duration-500"
+              class="h-full rounded-full bg-gradient-to-r from-mint-500 via-mint-400 to-mint-300 transition-all duration-500"
               :style="{ width: `${loadFactor}%` }"
             ></div>
           </div>
@@ -165,13 +165,13 @@
       <section class="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <!-- Schedule Section - Mobile Optimized -->
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-          <div class="bg-gradient-to-r from-violet-500 to-purple-600 px-4 sm:px-6 py-4">
+          <div class="bg-gradient-to-r from-mint-500 to-mint-400 px-4 sm:px-6 py-4">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div class="flex items-center gap-3">
                 <UIcon name="i-lucide-calendar-days" class="h-5 w-5 text-white" />
                 <div class="min-w-0 flex-1">
                   <h2 class="text-lg font-semibold text-white truncate">{{ t("dashboard.schedule.title") }}</h2>
-                  <p class="text-sm text-violet-100 hidden sm:block">{{ t('dashboard.schedule.appointmentsScheduled', { count: upcoming.length }) }}</p>
+                  <p class="text-sm text-mint-100 hidden sm:block">{{ t('dashboard.schedule.appointmentsScheduled', { count: upcoming.length }) }}</p>
                 </div>
               </div>
               <UButton
@@ -191,11 +191,11 @@
               <div
                 v-for="appointment in upcoming"
                 :key="appointment.id"
-                class="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 p-3 sm:p-4 transition-all duration-300 hover:border-violet-300 hover:bg-violet-50/60 dark:border-white/10 dark:bg-white/5 dark:hover:border-violet-400/60 dark:hover:bg-violet-500/10 touch-manipulation"
+              class="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 p-3 sm:p-4 transition-all duration-300 hover:border-mint-300 hover:bg-mint-50/60 dark:border-white/10 dark:bg-white/5 dark:hover:border-mint-400/60 dark:hover:bg-mint-500/10 touch-manipulation"
               >
                 <div class="flex items-start justify-between gap-3">
                   <div class="flex-1 min-w-0 space-y-1">
-                    <p class="text-sm font-semibold text-slate-900 truncate dark:text-white group-hover:text-violet-700 dark:group-hover:text-violet-200">
+                    <p class="text-sm font-semibold text-slate-900 truncate dark:text-white group-hover:text-mint-700 dark:group-hover:text-mint-200">
                       {{ appointment?.patientName || appointment?.patient?.name || '—' }}
                     </p>
                     <p class="text-xs text-slate-500 truncate dark:text-slate-400">
@@ -203,7 +203,7 @@
                     </p>
                     <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2 text-xs text-slate-500 dark:text-slate-400">
                       <span class="inline-flex items-center gap-1">
-                        <UIcon name="i-lucide-stethoscope" class="h-3.5 w-3.5 text-violet-500 dark:text-violet-300" />
+                        <UIcon name="i-lucide-stethoscope" class="h-3.5 w-3.5 text-mint-500 dark:text-mint-300" />
                         <span class="truncate">{{ appointment?.doctorName || appointment?.doctor?.name || '—' }}</span>
                       </span>
                       <span class="hidden sm:inline-flex h-1.5 w-1.5 rounded-full bg-slate-400/60"></span>
@@ -223,7 +223,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-indigo-600 opacity-0 transition group-hover:opacity-100"></div>
+                <div class="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-mint-500 via-mint-400 to-mint-300 opacity-0 transition group-hover:opacity-100"></div>
               </div>
             </div>
           </div>
@@ -248,18 +248,18 @@
                   v-for="action in quickActionCards"
                   :key="action.title"
                   type="button"
-                  class="group flex w-full flex-col gap-3 rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-50/70 dark:border-white/10 dark:bg-white/5 dark:hover:border-violet-400/60 dark:hover:bg-violet-500/10 touch-manipulation"
+                  class="group flex w-full flex-col gap-3 rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-mint-300 hover:bg-mint-50/70 dark:border-white/10 dark:bg-white/5 dark:hover:border-mint-400/60 dark:hover:bg-mint-500/10 touch-manipulation"
                   :class="getTouchTargetClass()"
                   @click="action.click()"
                 >
-                  <span :class="['inline-flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-sm shadow-violet-500/30', action.accent]">
+                  <span :class="['inline-flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-sm shadow-mint-500/30', action.accent]">
                     <UIcon :name="action.icon" class="h-5 w-5" />
                   </span>
                   <div class="space-y-1 min-w-0">
                     <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">{{ action.title }}</p>
                     <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{{ action.description }}</p>
                   </div>
-                  <span class="text-xs font-semibold text-violet-600 transition group-hover:text-violet-700 dark:text-violet-300 dark:group-hover:text-violet-200">
+                  <span class="text-xs font-semibold text-mint-600 transition group-hover:text-mint-700 dark:text-mint-300 dark:group-hover:text-mint-200">
                     {{ action.cta }}
                   </span>
                 </button>
@@ -405,12 +405,12 @@
 
         <!-- Operations Section -->
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-          <div class="bg-gradient-to-r from-violet-500 to-purple-600 px-6 py-4">
+          <div class="bg-gradient-to-r from-mint-500 to-mint-400 px-6 py-4">
             <div class="flex items-center gap-3">
               <UIcon name="i-lucide-check-square" class="h-5 w-5 text-white" />
               <div>
                 <h2 class="text-lg font-semibold text-white">{{ t("dashboard.operations.title") }}</h2>
-                <p class="text-sm text-violet-100">{{ t("dashboard.operations.subtitle") }}</p>
+                <p class="text-sm text-mint-100">{{ t("dashboard.operations.subtitle") }}</p>
               </div>
             </div>
           </div>
@@ -562,7 +562,7 @@ const quickActionCards = computed(() => [
     title: t("dashboard.quickActions.actions.bookAppointment.title"),
     description: t("dashboard.quickActions.actions.bookAppointment.description"),
     icon: "i-lucide-calendar-plus",
-    accent: "bg-gradient-to-br from-violet-500 to-indigo-500",
+    accent: "bg-gradient-to-br from-mint-600 to-mint-400",
     cta: t("dashboard.quickActions.actions.bookAppointment.cta"),
     click: () => navigateTo("/appointments/new")
   },
@@ -609,13 +609,13 @@ const channelPerformance = computed(() => [
     id: "email",
     label: t("dashboard.communication.channels.email.label"),
     icon: "i-lucide-mail",
-    badgeBg: "bg-purple-500/15 text-purple-300",
+    badgeBg: "bg-mint-500/15 text-mint-300",
     rate: "81%",
     delta: `+3% ${t("dashboard.communication.channels.email.delta")}`,
-    deltaBadge: "bg-purple-100/80 text-purple-600 dark:bg-purple-500/15 dark:text-purple-200",
+    deltaBadge: "bg-mint-100/80 text-mint-600 dark:bg-mint-500/15 dark:text-mint-200",
     trendIcon: "i-lucide-trending-up",
     description: t("dashboard.communication.channels.email.description"),
-    progressGradient: "from-purple-400 via-fuchsia-500 to-purple-400"
+    progressGradient: "from-mint-500 via-mint-400 to-mint-300"
   },
   {
     id: "sms",
@@ -658,8 +658,8 @@ const operationsProgress = computed(() => [
     percent: 54,
     completed: 13,
     total: 24,
-    badge: "bg-violet-100/80 text-violet-600 dark:bg-violet-500/15 dark:text-violet-200",
-    progressGradient: "bg-gradient-to-r from-violet-400 via-violet-500 to-purple-500",
+    badge: "bg-mint-100/80 text-mint-600 dark:bg-mint-500/15 dark:text-mint-200",
+    progressGradient: "bg-gradient-to-r from-mint-500 via-mint-400 to-mint-300",
     caption: t("dashboard.operations.items.labs.caption")
   }
 ]);
@@ -750,7 +750,7 @@ function statusColor(status: string | undefined) {
       return "red";
     case "SCHEDULED":
     default:
-      return "violet";
+      return "mint";
   }
 }
 

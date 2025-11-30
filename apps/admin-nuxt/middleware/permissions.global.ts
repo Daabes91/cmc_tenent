@@ -14,7 +14,8 @@ function getModuleForRoute(path: string): ModuleName | null {
     'blogs': 'blogs',
     'reports': 'reports',
     'staff': 'staff',
-    'clinic-settings': 'settings'
+    'clinic-settings': 'settings',
+    'billing': 'settings'
   };
 
   return routeToModuleMap[pathSegment] || null;
@@ -46,6 +47,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
     } catch (error) {
       console.error('Failed to load permissions:', error);
       return navigateTo('/403');
+    }
+    // If still not loaded (e.g., throttled/backed off), allow navigation to avoid lockout
+    if (!permissionsLoaded.value) {
+      return;
     }
   }
 

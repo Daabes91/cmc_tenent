@@ -1,4 +1,5 @@
 import type { FetchOptions } from "ofetch";
+import type { BillingPlanResponse, CancelPlanPayload } from "~/types/billing";
 
 type ApiErrorPayload = {
   field?: string | null;
@@ -20,6 +21,19 @@ export function useAdminApi() {
   const auth = useAuth();
   const { tenantSlug } = useTenantSlug();
 
+  const normalizePath = (path: string) => {
+    const normalizedBase = (baseURL || '').replace(/\/+$/, '');
+    const baseHasAdmin = normalizedBase.endsWith('/admin');
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+    // Avoid double "/admin" when the base URL already contains it
+    if (baseHasAdmin && normalizedPath.startsWith('/admin')) {
+      return normalizedPath.replace(/^\/admin/, '') || '/';
+    }
+
+    return normalizedPath;
+  };
+
   const authorizedRequest = async <T>(
     path: string,
     options: FetchOptions = {},
@@ -27,7 +41,7 @@ export function useAdminApi() {
   ): Promise<T> => {
     try {
       // Always get fresh authorization header at request time
-      const response = await $fetch<ApiResponseEnvelope<T>>(path, {
+      const response = await $fetch<ApiResponseEnvelope<T>>(normalizePath(path), {
         baseURL,
         credentials: "include",
         headers: {
@@ -84,5 +98,13 @@ export function useAdminApi() {
     }
   };
 
-  return { fetcher, request: authorizedRequest };
+  const getBillingPlan = () => authorizedRequest<BillingPlanResponse>("/billing/plan");
+
+  const cancelBillingPlan = (payload: CancelPlanPayload = {}) =>
+    authorizedRequest<void>("/billing/plan/cancel", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+  return { fetcher, request: authorizedRequest, getBillingPlan, cancelBillingPlan };
 }

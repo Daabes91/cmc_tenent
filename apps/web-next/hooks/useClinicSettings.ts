@@ -62,16 +62,19 @@ export function useClinicBranding() {
   // Use enhanced safe clinic name handling
   const clinicName = getSafeClinicName(clinicSettings?.clinicName);
   const logoUrl = clinicSettings?.logoUrl?.trim() || null;
+  const faviconUrl = clinicSettings?.faviconUrl?.trim() || null;
   
   // Validate logo URL with enhanced validation
   const validLogoUrl = logoUrl ? validateImageUrl(logoUrl) : null;
+  const validFaviconUrl = faviconUrl ? validateImageUrl(faviconUrl) : null;
   
   return {
     clinicName,
     logoUrl: validLogoUrl,
+    faviconUrl: validFaviconUrl,
     isLoading,
     error,
-    hasCustomBranding: !!(clinicSettings?.clinicName || clinicSettings?.logoUrl)
+    hasCustomBranding: !!(clinicSettings?.clinicName || clinicSettings?.logoUrl || clinicSettings?.faviconUrl)
   };
 }
 
@@ -118,7 +121,6 @@ import { createSafeBrandingFromSettings, logBrandingError, handleApiFailure } fr
  * 
  * @param url - The URL to validate
  * @returns Valid URL or null if invalid
- * @deprecated This function is no longer needed with static favicon configuration
  */
 function validateImageUrl(url: string): string | null {
   if (!url?.trim()) {
@@ -132,4 +134,3 @@ function validateImageUrl(url: string): string | null {
     return null;
   }
 }
-

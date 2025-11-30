@@ -152,7 +152,7 @@
           <div class="flex items-start justify-between">
             <div class="flex items-start gap-4 flex-1">
               <!-- Avatar -->
-              <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-purple-600 text-white font-bold text-lg">
+              <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-mint-600 to-mint-400 text-white font-bold text-lg">
                 {{ staff.fullName.charAt(0).toUpperCase() }}
               </div>
 
@@ -336,12 +336,18 @@ function getPermissionCount(permissions: ModulePermissions) {
 function getActiveModules(permissions: ModulePermissions) {
   const moduleNames: Record<string, string> = {
     appointments: 'Appointments',
+    calendar: 'Calendar',
     patients: 'Patients',
     doctors: 'Doctors',
+    materials: 'Materials',
     services: 'Services',
+    insuranceCompanies: 'Insurance Companies',
     treatmentPlans: 'Treatment Plans',
     reports: 'Reports',
+    billing: 'Billing',
+    translations: 'Translations',
     settings: 'Settings',
+    clinicSettings: 'Clinic Settings',
     staff: 'Staff',
     blogs: 'Blogs'
   };

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { TENANT_HEADER } from '@/lib/tenant'
-import { prisma } from '@/lib/prisma'
+import { dbQuery } from '@/lib/db'
 import type { TenantInfo, ApiErrorResponse } from '@/lib/theme-types'
 
 /**
@@ -51,13 +51,11 @@ export async function GET(
     }
     
     // Query tenant by slug with themeId
-    const tenant = await prisma.tenant.findUnique({
-      where: { slug: tenantSlug },
-      select: {
-        slug: true,
-        themeId: true
-      }
-    })
+    const tenantResult = await dbQuery<TenantInfo>(
+      'SELECT slug, "themeId" as "themeId" FROM tenants WHERE slug = $1 LIMIT 1',
+      [tenantSlug]
+    )
+    const tenant = tenantResult.rows[0]
     
     // Add error handling for missing tenant
     if (!tenant) {

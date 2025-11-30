@@ -97,6 +97,8 @@ public class ClinicSettingsService {
         // Update logo fields
         if (request.logoUrl() != null) settings.setLogoUrl(request.logoUrl());
         if (request.logoImageId() != null) settings.setLogoImageId(request.logoImageId());
+        if (request.faviconUrl() != null) settings.setFaviconUrl(request.faviconUrl());
+        if (request.faviconImageId() != null) settings.setFaviconImageId(request.faviconImageId());
 
         // Update social media
         if (request.socialMedia() != null) {
@@ -148,14 +150,6 @@ public class ClinicSettingsService {
         }
         if (request.paypalClientSecret() != null) {
             settings.setPaypalClientSecret(normalize(request.paypalClientSecret()));
-        }
-
-        // Update Cloudflare settings
-        if (request.cloudflareAccountId() != null) {
-            settings.setCloudflareAccountId(normalize(request.cloudflareAccountId()));
-        }
-        if (request.cloudflareApiToken() != null) {
-            settings.setCloudflareApiToken(normalize(request.cloudflareApiToken()));
         }
 
         // Update hero media settings
@@ -258,6 +252,7 @@ public class ClinicSettingsService {
         settings.setWhyChooseSubtitleEn("We combine cutting-edge technology with compassionate care to deliver exceptional dental experiences.");
         settings.setWhyChooseSubtitleAr("نجمع بين أحدث التقنيات والرعاية الإنسانية لنقدم تجربة أسنان استثنائية.");
         settings.setWhyChooseFeatures(defaultWhyChooseFeatures());
+        settings.setFaviconUrl("/favicon.ico");
         return settingsRepository.save(settings);
     }
 
@@ -303,6 +298,8 @@ public class ClinicSettingsService {
                 resolveCurrencySymbol(entity.getCurrency(), entity.getLocale()),
                 entity.getLogoUrl(),
                 entity.getLogoImageId(),
+                entity.getFaviconUrl(),
+                entity.getFaviconImageId(),
                 workingHours,
                 socialMedia,
                 entity.getVirtualConsultationFee(),
@@ -313,8 +310,6 @@ public class ClinicSettingsService {
                 resolvedPaypalClientSecret,
                 entity.getExchangeRates(),
                 resolvedTimezone,
-                entity.getCloudflareAccountId(),
-                entity.getCloudflareApiToken(),
                 resolvedSendgridKey,
                 resolvedEmailFrom,
                 resolvedEmailFromName,

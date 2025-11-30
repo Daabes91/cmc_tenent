@@ -31,10 +31,10 @@ services:
       SPRING_DATASOURCE_USERNAME: clinic
       SPRING_DATASOURCE_PASSWORD: clinic_password
       SPRING_PROFILES_ACTIVE: prod
-      SENDGRID_API_KEY: local-placeholder
-      EMAIL_FROM: clinic.notifier@example.com
-      EMAIL_FROM_NAME: Clinic
-      EMAIL_ENABLED: "false"
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      EMAIL_FROM: info@cliniqax.com
+      EMAIL_FROM_NAME: Cliniqax
+      EMAIL_ENABLED: "true"
       PUBLIC_APP_ORIGIN: http://localhost:3001
       ADMIN_APP_ORIGIN: http://localhost:3000
       SAAS_ADMIN_APP_ORIGIN: http://localhost:3002
@@ -55,6 +55,21 @@ services:
       SAAS_DEFAULT_ADMIN_EMAIL: ${SAAS_DEFAULT_ADMIN_EMAIL:-saas.admin@example.com}
       SAAS_DEFAULT_ADMIN_FULL_NAME: ${SAAS_DEFAULT_ADMIN_FULL_NAME:-SAAS Platform Admin}
       SAAS_DEFAULT_ADMIN_PASSWORD: ${SAAS_DEFAULT_ADMIN_PASSWORD:-saas-admin}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET:-}
+      PAYPAL_WEBHOOK_ID: ${PAYPAL_WEBHOOK_ID:-}
+      PAYPAL_ENVIRONMENT: ${PAYPAL_ENVIRONMENT:-sandbox}
+      PAYPAL_BASE_URL: ${PAYPAL_BASE_URL:-https://api-m.sandbox.paypal.com}
+      PAYPAL_ENCRYPTION_KEY: ${PAYPAL_ENCRYPTION_KEY:-local-dev-encryption-key-32bytes}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3001}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-${APP_BASE_URL:-http://localhost:3001}/auth/google/callback}
+      CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID:-}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:-}
+      CLOUDFLARE_BASE_URL: ${CLOUDFLARE_BASE_URL:-https://api.cloudflare.com/client/v4}
+      CLOUDFLARE_DELIVERY_URL: ${CLOUDFLARE_DELIVERY_URL:-}
+      CLOUDFLARE_IMAGES_MOCK_MODE: ${CLOUDFLARE_IMAGES_MOCK_MODE:-true}
     depends_on:
       postgres:
         condition: service_healthy
@@ -143,6 +158,37 @@ services:
       - clinic-net
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3002/saas-admin || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  saas-landing:
+    build:
+      context: ./apps/saas-landing
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+        NEXT_PUBLIC_APP_URL: http://localhost:3003
+        NEXT_PUBLIC_PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+        NEXT_PUBLIC_HERO_VIDEO_URL: https://www.youtube.com/embed/T8lXiW5x8_s?autoplay=1&mute=1&loop=1
+    container_name: clinic-saas-landing
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+      NEXT_PUBLIC_APP_URL: http://localhost:3003
+      NEXT_PUBLIC_PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      NODE_ENV: production
+      PORT: 3003
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3003:3003"
+    networks:
+      - clinic-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3003 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

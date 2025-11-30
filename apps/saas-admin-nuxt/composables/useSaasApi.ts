@@ -6,7 +6,9 @@ import type {
   SystemMetrics,
   TenantMetrics,
   AuditLog,
-  BrandingConfig
+  BrandingConfig,
+  PayPalConfigResponse,
+  PayPalConfigRequest
 } from '~/types'
 import { useApiErrorHandler } from './useApiErrorHandler'
 import { useConnectionStatus } from './useConnectionStatus'
@@ -16,6 +18,7 @@ interface TenantListParams {
   size?: number
   search?: string
   status?: string
+  billingStatus?: string
   sortBy?: string
   sortDirection?: 'asc' | 'desc'
 }
@@ -247,6 +250,63 @@ export const useSaasApi = () => {
       apiCall<BrandingConfig>(`/tenants/${id}/branding`, {
         method: 'PUT',
         body: JSON.stringify(config)
-      })
+      }),
+
+    // PayPal Configuration
+    getPayPalConfig: () =>
+      apiCall<PayPalConfigResponse>('/paypal-config'),
+
+    updatePayPalConfig: (config: PayPalConfigRequest) =>
+      apiCall<PayPalConfigResponse>('/paypal-config', {
+        method: 'PUT',
+        body: JSON.stringify(config)
+      }),
+
+    // Subscription Management
+    getTenantSubscription: (tenantId: number) =>
+      apiCall<any>(`/tenants/${tenantId}/subscription`),
+
+    updateBillingStatus: (tenantId: number, billingStatus: string, reason: string) =>
+      apiCall<void>(`/tenants/${tenantId}/billing-status`, {
+        method: 'PUT',
+        body: JSON.stringify({ billingStatus, reason })
+      }),
+
+    // Plan Management
+    getTenantPlan: (tenantId: number) =>
+      apiCall<any>(`/tenants/${tenantId}/plan`),
+
+    overrideTenantPlan: (tenantId: number, data: { targetTier: string; reason: string }) =>
+      apiCall<void>(`/tenants/${tenantId}/plan/override`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }),
+
+    cancelTenantSubscription: (tenantId: number, immediate: boolean, reason?: string) =>
+      apiCall<{ effectiveDate: string | number; message: string; immediate: boolean }>(
+        `/tenants/${tenantId}/plan/cancel`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ immediate, reason })
+        }
+      ),
+
+    resumeTenantSubscription: (tenantId: number) =>
+      apiCall<void>(`/tenants/${tenantId}/plan/resume`, {
+        method: 'POST'
+      }),
+
+    // Billing Audit Logs
+    getBillingAuditLogs: (params: {
+      tenantId?: number
+      actionType?: string
+      page?: number
+      size?: number
+    }) => {
+      const queryString = toQueryString(params)
+      return apiCall<{ content: any[]; totalPages: number; totalElements: number }>(
+        `/billing/audit-logs${queryString ? `?${queryString}` : ''}`
+      )
+    }
   }
 }

@@ -66,7 +66,8 @@ public class PatientAuthService {
         if (existingProfile.isPresent()) {
             // Update existing tenant profile
             patient = existingProfile.get();
-            patient.updateDetails(firstName, lastName, email, phone, request.dateOfBirth());
+            patient.updateDetails(firstName, lastName, email, phone, request.dateOfBirth(), patient.getNotes(),
+                    patient.getDriveFolderUrl());
         } else {
             // Create new tenant profile linked to global patient
             patient = new PatientEntity(

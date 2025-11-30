@@ -49,6 +49,16 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
         }
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        if (path == null) {
+            return false;
+        }
+        String normalizedPath = path.toLowerCase();
+        return normalizedPath.startsWith("/saas/") || normalizedPath.startsWith("/api/saas/");
+    }
+
     private TenantEntity resolveTenant(HttpServletRequest request) {
         String slug = resolveSlug(request);
         if (StringUtils.hasText(slug)) {

@@ -1,7 +1,7 @@
 <template>
   <div class="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-violet-200">
     <!-- Decorative gradient background -->
-    <div class="absolute right-0 top-0 h-24 w-24 rounded-full bg-gradient-to-br from-violet-100 to-transparent opacity-30 blur-2xl transition-opacity group-hover:opacity-50"></div>
+    <div class="absolute right-0 top-0 h-24 w-24 rounded-full bg-gradient-to-br from-mint-100 to-transparent opacity-30 blur-2xl transition-opacity group-hover:opacity-50"></div>
     
     <div class="relative">
       <div class="flex items-start justify-between">

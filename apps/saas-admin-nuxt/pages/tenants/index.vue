@@ -18,7 +18,7 @@
 
     <!-- Filters -->
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div class="md:col-span-2">
           <UInput
             v-model="filters.search"
@@ -31,6 +31,18 @@
         <USelect
           v-model="filters.status"
           :options="statusOptions"
+          size="lg"
+          @change="loadTenants"
+        />
+        <USelect
+          v-model="filters.billingStatus"
+          :options="billingStatusOptions"
+          size="lg"
+          @change="loadTenants"
+        />
+        <USelect
+          v-model="filters.planTier"
+          :options="planTierOptions"
           size="lg"
           @change="loadTenants"
         />
@@ -97,13 +109,32 @@ const pageSize = ref(20)
 
 const filters = reactive({
   search: (route.query.search as string) || '',
-  status: (route.query.status as string) || 'all'
+  status: (route.query.status as string) || 'all',
+  billingStatus: (route.query.billingStatus as string) || 'all',
+  planTier: (route.query.planTier as string) || 'all'
 })
 
 const statusOptions = [
   { label: 'All Statuses', value: 'all' },
   { label: 'Active', value: 'ACTIVE' },
   { label: 'Inactive', value: 'INACTIVE' }
+]
+
+const billingStatusOptions = [
+  { label: 'All Billing Statuses', value: 'all' },
+  { label: 'Active', value: 'ACTIVE' },
+  { label: 'Pending Payment', value: 'PENDING_PAYMENT' },
+  { label: 'Past Due', value: 'PAST_DUE' },
+  { label: 'Suspended', value: 'SUSPENDED' },
+  { label: 'Canceled', value: 'CANCELED' }
+]
+
+const planTierOptions = [
+  { label: 'All Plan Tiers', value: 'all' },
+  { label: 'Basic', value: 'BASIC' },
+  { label: 'Professional', value: 'PROFESSIONAL' },
+  { label: 'Enterprise', value: 'ENTERPRISE' },
+  { label: 'Custom', value: 'CUSTOM' }
 ]
 
 const loadTenants = async () => {
@@ -120,6 +151,8 @@ const loadTenants = async () => {
 
     if (filters.search) params.search = filters.search
     if (filters.status !== 'all') params.status = filters.status
+    if (filters.billingStatus !== 'all') params.billingStatus = filters.billingStatus
+    if (filters.planTier !== 'all') params.planTier = filters.planTier
 
     const response = await api.getTenants(params)
     tenants.value = response.content || []
@@ -139,6 +172,8 @@ const updateUrl = () => {
   if (currentPage.value > 1) query.page = String(currentPage.value)
   if (filters.search) query.search = filters.search
   if (filters.status !== 'all') query.status = filters.status
+  if (filters.billingStatus !== 'all') query.billingStatus = filters.billingStatus
+  if (filters.planTier !== 'all') query.planTier = filters.planTier
   router.push({ query })
 }
 

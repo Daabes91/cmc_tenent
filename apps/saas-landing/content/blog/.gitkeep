@@ -1,0 +1,13 @@
+# Blog Content Directory
+
+This directory contains blog posts in MDX format.
+
+## Creating a New Blog Post
+
+1. Create a new `.mdx` file in this directory
+2. Add frontmatter with required fields (see example below)
+3. Write your content using Markdown and JSX
+
+## Example Blog Post
+
+See the example post in this directory for the correct format.

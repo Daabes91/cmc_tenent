@@ -1,11 +1,13 @@
 package com.clinic.modules.saas.service;
 
 import com.clinic.modules.admin.staff.repository.StaffUserRepository;
+import com.clinic.modules.core.appointment.AppointmentRepository;
+import com.clinic.modules.core.patient.PatientRepository;
+import com.clinic.modules.core.tenant.TenantEntity;
 import com.clinic.modules.core.tenant.TenantRepository;
 import com.clinic.modules.core.tenant.TenantStatus;
-import com.clinic.modules.saas.dto.ActivityResponse;
-import com.clinic.modules.saas.dto.AnalyticsResponse;
-import com.clinic.modules.saas.dto.SystemMetricsResponse;
+import com.clinic.modules.saas.dto.*;
+import com.clinic.modules.saas.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,12 +27,18 @@ public class MetricsService {
 
     private final TenantRepository tenantRepository;
     private final StaffUserRepository staffUserRepository;
+    private final PatientRepository patientRepository;
+    private final AppointmentRepository appointmentRepository;
 
     public MetricsService(
             TenantRepository tenantRepository,
-            StaffUserRepository staffUserRepository) {
+            StaffUserRepository staffUserRepository,
+            PatientRepository patientRepository,
+            AppointmentRepository appointmentRepository) {
         this.tenantRepository = tenantRepository;
         this.staffUserRepository = staffUserRepository;
+        this.patientRepository = patientRepository;
+        this.appointmentRepository = appointmentRepository;
     }
 
     /**
@@ -103,6 +111,37 @@ public class MetricsService {
                 tenantGrowth,
                 userActivity,
                 systemPerformance
+        );
+    }
+
+    /**
+     * Retrieve high level usage metrics for a specific tenant.
+     *
+     * @param tenantId Tenant identifier
+     * @return metrics snapshot for the tenant
+     */
+    public TenantMetricsResponse getTenantMetrics(Long tenantId) {
+        TenantEntity tenant = tenantRepository.findById(tenantId)
+                .orElseThrow(() -> new NotFoundException("Tenant with ID " + tenantId + " not found"));
+
+        long staffCount = staffUserRepository.countByTenantId(tenantId);
+        long patientCount = patientRepository.countByTenantId(tenantId);
+        long appointmentCount = appointmentRepository.countByTenantId(tenantId);
+
+        // For now we treat "userCount" as the number of staff accounts.
+        long userCount = staffCount;
+
+        // Storage metrics not yet tracked - surface zero to avoid misleading data.
+        double storageUsedMb = 0d;
+
+        return new TenantMetricsResponse(
+                tenantId,
+                userCount,
+                staffCount,
+                patientCount,
+                appointmentCount,
+                storageUsedMb,
+                tenant.getUpdatedAt() != null ? tenant.getUpdatedAt() : tenant.getCreatedAt()
         );
     }
 }

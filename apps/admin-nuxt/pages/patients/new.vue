@@ -125,6 +125,34 @@
                 @upload-success="handleImageUploadSuccess"
               />
             </UFormGroup>
+
+            <UFormGroup :label="t('patients.details.form.fields.notes')" :hint="t('patients.details.form.hints.notes')" :error="errors.notes">
+              <UTextarea
+                v-model="form.notes"
+                :placeholder="t('patients.details.form.placeholders.notes')"
+                :rows="4"
+                @input="clearFieldError('notes')"
+              />
+            </UFormGroup>
+
+            <UFormGroup label="Tags" hint="Add tags to categorize this patient">
+               <USelectMenu
+                  v-model="form.tags"
+                  :options="availableTags"
+                  option-attribute="name"
+                  value-attribute="id"
+                  multiple
+                  creatable
+                  searchable
+                  placeholder="Select or create tags"
+                  @create="handleCreateTag"
+               >
+                 <template #label>
+                    <span v-if="form.tags.length" class="truncate">{{ form.tags.length }} tags selected</span>
+                    <span v-else class="text-gray-500">Select or create tags</span>
+                 </template>
+               </USelectMenu>
+            </UFormGroup>
           </div>
 
           <!-- Form Actions -->
@@ -155,8 +183,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTagService, type Tag } from '@/services/tag.service'
 
 const { t } = useI18n()
 
@@ -169,6 +198,7 @@ useHead(() => ({ title: t('patients.create.meta.headTitle') }))
 const toast = useToast()
 const router = useRouter()
 const { request } = useAdminApi()
+const { listTags, createTag } = useTagService()
 
 // State
 const form = ref({
@@ -177,8 +207,39 @@ const form = ref({
   email: '',
   phone: '',
   dateOfBirth: '',
-  profileImageUrl: ''
+  profileImageUrl: '',
+  dateOfBirth: '',
+  profileImageUrl: '',
+  notes: '',
+  tags: [] as number[]
 })
+
+const availableTags = ref<Tag[]>([])
+
+onMounted(async () => {
+  try {
+    availableTags.value = await listTags()
+  } catch (e) {
+    console.error("Failed to load tags", e)
+  }
+})
+
+const handleCreateTag = async (name: string) => {
+  try {
+    const newTag = await createTag(name)
+    if (!availableTags.value.some(tag => tag.id === newTag.id)) {
+      availableTags.value.push(newTag)
+    }
+    if (!form.value.tags.includes(newTag.id)) {
+      form.value.tags.push(newTag.id)
+    }
+  } catch (e) {
+    toast.add({
+      title: "Failed to create tag",
+      color: "red"
+    })
+  }
+}
 
 const errors = ref<Record<string, string>>({})
 const saving = ref(false)
@@ -230,6 +291,13 @@ const validateField = (fieldName: string) => {
         delete errors.value.profileImageUrl
       }
       break
+    case 'notes':
+      if (form.value.notes && form.value.notes.length > 2000) {
+        errors.value.notes = t('patients.details.validation.notesTooLong')
+      } else {
+        delete errors.value.notes
+      }
+      break
   }
 }
 
@@ -259,6 +327,7 @@ const validateForm = (): boolean => {
   validateField('lastName')
   validateField('email')
   validateField('profileImageUrl')
+  validateField('notes')
 
   return Object.keys(errors.value).length === 0
 }
@@ -275,7 +344,10 @@ const handleSave = async () => {
       email: form.value.email.trim() || null,
       phone: form.value.phone.trim() || null,
       dateOfBirth: form.value.dateOfBirth || null,
-      profileImageUrl: form.value.profileImageUrl.trim() || null
+      profileImageUrl: form.value.profileImageUrl.trim() || null,
+      profileImageUrl: form.value.profileImageUrl.trim() || null,
+      notes: form.value.notes.trim() || null,
+      tagIds: form.value.tags
     }
 
     await request('/patients', {

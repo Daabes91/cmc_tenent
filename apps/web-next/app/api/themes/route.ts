@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { dbQuery } from '@/lib/db'
 import type { ThemeListItem, ApiErrorResponse } from '@/lib/theme-types'
 
 /**
@@ -28,19 +28,12 @@ import type { ThemeListItem, ApiErrorResponse } from '@/lib/theme-types'
  */
 export async function GET(): Promise<NextResponse<ThemeListItem[] | ApiErrorResponse>> {
   try {
-    const themes = await prisma.theme.findMany({
-      where: { status: 'published' },
-      select: { 
-        id: true, 
-        key: true, 
-        name: true 
-      },
-      orderBy: {
-        name: 'asc'
-      }
-    })
+    const themesResult = await dbQuery<ThemeListItem>(
+      'SELECT id, "key" as key, name FROM "Theme" WHERE status = $1 ORDER BY name ASC',
+      ['published']
+    )
     
-    return NextResponse.json(themes)
+    return NextResponse.json(themesResult.rows)
   } catch (error) {
     console.error('Error fetching themes:', error)
     

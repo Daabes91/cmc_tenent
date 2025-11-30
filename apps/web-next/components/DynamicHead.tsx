@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useClinicBranding } from '@/hooks/useClinicSettings';
 import { getPageTitleFromRoute, formatWebTitle } from '@/utils/pageTitleUtils';
+import { updateFavicon } from '@/utils/faviconUtils';
 
 interface DynamicHeadProps {
   /** Optional initial page title override */
@@ -19,7 +20,7 @@ interface DynamicHeadProps {
 
 export function DynamicHead({ initialTitle, locale = 'en' }: DynamicHeadProps) {
   const pathname = usePathname();
-  const { clinicName, isLoading } = useClinicBranding();
+  const { clinicName, faviconUrl, isLoading } = useClinicBranding();
 
   useEffect(() => {
     // Don't update if still loading clinic settings
@@ -33,9 +34,11 @@ export function DynamicHead({ initialTitle, locale = 'en' }: DynamicHeadProps) {
     
     // Update document title
     document.title = fullTitle;
+
+    // Update favicon with tenant-specific value or fallback
+    updateFavicon(faviconUrl);
     
-  }, [pathname, locale, clinicName, isLoading, initialTitle]);
+  }, [pathname, locale, clinicName, faviconUrl, isLoading, initialTitle]);
 
   return null; // This component doesn't render anything
 }
-

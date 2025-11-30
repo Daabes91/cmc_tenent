@@ -166,6 +166,59 @@
                 @upload-success="handleImageUploadSuccess"
               />
             </UFormGroup>
+
+                <UFormGroup :label="t('patients.details.form.fields.notes')" :hint="t('patients.details.form.hints.notes')" :error="errors.notes">
+                  <UTextarea
+                    v-model="form.notes"
+                    :placeholder="t('patients.details.form.placeholders.notes')"
+                    :rows="4"
+                    @input="clearFieldError('notes')"
+                  />
+                </UFormGroup>
+
+                <UFormGroup :label="t('patients.details.form.fields.driveFolder')" :hint="t('patients.details.form.hints.driveFolder')" :error="errors.driveFolderUrl">
+                  <div class="flex flex-col gap-3 md:flex-row md:items-center">
+                    <UInput
+                      v-model="form.driveFolderUrl"
+                      size="lg"
+                      :placeholder="t('patients.details.form.placeholders.driveFolder')"
+                      icon="i-lucide-folder"
+                      @blur="validateField('driveFolderUrl')"
+                      @input="clearFieldError('driveFolderUrl')"
+                    />
+                    <UButton
+                      v-if="driveFolderHref"
+                      type="button"
+                      color="gray"
+                      variant="outline"
+                      icon="i-lucide-link"
+                      class="w-full md:w-auto"
+                      @click="openDriveFolder"
+                    >
+                      {{ t('patients.details.form.actions.openDriveFolder') }}
+                    </UButton>
+                  </div>
+                  <template #description>{{ t('patients.details.form.descriptions.driveFolder') }}</template>
+                </UFormGroup>
+
+                <UFormGroup label="Tags" hint="Add tags to categorize this patient">
+                   <USelectMenu
+                      v-model="form.tags"
+                      :options="availableTags"
+                      option-attribute="name"
+                      value-attribute="id"
+                      multiple
+                      creatable
+                      searchable
+                      placeholder="Select or create tags"
+                      @create="handleCreateTag"
+                   >
+                     <template #label>
+                        <span v-if="form.tags.length" class="truncate">{{ form.tags.length }} tags selected</span>
+                        <span v-else class="text-gray-500">Select or create tags</span>
+                     </template>
+                   </USelectMenu>
+                </UFormGroup>
               </div>
 
               <!-- Form Actions -->
@@ -192,7 +245,7 @@
 
           <!-- Patient Treatment Plans -->
           <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
+            <div class="bg-gradient-to-r from-mint-600 to-mint-400 px-6 py-4">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <UIcon name="i-lucide-clipboard-list" class="h-5 w-5 text-white" />
@@ -396,7 +449,7 @@
 
           <!-- Quick Actions -->
           <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
+            <div class="bg-gradient-to-r from-mint-600 to-mint-400 px-6 py-4">
               <div class="flex items-center gap-3">
                 <UIcon name="i-lucide-zap" class="h-5 w-5 text-white" />
                 <h3 class="text-lg font-semibold text-white">{{ t('patients.details.quickActions.title') }}</h3>
@@ -425,10 +478,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watchEffect } from 'vue'
+import { ref, reactive, computed, watchEffect, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTreatmentPlans } from '~/composables/useTreatmentPlans'
 import type { TreatmentPlan, TreatmentPlanStatus } from '~/composables/useTreatmentPlans'
+import { useTagService, type Tag } from '@/services/tag.service'
 
 const { t, locale } = useI18n()
 const numberFormatter = computed(() => new Intl.NumberFormat(locale.value || undefined))
@@ -443,6 +497,7 @@ const router = useRouter()
 const route = useRoute()
 const { request } = useAdminApi()
 const treatmentPlansApi = useTreatmentPlans()
+const { listTags, createTag } = useTagService()
 
 useHead(() => ({ title: t('patients.details.meta.headTitle') }))
 
@@ -587,8 +642,38 @@ const form = reactive({
   email: "",
   phone: "",
   profileImageUrl: "",
-  dateOfBirth: ""
+  dateOfBirth: "",
+  driveFolderUrl: "",
+  notes: "",
+  tags: [] as number[]
 })
+
+const availableTags = ref<Tag[]>([])
+
+onMounted(async () => {
+  try {
+    availableTags.value = await listTags()
+  } catch (e) {
+    console.error("Failed to load tags", e)
+  }
+})
+
+const handleCreateTag = async (name: string) => {
+  try {
+    const newTag = await createTag(name)
+    if (!availableTags.value.some(tag => tag.id === newTag.id)) {
+      availableTags.value.push(newTag)
+    }
+    if (!form.tags.includes(newTag.id)) {
+      form.tags.push(newTag.id)
+    }
+  } catch (e) {
+    toast.add({
+      title: "Failed to create tag",
+      color: "red"
+    })
+  }
+}
 
 watchEffect(() => {
   if (!patient.value) return
@@ -598,6 +683,9 @@ watchEffect(() => {
   form.phone = patient.value.phone ?? ""
   form.profileImageUrl = patient.value.profileImageUrl ?? ""
   form.dateOfBirth = patient.value.dateOfBirth ? new Date(patient.value.dateOfBirth).toISOString().split('T')[0] : ""
+  form.notes = patient.value.notes ?? ""
+  form.driveFolderUrl = patient.value.driveFolderUrl ?? ""
+  form.tags = patient.value.tags?.map((t: any) => t.id) ?? []
 })
 
 const saving = ref(false)
@@ -618,6 +706,47 @@ const isValidUrl = (url: string): boolean => {
   } catch {
     return false
   }
+}
+
+const extractDriveFolderId = (value: string): string | null => {
+  const input = value.trim()
+  if (!input) return null
+
+  try {
+    const url = new URL(input)
+    const pathMatch = url.pathname.match(/\/folders\/([\w-]+)/)
+    if (pathMatch?.[1]) {
+      return pathMatch[1]
+    }
+  } catch {
+    // Not a full URL; fall back to ID detection below
+  }
+
+  const idMatch = input.match(/^[A-Za-z0-9_-]{10,}$/)
+  return idMatch ? input : null
+}
+
+const normalizeDriveFolderValue = (value: string): string | null => {
+  const id = extractDriveFolderId(value)
+  if (id) {
+    return `https://drive.google.com/drive/folders/${id}`
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) return null
+
+  try {
+    return new URL(trimmed).toString()
+  } catch {
+    return null
+  }
+}
+
+const driveFolderHref = computed(() => normalizeDriveFolderValue(form.driveFolderUrl) || null)
+
+const openDriveFolder = () => {
+  if (!driveFolderHref.value) return
+  window.open(driveFolderHref.value, '_blank', 'noopener,noreferrer')
 }
 
 // Individual field validation
@@ -651,6 +780,20 @@ const validateField = (fieldName: string) => {
         delete errors.value.profileImageUrl
       }
       break
+    case 'driveFolderUrl':
+      if (form.driveFolderUrl && !normalizeDriveFolderValue(form.driveFolderUrl)) {
+        errors.value.driveFolderUrl = t('patients.details.validation.invalidDriveFolder')
+      } else {
+        delete errors.value.driveFolderUrl
+      }
+      break
+    case 'notes':
+      if (form.notes && form.notes.length > 2000) {
+        errors.value.notes = t('patients.details.validation.notesTooLong')
+      } else {
+        delete errors.value.notes
+      }
+      break
   }
 }
 
@@ -680,6 +823,8 @@ const validateForm = (): boolean => {
   validateField('lastName')
   validateField('email')
   validateField('profileImageUrl')
+  validateField('driveFolderUrl')
+  validateField('notes')
 
   return Object.keys(errors.value).length === 0
 }
@@ -688,13 +833,21 @@ async function handleSave() {
   if (!patient.value || !validateForm()) return
   saving.value = true
 
+  const normalizedDriveFolderUrl = normalizeDriveFolderValue(form.driveFolderUrl)
+  if (normalizedDriveFolderUrl || !form.driveFolderUrl.trim()) {
+    form.driveFolderUrl = normalizedDriveFolderUrl ?? ""
+  }
+
   const payload = {
     firstName: form.firstName.trim(),
     lastName: form.lastName.trim(),
     email: form.email.trim() || null,
     phone: form.phone.trim() || null,
     profileImageUrl: form.profileImageUrl.trim() || null,
-    dateOfBirth: form.dateOfBirth ? form.dateOfBirth : null
+    dateOfBirth: form.dateOfBirth ? form.dateOfBirth : null,
+    driveFolderUrl: normalizedDriveFolderUrl,
+    notes: form.notes.trim() || null,
+    tagIds: form.tags
   }
 
   try {

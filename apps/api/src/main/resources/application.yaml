@@ -18,6 +18,7 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     out-of-order: true
+    validate-on-migrate: false
   servlet:
     multipart:
       enabled: true
@@ -80,14 +81,15 @@ security:
     clinic-address: ${CLINIC_ADDRESS:123 Medical Center, Amman, Jordan}
   cloudflare:
     images:
-      account-id: ${CLOUDFLARE_ACCOUNT_ID}
-      api-token: ${CLOUDFLARE_API_TOKEN}
-      base-url: ${CLOUDFLARE_BASE_URL:https://api.cloudflare.com/client/v4}
-      delivery-url: ${CLOUDFLARE_DELIVERY_URL}
-      max-file-size-mb: ${CLOUDFLARE_MAX_FILE_SIZE_MB:10}
-      image-quality: ${CLOUDFLARE_IMAGE_QUALITY:85}
-      auto-optimize: ${CLOUDFLARE_AUTO_OPTIMIZE:true}
-      allowed-extensions: ${CLOUDFLARE_ALLOWED_EXTENSIONS:jpg,jpeg,png,webp,gif}
+      account-id: ${CLOUDFLARE_ACCOUNT_ID:${SECURITY_CLOUDFLARE_IMAGES_ACCOUNT_ID:}}
+      api-token: ${CLOUDFLARE_API_TOKEN:${SECURITY_CLOUDFLARE_IMAGES_API_TOKEN:}}
+      base-url: ${CLOUDFLARE_BASE_URL:${CLOUDFLARE_IMAGES_BASE_URL:https://api.cloudflare.com/client/v4}}
+      delivery-url: ${CLOUDFLARE_DELIVERY_URL:${CLOUDFLARE_IMAGES_DELIVERY_URL:}}
+      max-file-size-mb: ${CLOUDFLARE_MAX_FILE_SIZE_MB:${CLOUDFLARE_IMAGES_MAX_FILE_SIZE_MB:10}}
+      image-quality: ${CLOUDFLARE_IMAGE_QUALITY:${CLOUDFLARE_IMAGES_IMAGE_QUALITY:85}}
+      auto-optimize: ${CLOUDFLARE_AUTO_OPTIMIZE:${CLOUDFLARE_IMAGES_AUTO_OPTIMIZE:true}}
+      allowed-extensions: ${CLOUDFLARE_ALLOWED_EXTENSIONS:${CLOUDFLARE_IMAGES_ALLOWED_EXTENSIONS:jpg,jpeg,png,webp,gif}}
+      mock-mode: ${CLOUDFLARE_IMAGES_MOCK_MODE:false}
 
 server:
   port: 8080
@@ -124,6 +126,16 @@ paypal:
   webhook-id: ${PAYPAL_WEBHOOK_ID:}
   environment: ${PAYPAL_ENVIRONMENT:sandbox}
   base-url: ${PAYPAL_BASE_URL:https://api-m.sandbox.paypal.com}
+  encryption:
+    key: ${PAYPAL_ENCRYPTION_KEY:local-dev-encryption-key-32bytes}
+
+# Google OAuth Configuration
+google:
+  oauth:
+    client-id: ${GOOGLE_CLIENT_ID:}
+    client-secret: ${GOOGLE_CLIENT_SECRET:}
+    # Default aligns to app base URL; override per environment if needed.
+    redirect-uri: ${GOOGLE_REDIRECT_URI:${APP_BASE_URL:http://localhost:3001}/auth/google/callback}
 
 saas:
   default-admin:
@@ -131,3 +143,9 @@ saas:
     email: ${SAAS_DEFAULT_ADMIN_EMAIL:saas.admin@example.com}
     full-name: ${SAAS_DEFAULT_ADMIN_FULL_NAME:SAAS Platform Admin}
     password: ${SAAS_DEFAULT_ADMIN_PASSWORD:saas-admin}
+
+# Application Configuration
+app:
+  base-url: ${APP_BASE_URL:http://localhost:3000}
+  admin-url: ${APP_ADMIN_URL:http://localhost:3000}
+  marketing-url: ${APP_MARKETING_URL:${APP_BASE_URL:http://localhost:3000}}

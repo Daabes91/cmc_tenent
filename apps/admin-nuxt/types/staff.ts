@@ -6,23 +6,35 @@ export type PermissionAction = 'VIEW' | 'CREATE' | 'EDIT' | 'DELETE';
 
 export type ModuleName =
   | 'appointments'
+  | 'calendar'
   | 'patients'
   | 'doctors'
+  | 'materials'
   | 'services'
+  | 'insuranceCompanies'
   | 'treatmentPlans'
   | 'reports'
+  | 'billing'
+  | 'translations'
   | 'settings'
+  | 'clinicSettings'
   | 'staff'
   | 'blogs';
 
 export interface ModulePermissions {
   appointments: PermissionAction[];
+  calendar: PermissionAction[];
   patients: PermissionAction[];
   doctors: PermissionAction[];
+  materials: PermissionAction[];
   services: PermissionAction[];
+  insuranceCompanies: PermissionAction[];
   treatmentPlans: PermissionAction[];
   reports: PermissionAction[];
+  billing: PermissionAction[];
+  translations: PermissionAction[];
   settings: PermissionAction[];
+  clinicSettings: PermissionAction[];
   staff: PermissionAction[];
   blogs: PermissionAction[];
 }

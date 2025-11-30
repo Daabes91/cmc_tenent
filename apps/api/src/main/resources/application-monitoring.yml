@@ -1,0 +1,64 @@
+# Monitoring and Metrics Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        # Expose actuator endpoints for monitoring
+        include: health,metrics,prometheus,info
+      base-path: /actuator
+  
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  
+  metrics:
+    export:
+      # Enable Prometheus format for metrics export
+      prometheus:
+        enabled: true
+    
+    # Enable JVM metrics
+    enable:
+      jvm: true
+      process: true
+      system: true
+      tomcat: true
+      logback: true
+    
+    # Custom metric tags
+    tags:
+      application: ${spring.application.name:clinic-api}
+      environment: ${spring.profiles.active:development}
+    
+    distribution:
+      # Configure percentiles for timing metrics
+      percentiles-histogram:
+        billing.webhook.processing.time: true
+        billing.paypal.api.response.time: true
+      
+      # Configure SLA boundaries for timing metrics (in milliseconds)
+      sla:
+        billing.webhook.processing.time: 100,500,1000,5000
+        billing.paypal.api.response.time: 500,1000,2000,5000
+
+# Logging configuration for alerts
+logging:
+  level:
+    # Dedicated logger for billing alerts
+    BILLING_ALERTS: ERROR
+    com.clinic.modules.saas.monitoring: INFO
+    com.clinic.modules.saas.service: INFO
+  
+  # Configure separate log file for billing alerts (optional)
+  file:
+    name: logs/billing-alerts.log
+  
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

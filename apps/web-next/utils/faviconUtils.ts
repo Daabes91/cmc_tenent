@@ -1,6 +1,8 @@
+import { withBasePath } from './basePath';
+
 /**
  * Favicon utilities for web-next
- * Simplified utilities for static favicon handling
+ * Supports tenant-aware favicon resolution and DOM updates
  */
 
 /**
@@ -28,4 +30,56 @@ export function getFaviconMimeType(url: string): string {
   };
   
   return mimeTypeMap[extension || ''] || 'image/x-icon';
+}
+
+/**
+ * Normalize favicon URL with base path support and fallback
+ * 
+ * @param url - Favicon URL from settings
+ * @returns Resolved URL string
+ */
+export function resolveFaviconUrl(url?: string | null): string {
+  if (!url || !url.trim()) {
+    return withBasePath(DEFAULT_FAVICON);
+  }
+
+  const trimmed = url.trim();
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith('/')) {
+    return withBasePath(trimmed);
+  }
+
+  return withBasePath(`/${trimmed}`);
+}
+
+/**
+ * Update or create favicon link elements in the document head
+ * 
+ * @param url - Target favicon URL
+ */
+export function updateFavicon(url?: string | null): void {
+  if (typeof document === 'undefined') return;
+
+  const href = resolveFaviconUrl(url);
+  const mimeType = getFaviconMimeType(href);
+  const relValues = ['icon', 'shortcut icon', 'apple-touch-icon'];
+
+  relValues.forEach(rel => {
+    let link = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = rel;
+      document.head.appendChild(link);
+    }
+
+    link.href = href;
+    if (rel !== 'apple-touch-icon') {
+      link.type = mimeType;
+    }
+  });
 }

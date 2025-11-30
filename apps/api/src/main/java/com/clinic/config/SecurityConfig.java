@@ -1,6 +1,7 @@
 package com.clinic.config;
 
 import com.clinic.security.AdminIpFilter;
+import com.clinic.security.BillingStatusFilter;
 import com.clinic.security.CustomAccessDeniedHandler;
 import com.clinic.security.PatientJwtAuthenticationFilter;
 import com.clinic.security.RateLimitingFilter;
@@ -33,6 +34,7 @@ public class SecurityConfig {
     private final RateLimitingFilter rateLimitingFilter;
     private final AdminIpFilter adminIpFilter;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final BillingStatusFilter billingStatusFilter;
 
     public SecurityConfig(
             StaffJwtAuthenticationFilter staffJwtAuthenticationFilter,
@@ -41,7 +43,8 @@ public class SecurityConfig {
             CorsConfigurationSource corsConfigurationSource,
             RateLimitingFilter rateLimitingFilter,
             AdminIpFilter adminIpFilter,
-            CustomAccessDeniedHandler customAccessDeniedHandler
+            CustomAccessDeniedHandler customAccessDeniedHandler,
+            BillingStatusFilter billingStatusFilter
     ) {
         this.staffJwtAuthenticationFilter = staffJwtAuthenticationFilter;
         this.patientJwtAuthenticationFilter = patientJwtAuthenticationFilter;
@@ -50,6 +53,7 @@ public class SecurityConfig {
         this.rateLimitingFilter = rateLimitingFilter;
         this.adminIpFilter = adminIpFilter;
         this.customAccessDeniedHandler = customAccessDeniedHandler;
+        this.billingStatusFilter = billingStatusFilter;
     }
 
     @Bean
@@ -91,21 +95,44 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/admin/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/admin/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.POST, "/admin/auth/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/admin/auth/forgot-password").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/admin/auth/validate-reset-token").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/admin/auth/reset-password").permitAll()
                         .requestMatchers("/admin/setup/**").permitAll() // Public endpoints for staff setup
                         .anyRequest().hasAnyRole("ADMIN", "RECEPTIONIST", "DOCTOR"))
                 .exceptionHandling(exceptions -> exceptions
                         .accessDeniedHandler(customAccessDeniedHandler))
                 .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(adminIpFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(staffJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(staffJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(billingStatusFilter, StaffJwtAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
     @Order(2)
+    public SecurityFilterChain webhookApiSecurity(HttpSecurity http) throws Exception {
+        http.securityMatcher("/api/webhooks/**")
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'"))
+                        .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
+                        .xssProtection(Customizer.withDefaults())
+                        .frameOptions(frame -> frame.deny()))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/webhooks/**").permitAll())
+                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(3)
     public SecurityFilterChain publicApiSecurity(HttpSecurity http) throws Exception {
-        http.securityMatcher("/public/**")
+        http.securityMatcher("/public/**", "/api/public/**")
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -125,8 +152,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/public/blogs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/public/availability").permitAll()
                         .requestMatchers("/public/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/public/auth/google/authorize").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/public/auth/google/callback").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/public/auth/google/link").authenticated()
                         .requestMatchers(HttpMethod.POST, "/public/bookings/guest").permitAll()
                         .requestMatchers("/public/payments/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/public/plans/**").permitAll()
+                        .requestMatchers("/api/public/signup/**").permitAll()
+                        .requestMatchers("/api/public/payment-confirmation/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(patientJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

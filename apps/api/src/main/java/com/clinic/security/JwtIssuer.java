@@ -75,6 +75,11 @@ public class JwtIssuer {
         Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         Instant expiresAt = now.plus(tokenConfig.accessTtl());
 
+        // Get auth provider from global patient
+        String authProvider = patient.getGlobalPatient().getAuthProvider() != null 
+            ? patient.getGlobalPatient().getAuthProvider().name() 
+            : "LOCAL";
+
         var claims = new JWTClaimsSet.Builder()
                 .subject(String.valueOf(patient.getId()))
                 .issuer(issuer)
@@ -86,6 +91,7 @@ public class JwtIssuer {
                 .claim("roles", List.of("ROLE_PATIENT"))
                 .claim("tenantProfileId", patient.getId())
                 .claim("globalPatientId", patient.getGlobalPatient().getId())
+                .claim("auth_provider", authProvider)
                 .build();
 
         return signToken(claims, patientSigner, "patient");

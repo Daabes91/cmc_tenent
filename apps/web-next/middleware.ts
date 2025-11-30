@@ -8,7 +8,6 @@ import {
   tenantFromHost,
   getDefaultTenantSlug,
 } from './lib/tenant';
-import { prisma } from './lib/prisma';
 
 const defaultLocale = locales[0] ?? 'en';
 
@@ -22,30 +21,7 @@ async function resolveTenantSlug(request: NextRequest): Promise<{ slug: string |
 
   if (!slug) {
     const host = request.headers.get('host');
-    const bareHost = host?.toLowerCase().split(':')[0];
-    
-    // First try subdomain resolution
     slug = sanitizeTenantSlug(tenantFromHost(host));
-    
-    // If no subdomain match, try custom domain lookup in database
-    if (!slug && bareHost) {
-      try {
-        const tenant = await prisma.tenant.findUnique({
-          where: { domain: bareHost },
-          select: { slug: true, status: true }
-        });
-        
-        if (tenant && tenant.status === 'active') {
-          slug = tenant.slug;
-        } else if (tenant && tenant.status !== 'active') {
-          // Tenant exists but is not active
-          return { slug: null, notFound: true };
-        }
-      } catch (error) {
-        console.error('Error looking up tenant by domain:', error);
-        // Continue with fallback logic
-      }
-    }
   }
 
   if (!slug) {

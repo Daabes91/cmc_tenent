@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-mint-500 to-mint-300 shadow-lg">
               <UIcon name="i-lucide-calendar-plus" class="h-6 w-6 text-white" />
             </div>
             <div>
@@ -41,7 +41,7 @@
         <div class="space-y-6">
           <!-- Booking Details Card -->
           <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-            <div class="bg-gradient-to-r from-violet-500 to-indigo-600 px-6 py-4">
+            <div class="bg-gradient-to-r from-mint-500 to-mint-300 px-6 py-4">
               <div class="flex items-center gap-3">
                 <UIcon name="i-lucide-calendar-check" class="h-5 w-5 text-white" />
                 <div>
@@ -125,14 +125,13 @@
                 </UFormGroup>
                 <UFormGroup :label="t('appointments.create.fields.slotDuration')" :hint="t('appointments.create.hints.slotDuration')">
                   <UInput
-                    :model-value="form.slotDurationMinutes"
+                    v-model="form.slotDurationMinutes"
                     type="number"
                     min="5"
                     max="240"
                     step="5"
                     size="lg"
                     icon="i-lucide-timer"
-                    disabled
                   />
                 </UFormGroup>
               </div>
@@ -382,31 +381,6 @@ const doctorOptions = computed(() => {
     }));
 });
 
-if (import.meta.client) {
-  watch(
-    () => form.serviceId,
-    serviceId => {
-      if (!serviceId) {
-        resetSlots();
-        return;
-      }
-      const doctorMatchesService = doctorOptions.value.some(option => option.value === form.doctorId);
-      if (!doctorMatchesService) {
-        form.doctorId = null;
-      }
-    }
-  );
-
-  watch(
-    [() => form.serviceId, () => form.doctorId, () => form.date, () => form.bookingMode, refreshKey],
-    async ([serviceId, doctorId, date, bookingModeValue]) => {
-      console.debug("[appointments:new] Watching form changes", { serviceId, doctorId, date, bookingMode: bookingModeValue }); // Debugging log
-      await fetchSlots(serviceId ?? null, doctorId ?? null, date ?? "");
-    },
-    { immediate: true, flush: "post" }
-  );
-}
-
 watch(
   () => form.date,
   (value) => {
@@ -449,6 +423,14 @@ const slotFormatter = computed(
     })
 );
 
+const normalizedSlotDuration = computed(() => {
+  const parsed = Number(form.slotDurationMinutes);
+  if (!Number.isFinite(parsed)) {
+    return defaultSlotDurationMinutes.value;
+  }
+  return Math.min(Math.max(Math.round(parsed), 5), 240);
+});
+
 const slotOptions = computed(() => {
   console.debug("[appointments:new] Computing slot options from availabilitySlots", availabilitySlots.value); // Debugging log
   if (!availabilitySlots.value.length) {
@@ -456,7 +438,7 @@ const slotOptions = computed(() => {
   }
   return availabilitySlots.value.map(slot => {
     const start = new Date(slot.start);
-    const end = new Date(slot.end);
+    const end = new Date(start.getTime() + normalizedSlotDuration.value * 60 * 1000);
     return {
       value: slot.start,
       label: slotFormatter.value.format(start),
@@ -464,6 +446,7 @@ const slotOptions = computed(() => {
     };
   });
 });
+
 
 watch(
   availabilitySlots,
@@ -483,12 +466,45 @@ watch(
 
 const canLoadSlots = computed(() => Boolean(form.serviceId && form.doctorId && form.bookingMode && form.date));
 
+if (import.meta.client) {
+  watch(
+    () => form.serviceId,
+    serviceId => {
+      if (!serviceId) {
+        resetSlots();
+        return;
+      }
+      const doctorMatchesService = doctorOptions.value.some(option => option.value === form.doctorId);
+      if (!doctorMatchesService) {
+        form.doctorId = null;
+      }
+    }
+  );
+
+  watch(
+    [() => form.serviceId, () => form.doctorId, () => form.date, () => form.bookingMode, refreshKey],
+    async ([serviceId, doctorId, date, bookingModeValue]) => {
+      console.debug("[appointments:new] Watching form changes", { serviceId, doctorId, date, bookingMode: bookingModeValue }); // Debugging log
+      await fetchSlots(serviceId ?? null, doctorId ?? null, date ?? "");
+    },
+    { immediate: true, flush: "post" }
+  );
+
+  watch(
+    () => normalizedSlotDuration.value,
+    () => {
+      if (canLoadSlots.value) {
+        loadSlots();
+      }
+    }
+  );
+}
+
 function clearSlots() {
   availabilitySlots.value = [];
   selectedSlot.value = "";
   slotError.value = null;
   slotsLoading.value = false;
-  form.slotDurationMinutes = defaultSlotDurationMinutes.value.toString();
 }
 
 function resetSlots(clearDate = true) {
@@ -561,10 +577,6 @@ async function fetchSlots(serviceId: string | null, doctorIdValue: string | null
     const previousSelection = selectedSlot.value;
     const existing = transformedSlots.find(slot => slot.start === previousSelection);
     selectedSlot.value = existing ? existing.start : transformedSlots.length ? transformedSlots[0].start : "";
-    const initialSlot = availabilitySlots.value.find(slot => slot.start === selectedSlot.value);
-    form.slotDurationMinutes = initialSlot
-      ? computeSlotDurationMinutes(initialSlot.start, initialSlot.end).toString()
-      : defaultSlotDurationMinutes.value.toString();
   } catch (error: any) {
     console.error("[appointments:new] Error fetching slots", error); // Debugging log
     slotError.value = error?.data?.message ?? error?.message ?? t("common.errors.unexpected");
@@ -579,19 +591,8 @@ function loadSlots() {
   refreshKey.value += 1;
 }
 
-function computeSlotDurationMinutes(start: string, end: string) {
-  const startMs = new Date(start).getTime();
-  const endMs = new Date(end).getTime();
-  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) {
-    return defaultSlotDurationMinutes.value;
-  }
-  const diff = Math.round((endMs - startMs) / 60000);
-  return Math.min(Math.max(diff, 5), 240);
-}
-
 function selectSlot(value: string) {
   selectedSlot.value = value;
-  const slot = availabilitySlots.value.find(slot => slot.start === value);
 }
 
 async function handleSave() {
@@ -606,10 +607,7 @@ async function handleSave() {
 
   saving.value = true;
 
-  const parsedSlotDuration = Number(form.slotDurationMinutes);
-  const slotDurationMinutes = Number.isFinite(parsedSlotDuration)
-    ? Math.min(Math.max(Math.round(parsedSlotDuration), 5), 240)
-    : defaultSlotDurationMinutes.value;
+  const slotDurationMinutes = normalizedSlotDuration.value;
 
   const payload = {
     patientId: Number(form.patientId),

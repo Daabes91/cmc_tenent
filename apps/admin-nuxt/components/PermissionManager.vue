@@ -86,6 +86,12 @@ const modules = computed(() => [
     icon: 'i-lucide-calendar'
   },
   {
+    key: 'calendar' as ModuleName,
+    label: t('staff.permissions.modules.calendar.label'),
+    description: t('staff.permissions.modules.calendar.description'),
+    icon: 'i-lucide-calendar-days'
+  },
+  {
     key: 'patients' as ModuleName,
     label: t('staff.permissions.modules.patients.label'),
     description: t('staff.permissions.modules.patients.description'),
@@ -98,10 +104,22 @@ const modules = computed(() => [
     icon: 'i-lucide-stethoscope'
   },
   {
+    key: 'materials' as ModuleName,
+    label: t('staff.permissions.modules.materials.label'),
+    description: t('staff.permissions.modules.materials.description'),
+    icon: 'i-lucide-package'
+  },
+  {
     key: 'services' as ModuleName,
     label: t('staff.permissions.modules.services.label'),
     description: t('staff.permissions.modules.services.description'),
     icon: 'i-lucide-briefcase-medical'
+  },
+  {
+    key: 'insuranceCompanies' as ModuleName,
+    label: t('staff.permissions.modules.insuranceCompanies.label'),
+    description: t('staff.permissions.modules.insuranceCompanies.description'),
+    icon: 'i-lucide-building-2'
   },
   {
     key: 'treatmentPlans' as ModuleName,
@@ -116,10 +134,28 @@ const modules = computed(() => [
     icon: 'i-lucide-bar-chart-3'
   },
   {
+    key: 'billing' as ModuleName,
+    label: t('staff.permissions.modules.billing.label'),
+    description: t('staff.permissions.modules.billing.description'),
+    icon: 'i-lucide-credit-card'
+  },
+  {
+    key: 'translations' as ModuleName,
+    label: t('staff.permissions.modules.translations.label'),
+    description: t('staff.permissions.modules.translations.description'),
+    icon: 'i-lucide-languages'
+  },
+  {
     key: 'settings' as ModuleName,
     label: t('staff.permissions.modules.settings.label'),
     description: t('staff.permissions.modules.settings.description'),
     icon: 'i-lucide-settings'
+  },
+  {
+    key: 'clinicSettings' as ModuleName,
+    label: t('staff.permissions.modules.clinicSettings.label'),
+    description: t('staff.permissions.modules.clinicSettings.description'),
+    icon: 'i-lucide-building'
   },
   {
     key: 'staff' as ModuleName,

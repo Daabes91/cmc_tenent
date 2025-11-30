@@ -93,7 +93,11 @@ public class SecurityProperties {
             String baseDomain
     ) {
         public Cors() {
-            this(List.of("http://localhost:3000"), List.of("http://localhost:3001"), "");
+            this(
+                    List.of("http://localhost:3000", "http://localhost:3003"),
+                    List.of("http://localhost:3001"),
+                    ""
+            );
         }
     }
 

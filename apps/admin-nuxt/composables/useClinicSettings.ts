@@ -45,6 +45,8 @@ type ClinicSettingsPayload = {
   currencySymbol?: string | null;
   logoUrl?: string | null;
   logoImageId?: string | null;
+  faviconUrl?: string | null;
+  faviconImageId?: string | null;
   virtualConsultationFee?: number | null;
   virtualConsultationMeetingLink?: string | null;
   slotDurationMinutes?: number | null;
@@ -52,8 +54,6 @@ type ClinicSettingsPayload = {
   paypalClientId?: string | null;
   paypalClientSecret?: string | null;
   exchangeRates?: ExchangeRatesMap | null;
-  cloudflareAccountId?: string | null;
-  cloudflareApiToken?: string | null;
   sendgridApiKey?: string | null;
   emailFrom?: string | null;
   emailFromName?: string | null;
@@ -187,6 +187,8 @@ export function useClinicSettings(options: UseClinicSettingsOptions = {}) {
     // Ensure clinic name is properly handled for branding
     const clinicName = payload.clinicName?.trim() || null;
     const logoUrl = payload.logoUrl?.trim() || null;
+    const faviconUrl = payload.faviconUrl?.trim() || null;
+    const faviconImageId = payload.faviconImageId?.trim() || null;
 
     // Hero media fields
     const heroMediaType = payload.heroMediaType?.trim() || 'image';
@@ -198,6 +200,8 @@ export function useClinicSettings(options: UseClinicSettingsOptions = {}) {
       ...payload,
       clinicName,
       logoUrl,
+      faviconUrl,
+      faviconImageId,
       currency,
       locale,
       currencySymbol: symbol,

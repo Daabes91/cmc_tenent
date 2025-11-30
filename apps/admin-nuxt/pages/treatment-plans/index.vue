@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-mint-600 to-mint-400 shadow-lg">
               <UIcon name="i-lucide-clipboard-list" class="h-6 w-6 text-white" />
             </div>
             <div>
@@ -68,8 +68,8 @@
 
         <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/60 hover:shadow-md transition-all duration-200">
           <div class="flex items-center gap-3 mb-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-900/20">
-              <UIcon name="i-lucide-check-circle" class="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-mint-50 dark:bg-mint-900/20">
+              <UIcon name="i-lucide-check-circle" class="h-5 w-5 text-mint-600 dark:text-mint-400" />
             </div>
             <div class="flex-1">
               <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">{{ t('treatmentPlans.list.metrics.completion.label') }}</p>
@@ -166,7 +166,7 @@
 
       <!-- Treatment Plans Grid -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
+        <div class="bg-gradient-to-r from-mint-600 to-mint-400 px-6 py-4">
           <div class="flex items-center gap-3">
             <UIcon name="i-lucide-clipboard-list" class="h-5 w-5 text-white" />
             <div>
@@ -375,7 +375,7 @@
     <UModal v-model="showCreateModal" :ui="{ width: 'sm:max-w-3xl' }">
       <div class="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-800">
         <!-- Header with Gradient -->
-        <div class="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 p-6 text-white">
+        <div class="relative overflow-hidden bg-gradient-to-br from-mint-700 via-mint-600 to-mint-400 p-6 text-white">
           <div class="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10 blur-3xl"></div>
           <div class="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-indigo-400/20 blur-2xl"></div>
 
@@ -606,7 +606,7 @@
               </div>
 
               <!-- Summary Preview -->
-              <div v-if="createForm.patientId && createForm.totalPrice" class="rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-5 border-2 border-indigo-200 dark:border-indigo-700">
+              <div v-if="createForm.patientId && createForm.totalPrice" class="rounded-xl bg-gradient-to-br from-mint-50 to-mint-100 dark:from-mint-900/20 dark:to-mint-900/20 p-5 border-2 border-mint-200 dark:border-mint-700">
                 <div class="flex items-center gap-2 mb-3">
                   <UIcon name="i-lucide-sparkles" class="h-5 w-5 text-indigo-600" />
                   <h4 class="font-semibold text-indigo-900 dark:text-indigo-300">{{ t('treatmentPlans.create.sections.summary.title') }}</h4>

@@ -17,6 +17,7 @@ export function getPageNameFromRoute(path: string): string {
     '/reports': 'Reports',
     '/staff': 'Staff',
     '/clinic-settings': 'Clinic Settings',
+    '/billing': 'Billing',
     '/settings': 'Settings',
     '/paypal-transactions': 'PayPal Transactions'
   };

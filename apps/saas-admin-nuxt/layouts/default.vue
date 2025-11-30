@@ -292,6 +292,11 @@ const navigation = computed(() => [
     label: t('nav.auditLogs'),
     icon: 'i-heroicons-document-text',
     to: '/audit-logs'
+  },
+  {
+    label: t('nav.billingSettings'),
+    icon: 'i-heroicons-credit-card',
+    to: '/billing/paypal-config'
   }
 ])
 
@@ -344,6 +349,7 @@ const currentPageTitle = computed(() => {
   if (path.startsWith('/tenants')) return t('nav.tenants')
   if (path.startsWith('/analytics')) return t('nav.analytics')
   if (path.startsWith('/audit-logs')) return t('nav.auditLogs')
+  if (path.startsWith('/billing')) return t('nav.billingSettings')
   return t('app.name')
 })
 

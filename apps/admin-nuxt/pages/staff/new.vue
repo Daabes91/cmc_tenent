@@ -187,12 +187,18 @@ const form = reactive({
   doctorId: null as number | null,
   permissions: {
     appointments: [],
+    calendar: [],
     patients: [],
     doctors: [],
+    materials: [],
     services: [],
+    insuranceCompanies: [],
     treatmentPlans: [],
     reports: [],
+    billing: [],
+    translations: [],
     settings: [],
+    clinicSettings: [],
     staff: [],
     blogs: []
   } as ModulePermissions

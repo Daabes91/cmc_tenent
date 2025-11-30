@@ -31,8 +31,7 @@ class ValidationTest {
         TenantCreateRequest request = new TenantCreateRequest(
                 "valid-slug-123",
                 "Valid Clinic Name",
-                "example.com"
-        );
+                "example.com");
 
         Set<ConstraintViolation<TenantCreateRequest>> violations = validator.validate(request);
         assertTrue(violations.isEmpty(), "Valid request should have no violations");
@@ -43,8 +42,7 @@ class ValidationTest {
         TenantCreateRequest request = new TenantCreateRequest(
                 "ab",
                 "Valid Clinic Name",
-                null
-        );
+                null);
 
         Set<ConstraintViolation<TenantCreateRequest>> violations = validator.validate(request);
         assertEquals(1, violations.size());
@@ -56,8 +54,7 @@ class ValidationTest {
         TenantCreateRequest request = new TenantCreateRequest(
                 "a".repeat(65),
                 "Valid Clinic Name",
-                null
-        );
+                null);
 
         Set<ConstraintViolation<TenantCreateRequest>> violations = validator.validate(request);
         assertEquals(1, violations.size());
@@ -69,8 +66,7 @@ class ValidationTest {
         TenantCreateRequest request = new TenantCreateRequest(
                 "Invalid_Slug",
                 "Valid Clinic Name",
-                null
-        );
+                null);
 
         Set<ConstraintViolation<TenantCreateRequest>> violations = validator.validate(request);
         assertEquals(1, violations.size());
@@ -82,8 +78,7 @@ class ValidationTest {
         TenantCreateRequest request = new TenantCreateRequest(
                 "Invalid-Slug",
                 "Valid Clinic Name",
-                null
-        );
+                null);
 
         Set<ConstraintViolation<TenantCreateRequest>> violations = validator.validate(request);
         assertEquals(1, violations.size());
@@ -95,8 +90,7 @@ class ValidationTest {
         TenantCreateRequest request = new TenantCreateRequest(
                 "",
                 "Valid Clinic Name",
-                null
-        );
+                null);
 
         Set<ConstraintViolation<TenantCreateRequest>> violations = validator.validate(request);
         assertFalse(violations.isEmpty());
@@ -107,8 +101,7 @@ class ValidationTest {
         TenantCreateRequest request = new TenantCreateRequest(
                 "valid-slug",
                 "",
-                null
-        );
+                null);
 
         Set<ConstraintViolation<TenantCreateRequest>> violations = validator.validate(request);
         assertEquals(1, violations.size());
@@ -120,8 +113,7 @@ class ValidationTest {
         TenantCreateRequest request = new TenantCreateRequest(
                 "valid-slug",
                 "Valid Clinic Name",
-                "invalid domain"
-        );
+                "invalid domain");
 
         Set<ConstraintViolation<TenantCreateRequest>> violations = validator.validate(request);
         assertEquals(1, violations.size());
@@ -133,8 +125,7 @@ class ValidationTest {
         TenantCreateRequest request = new TenantCreateRequest(
                 "valid-slug",
                 "Valid Clinic Name",
-                "subdomain.example.com"
-        );
+                "subdomain.example.com");
 
         Set<ConstraintViolation<TenantCreateRequest>> violations = validator.validate(request);
         assertTrue(violations.isEmpty(), "Valid domain should have no violations");
@@ -144,8 +135,8 @@ class ValidationTest {
     void testTenantUpdateRequest_ValidUpdate() {
         TenantUpdateRequest request = new TenantUpdateRequest(
                 "Updated Name",
-                "newdomain.example.com"
-        );
+                "newdomain.example.com",
+                null);
 
         Set<ConstraintViolation<TenantUpdateRequest>> violations = validator.validate(request);
         assertTrue(violations.isEmpty(), "Valid update request should have no violations");
@@ -155,8 +146,8 @@ class ValidationTest {
     void testTenantUpdateRequest_InvalidCustomDomain() {
         TenantUpdateRequest request = new TenantUpdateRequest(
                 "Updated Name",
-                "not a valid domain"
-        );
+                "not a valid domain",
+                null);
 
         Set<ConstraintViolation<TenantUpdateRequest>> violations = validator.validate(request);
         assertEquals(1, violations.size());
@@ -165,7 +156,7 @@ class ValidationTest {
 
     @Test
     void testTenantUpdateRequest_NullFieldsAllowed() {
-        TenantUpdateRequest request = new TenantUpdateRequest(null, null);
+        TenantUpdateRequest request = new TenantUpdateRequest(null, null, null);
 
         Set<ConstraintViolation<TenantUpdateRequest>> violations = validator.validate(request);
         assertTrue(violations.isEmpty(), "Null fields should be allowed in update request");

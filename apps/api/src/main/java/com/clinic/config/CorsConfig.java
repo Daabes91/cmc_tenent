@@ -31,8 +31,11 @@ public class CorsConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/public/**", publicCors);
+        source.registerCorsConfiguration("/api/public/**", publicCors);
         source.registerCorsConfiguration("/admin/**", adminCors);
+        source.registerCorsConfiguration("/api/admin/**", adminCors);
         source.registerCorsConfiguration("/saas/**", saasCors);
+        source.registerCorsConfiguration("/api/saas/**", saasCors);
         return source;
     }
 

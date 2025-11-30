@@ -10,6 +10,8 @@ import { AnalyticsScript } from "@/components/AnalyticsScript";
 import { SeoStructuredData } from "@/components/SeoStructuredData";
 import { buildRootMetadata } from "@/lib/seo";
 
+export const runtime = "nodejs";
+
 export async function generateMetadata(): Promise<Metadata> {
   return buildRootMetadata();
 }

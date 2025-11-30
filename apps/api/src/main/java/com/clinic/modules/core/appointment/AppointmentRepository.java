@@ -18,6 +18,8 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
 
     List<AppointmentEntity> findByTenantIdAndPatientId(Long tenantId, Long patientId);
 
+    long countByTenantId(Long tenantId);
+
     List<AppointmentEntity> findByTenantIdAndDoctorId(Long tenantId, Long doctorId);
 
     long countByScheduledAtBetween(Instant start, Instant end);

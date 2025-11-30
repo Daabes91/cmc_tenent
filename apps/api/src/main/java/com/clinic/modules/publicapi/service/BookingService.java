@@ -270,7 +270,9 @@ public class BookingService {
                     updatedLastName,
                     updatedEmail,
                     updatedPhone,
-                    patient.getDateOfBirth()
+                    patient.getDateOfBirth(),
+                    patient.getNotes(),
+                    patient.getDriveFolderUrl()
             );
         }
 

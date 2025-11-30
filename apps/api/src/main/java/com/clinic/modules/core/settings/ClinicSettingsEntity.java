@@ -95,6 +95,12 @@ public class ClinicSettingsEntity {
     @Column(name = "logo_image_id", length = 100)
     private String logoImageId;
 
+    @Column(name = "favicon_url", length = 500)
+    private String faviconUrl;
+
+    @Column(name = "favicon_image_id", length = 100)
+    private String faviconImageId;
+
     // PayPal Settings - Only business settings, not credentials
     @Column(name = "virtual_consultation_fee", precision = 10, scale = 2)
     private java.math.BigDecimal virtualConsultationFee;
@@ -116,12 +122,6 @@ public class ClinicSettingsEntity {
     private String timezone = "Asia/Amman";
 
     // Cloudflare Images Configuration
-    @Column(name = "cloudflare_account_id", length = 100)
-    private String cloudflareAccountId;
-
-    @Column(name = "cloudflare_api_token", length = 500)
-    private String cloudflareApiToken;
-
     // SendGrid Email Configuration
     @Column(name = "sendgrid_api_key", length = 500)
     private String sendgridApiKey;
@@ -398,6 +398,22 @@ public class ClinicSettingsEntity {
         this.logoImageId = logoImageId;
     }
 
+    public String getFaviconUrl() {
+        return faviconUrl;
+    }
+
+    public void setFaviconUrl(String faviconUrl) {
+        this.faviconUrl = faviconUrl;
+    }
+
+    public String getFaviconImageId() {
+        return faviconImageId;
+    }
+
+    public void setFaviconImageId(String faviconImageId) {
+        this.faviconImageId = faviconImageId;
+    }
+
     public Instant getUpdatedAt() {
         return updatedAt;
     }
@@ -444,22 +460,6 @@ public class ClinicSettingsEntity {
 
     public void setTimezone(String timezone) {
         this.timezone = timezone;
-    }
-
-    public String getCloudflareAccountId() {
-        return cloudflareAccountId;
-    }
-
-    public void setCloudflareAccountId(String cloudflareAccountId) {
-        this.cloudflareAccountId = cloudflareAccountId;
-    }
-
-    public String getCloudflareApiToken() {
-        return cloudflareApiToken;
-    }
-
-    public void setCloudflareApiToken(String cloudflareApiToken) {
-        this.cloudflareApiToken = cloudflareApiToken;
     }
 
     public String getSendgridApiKey() {

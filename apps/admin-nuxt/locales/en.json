@@ -155,14 +155,20 @@
       "branding": {
         "welcome": "Welcome to",
         "title": "Clinic Admin",
-        "headlineLine1": "Manage your clinic",
-        "headlineLine2": "with confidence",
-        "description": "Streamline appointments, track patients, and grow your practice all in one place.",
-        "features": {
-          "scheduling": {
-            "title": "Smart Scheduling",
-            "description": "Automated appointment management"
-          },
+      "headlineLine1": "Manage your clinic",
+      "headlineLine2": "with confidence",
+      "description": "Streamline appointments, track patients, and grow your practice all in one place.",
+      "tagline": "Real-time overview",
+      "metrics": {
+        "sessions": "Sessions",
+        "waitTime": "Avg. wait time",
+        "satisfaction": "Satisfaction"
+      },
+      "features": {
+        "scheduling": {
+          "title": "Smart Scheduling",
+          "description": "Automated appointment management"
+        },
           "records": {
             "title": "Patient Records",
             "description": "Centralized patient database"
@@ -202,6 +208,57 @@
       "needAccess": {
         "text": "Need access?",
         "cta": "Contact your administrator"
+      }
+    },
+    "forgotPassword": {
+      "mobileHeader": {
+        "title": "Reset Password",
+        "subtitle": "Enter your details to receive a reset link"
+      },
+      "form": {
+        "title": "Forgot your password?",
+        "subtitle": "Enter your email and clinic slug to receive a password reset link",
+        "tenantLabel": "Clinic slug",
+        "tenantPlaceholder": "e.g., smilecare",
+        "tenantHint": "Match the slug configured for your clinic (default, smilecare, etc.).",
+        "emailLabel": "Email Address",
+        "emailPlaceholder": "you{at}clinic.com"
+      },
+      "submit": "Send Reset Link",
+      "backToLogin": "Back to login",
+      "success": {
+        "title": "Check your email",
+        "description": "If an account exists with this email, you will receive a password reset link shortly."
+      },
+      "errors": {
+        "emptyFields": "Please fill in all required fields"
+      }
+    },
+    "resetPassword": {
+      "mobileHeader": {
+        "title": "Set New Password",
+        "subtitle": "Enter your new password"
+      },
+      "form": {
+        "title": "Set new password",
+        "subtitle": "Choose a strong password for your account",
+        "passwordLabel": "New Password",
+        "passwordPlaceholder": "Enter new password",
+        "passwordHint": "Must be at least 8 characters long",
+        "confirmPasswordLabel": "Confirm Password",
+        "confirmPasswordPlaceholder": "Re-enter new password"
+      },
+      "submit": "Reset Password",
+      "requestNew": "Request new reset link",
+      "success": {
+        "title": "Password reset successful",
+        "redirecting": "Redirecting to login page..."
+      },
+      "errors": {
+        "missingToken": "Invalid or missing reset token",
+        "invalidToken": "This reset link is invalid or has expired",
+        "passwordTooShort": "Password must be at least 8 characters long",
+        "passwordMismatch": "Passwords do not match"
       }
     }
   },
@@ -852,12 +909,18 @@
     "weekView": {
       "allDay": "All day",
       "timeSlot": "{time}",
+      "timeColumn": "Time",
+      "selectionHint": "Click and drag inside a day column to choose a time range.",
       "noAppointments": "No appointments"
     },
     "dayView": {
       "hourSlot": "{hour}:00",
+      "selectionHint": "Click and drag to select a time range.",
       "noAppointments": "No appointments scheduled",
       "clickToSchedule": "Click to schedule appointment"
+    },
+    "monthView": {
+      "selectionHint": "Click to open a day or drag across days to create a period."
     },
     "filter": {
       "doctor": {
@@ -882,10 +945,219 @@
     "insuranceCompanies": "Insurance Companies",
     "blogs": "Blog",
     "reports": "Reports",
+    "finance": "Finance",
+    "financeExpenses": "Expenses",
     "staff": "Staff",
     "clinicSettings": "Clinic settings",
+    "billing": "Billing",
     "translations": "Translations",
     "settings": "Settings"
+  },
+  "finance": {
+    "expenses": {
+      "meta": {
+        "title": "Expenses"
+      },
+      "header": {
+        "title": "Expenses",
+        "subtitle": "Track and manage clinic expenses"
+      },
+      "actions": {
+        "refresh": "Refresh"
+      },
+      "filters": {
+        "title": "Filter Expenses",
+        "subtitle": "Narrow down your expense list",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "category": "Category",
+        "allCategories": "All Categories",
+        "clear": "Clear",
+        "apply": "Apply Filters"
+      },
+      "list": {
+    "title": "Expense List",
+    "count": "{count} expenses",
+    "addNew": "New Expense",
+    "manageCategories": "Manage Categories",
+    "error": {
+      "title": "Failed to load expenses",
+      "retry": "Try Again"
+        },
+        "empty": {
+          "title": "No expenses found",
+          "subtitle": "Start tracking your clinic expenses",
+          "action": "Add First Expense"
+        }
+      },
+      "table": {
+        "date": "Date",
+        "category": "Category",
+        "amount": "Amount",
+        "notes": "Notes",
+        "actions": "Actions",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "form": {
+        "create": {
+          "title": "New Expense",
+          "subtitle": "Record a new clinic expense"
+        },
+        "edit": {
+          "title": "Edit Expense",
+          "subtitle": "Update expense details"
+        },
+        "date": {
+          "label": "Date",
+          "placeholder": "Select date"
+        },
+        "category": {
+          "label": "Category",
+          "placeholder": "Select category"
+        },
+        "amount": {
+          "label": "Amount",
+          "placeholder": "0.00"
+        },
+        "notes": {
+          "label": "Notes",
+          "placeholder": "Optional notes about this expense"
+        },
+        "validation": {
+          "dateRequired": "Date is required",
+          "categoryRequired": "Category is required",
+          "amountPositive": "Amount must be greater than zero"
+        },
+        "actions": {
+          "cancel": "Cancel",
+          "create": "Create Expense",
+          "update": "Update Expense"
+        }
+      },
+      "confirm": {
+        "delete": "Are you sure you want to delete this expense?"
+      }
+    },
+    "categories": {
+      "meta": {
+        "title": "Expense Categories"
+      },
+      "header": {
+        "title": "Expense Categories",
+        "subtitle": "Manage expense categories"
+      },
+      "title": "Expense Categories",
+      "subtitle": "Organize your expenses",
+      "actions": {
+        "add": "New Category",
+        "edit": "Edit",
+        "disable": "Disable",
+        "enable": "Enable",
+        "refresh": "Refresh"
+      },
+      "list": {
+        "title": "Categories",
+        "count": "{count} categories",
+        "error": {
+          "title": "Failed to load categories"
+        },
+        "empty": {
+          "title": "No categories found",
+          "subtitle": "Categories will appear here"
+        }
+      },
+      "badges": {
+        "system": "System"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "modal": {
+        "create": {
+          "title": "New Category",
+          "subtitle": "Create a custom expense category"
+        },
+        "edit": {
+          "title": "Edit Category",
+          "subtitle": "Update category name"
+        },
+        "form": {
+          "name": {
+            "label": "Category Name",
+            "placeholder": "Enter category name"
+          }
+        },
+        "validation": {
+          "nameRequired": "Category name is required"
+        },
+        "actions": {
+          "cancel": "Cancel",
+          "create": "Create Category",
+          "update": "Update Category"
+        }
+      },
+      "confirm": {
+        "title": "Disable Category?",
+        "message": "Are you sure you want to disable \"{name}\"? Existing expenses will remain unchanged.",
+        "cancel": "Cancel",
+        "confirm": "Disable"
+      }
+    },
+    "summary": {
+      "meta": {
+        "title": "Monthly Summary"
+      },
+      "header": {
+        "title": "Monthly Summary",
+        "subtitle": "View expense summaries by month"
+      },
+      "selector": {
+        "title": "Select Period",
+        "subtitle": "Choose month and year",
+        "month": "Month",
+        "year": "Year",
+        "load": "Load Summary"
+      },
+      "total": {
+        "title": "Total Expenses",
+        "label": "Total for period"
+      },
+      "breakdown": {
+        "title": "Category Breakdown",
+        "subtitle": "Expenses by category",
+        "table": {
+          "category": "Category",
+          "amount": "Amount",
+          "percentage": "Percentage",
+          "total": "Total"
+        }
+      },
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      },
+      "loading": "Loading summary...",
+      "error": {
+        "title": "Failed to load summary",
+        "retry": "Try Again"
+      },
+      "empty": {
+        "title": "No expenses for this period",
+        "subtitle": "No expenses were recorded in the selected month"
+      }
+    }
   },
   "translationsPage": {
     "header": {
@@ -1459,30 +1731,40 @@
         "fields": {
           "firstName": "First Name",
           "lastName": "Last Name",
-          "email": "Email Address",
-          "phone": "Phone Number",
-          "dateOfBirth": "Date of Birth",
-          "profileImage": "Profile Image"
-        },
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "dateOfBirth": "Date of Birth",
+      "profileImage": "Profile Image",
+      "notes": "Internal Notes",
+      "driveFolder": "Drive Folder"
+    },
         "placeholders": {
           "firstName": "Enter first name",
           "lastName": "Enter last name",
-          "email": "patient\\u0040example.com",
-          "phone": "+971 50 000 0000",
-          "profileImage": "https://example.com/profile.jpg"
-        },
-        "hints": {
-          "dateOfBirth": "Optional – used to personalize patient reminders",
-          "profileImage": "Upload or provide a URL for the patient's profile image"
-        },
-        "descriptions": {
-          "email": "Email is required to send follow-up reminders."
-        },
-        "image": {
-          "alt": "Patient profile image",
-          "title": "Profile Image Preview",
-          "description": "Patient profile image will appear like this"
-        }
+      "email": "patient\\u0040example.com",
+      "phone": "+971 50 000 0000",
+      "profileImage": "https://example.com/profile.jpg",
+      "notes": "Document allergies, preferences, or follow-up context",
+      "driveFolder": "Paste Google Drive folder link or ID"
+    },
+    "hints": {
+      "dateOfBirth": "Optional – used to personalize patient reminders",
+      "profileImage": "Upload or provide a URL for the patient's profile image",
+      "notes": "Only visible to clinic staff. Keep sensitive observations here.",
+      "driveFolder": "Link to the patient's Drive folder for images and history. Access is still controlled in Drive."
+    },
+    "descriptions": {
+      "email": "Email is required to send follow-up reminders.",
+      "driveFolder": "Paste the shared folder link you already manage in Drive."
+    },
+    "actions": {
+      "openDriveFolder": "Open Drive folder"
+    },
+    "image": {
+      "alt": "Patient profile image",
+      "title": "Profile Image Preview",
+      "description": "Patient profile image will appear like this"
+    }
       },
       "sidebar": {
         "patientId": "Patient ID: {id}",
@@ -1621,11 +1903,13 @@
         "viewHistory": "View history"
       },
       "validation": {
-        "firstNameRequired": "First name is required",
-        "lastNameRequired": "Last name is required",
-        "invalidEmail": "Please enter a valid email address",
-        "invalidUrl": "Please enter a valid URL"
-      },
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidUrl": "Please enter a valid URL",
+    "invalidDriveFolder": "Enter a valid Google Drive folder link or ID",
+    "notesTooLong": "Notes must be 2000 characters or fewer"
+  },
       "toasts": {
         "updateSuccess": {
           "title": "Patient updated",
@@ -2777,24 +3061,29 @@
       "loadError": "Failed to load report metrics",
       "noData": "No data available"
     },
-    "metrics": {
-      "totalAppointments": {
-        "label": "Total Appointments",
-        "thisMonth": "booked this month"
-      },
-      "totalPatients": {
-        "label": "Total Patients",
-        "newThisMonth": "new this month"
-      },
-      "revenueThisMonth": {
-        "label": "Revenue This Month",
-        "vsLastMonth": "vs last month"
-      },
-      "collectionHealth": {
-        "label": "Collection Health",
-        "outstanding": "outstanding payments"
-      }
+  "metrics": {
+    "totalAppointments": {
+      "label": "Total Appointments",
+      "thisMonth": "booked this month"
     },
+    "totalPatients": {
+      "label": "Total Patients",
+      "newThisMonth": "new this month"
+    },
+    "revenueThisMonth": {
+      "label": "Revenue This Month",
+      "vsLastMonth": "vs last month"
+    },
+    "expenses": {
+      "label": "Expenses",
+      "topCategories": "Top categories",
+      "empty": "No expenses in this period"
+    },
+    "collectionHealth": {
+      "label": "Collection Health",
+      "outstanding": "outstanding payments"
+    }
+  },
     "snapshots": {
       "period": {
         "title": "Period Snapshot",
@@ -3202,6 +3491,10 @@
           "label": "Appointments",
           "description": "Schedule and manage patient appointments"
         },
+        "calendar": {
+          "label": "Calendar",
+          "description": "Calendar view of appointments and availability"
+        },
         "patients": {
           "label": "Patients",
           "description": "Patient records and information"
@@ -3210,9 +3503,17 @@
           "label": "Doctors",
           "description": "Doctor profiles and schedules"
         },
+        "materials": {
+          "label": "Materials",
+          "description": "Inventory of clinic materials and supplies"
+        },
         "services": {
           "label": "Services",
           "description": "Clinic services and pricing"
+        },
+        "insuranceCompanies": {
+          "label": "Insurance Companies",
+          "description": "Manage insurance partners and contracts"
         },
         "treatmentPlans": {
           "label": "Treatment Plans",
@@ -3222,9 +3523,21 @@
           "label": "Reports",
           "description": "Analytics and reporting"
         },
+        "billing": {
+          "label": "Billing",
+          "description": "Subscription and billing management"
+        },
+        "translations": {
+          "label": "Translations",
+          "description": "Manage translations and localization content"
+        },
         "settings": {
           "label": "Settings",
           "description": "Clinic configuration"
+        },
+        "clinicSettings": {
+          "label": "Clinic Settings",
+          "description": "Clinic profile, branding, and defaults"
         },
         "staff": {
           "label": "Staff Management",
@@ -3277,13 +3590,13 @@
         "title": "Payment Settings",
         "subtitle": "Configure payment processing options"
       },
+      "subscription": {
+        "title": "Plan & Billing",
+        "subtitle": "Manage your SaaS subscription"
+      },
       "hours": {
         "title": "Operating Hours",
         "subtitle": "Set your clinic's working schedule"
-      },
-      "cloudflare": {
-        "title": "Cloudflare Images",
-        "subtitle": "Deliver media through Cloudflare's global network"
       },
       "email": {
         "title": "Email Delivery",
@@ -3312,6 +3625,12 @@
         "label": "Clinic Logo",
         "hint": "Upload your clinic's logo for branding",
         "altText": "Clinic Logo"
+      },
+      "favicon": {
+        "label": "Favicon",
+        "hint": "Shown in the browser tab; use a square image for best results",
+        "altText": "Clinic favicon preview",
+        "helper": "If empty, the default favicon will be used."
       },
       "address": {
         "label": "Address",
@@ -3370,18 +3689,6 @@
         "label": "Virtual meeting link",
         "hint": "Link included in virtual consultation emails to patients.",
         "placeholder": "https://meet.google.com/your-meeting"
-      },
-      "cloudflare": {
-        "accountId": {
-          "label": "Cloudflare account ID",
-          "placeholder": "Enter your Cloudflare account ID",
-          "hint": "Available in the URL of the Cloudflare Images dashboard."
-        },
-        "apiToken": {
-          "label": "Cloudflare API token",
-          "placeholder": "Enter your Cloudflare Images API token",
-          "hint": "Create an API token with the Images:Read and Images:Write permissions."
-        }
       },
       "paypal": {
         "environment": {
@@ -3504,6 +3811,52 @@
       "addressNotProvided": "Address not provided",
       "virtualMeetingLink": "Virtual meeting link"
     },
+    "plan": {
+      "currentPlan": "Current plan",
+      "perMonth": "per month",
+      "perYear": "per year",
+      "nextBilling": "Next billing date",
+      "paymentMethod": "Payment method",
+      "planIncludes": "Plan includes",
+      "notAvailable": "Not available",
+      "expires": "Expires {date}",
+      "status": {
+        "active": "Active",
+        "canceled": "Canceled"
+      },
+      "actions": {
+        "upgrade": "Upgrade plan",
+        "cancel": "Cancel subscription",
+        "updatePayment": "Update card"
+      },
+      "modal": {
+        "cancelTitle": "Cancel subscription",
+        "cancelDescription": "Your account remains active until {date}. Are you sure you want to cancel?",
+        "warning": "Canceling stops future billing and downgrades you to the free tier when this cycle ends.",
+        "pointAccess": "You can keep using every paid feature until the current billing period ends.",
+        "pointData": "All clinic data stays safe. Reactivate whenever you're ready.",
+        "keep": "Keep my plan",
+        "confirm": "Yes, cancel plan"
+      },
+      "toasts": {
+        "upgrade": {
+          "title": "Opening billing portal",
+          "description": "A secure tab will open so you can change plans."
+        },
+        "paymentUpdate": {
+          "title": "Manage payment method",
+          "description": "We'll open the billing portal so you can update your card."
+        },
+        "cancelled": {
+          "title": "Cancellation scheduled",
+          "description": "Your plan remains active until {date}. Reactivate anytime."
+        },
+        "error": {
+          "title": "Unable to cancel",
+          "description": "We couldn't cancel the plan. Please try again."
+        }
+      }
+    },
     "schedule": {
       "title": "Schedule",
       "subtitle": "Current operating hours",
@@ -3521,12 +3874,6 @@
       "currentEnvironment": "Current environment",
       "notConfigured": "Not configured",
       "configured": "PayPal credentials saved."
-    },
-    "cloudflare": {
-      "title": "Connect Cloudflare Images",
-      "description": "Store uploads with Cloudflare Images for faster, more secure delivery across the platform.",
-      "hint": "Provide the account ID and an API token with Images permissions from your Cloudflare dashboard.",
-      "configured": "Cloudflare Images credentials saved."
     },
     "metrics": {
       "identity": {
@@ -3578,6 +3925,14 @@
       "logoError": {
         "title": "Upload failed",
         "description": "Unable to upload logo. Please try again."
+      },
+      "faviconSuccess": {
+        "title": "Favicon updated",
+        "description": "Browser tab icon has been uploaded successfully"
+      },
+      "faviconError": {
+        "title": "Favicon upload failed",
+        "description": "Unable to upload favicon. Please try again."
       },
       "heroImageSuccess": {
         "title": "Hero image uploaded",
@@ -3894,5 +4249,108 @@
   "currency": {
     "clinic": "Clinic Currency",
     "original": "Original"
+  },
+  "billing": {
+    "plan": {
+      "title": "Subscription Plan",
+      "subtitle": "Manage your subscription",
+      "currentPlan": "Current Plan",
+      "subscriptionPlan": "Subscription Plan",
+      "nextRenewal": "Next renewal",
+      "paymentMethod": "Payment method",
+      "noPaymentMethod": "No payment method",
+      "update": "Update",
+      "upgradePlan": "Upgrade Plan",
+      "cancelSubscription": "Cancel Subscription",
+      "helpText": "Need help? Contact our support team",
+      "unknown": "Unknown",
+      "priceUnavailable": "Price unavailable",
+      "month": "month",
+      "year": "year",
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "noRenewalDate": "No renewal date",
+      "notAvailable": "Not available",
+      "status": {
+        "active": "Active",
+        "past_due": "Past Due",
+        "canceled": "Canceled",
+        "pending": "Pending"
+      },
+      "pendingChange": "Pending Change",
+      "pendingCancellation": "Your subscription will be cancelled on {date}",
+      "pendingDowngrade": "Your plan will change to {tier} on {date}",
+      "modal": {
+        "upgradeTitle": "Upgrade Your Plan",
+        "upgradeDescription": "Choose a plan that fits your needs",
+        "currentPlan": "Current Plan",
+        "selectNewPlan": "Select your new plan",
+        "billingCycle": "Billing Cycle",
+        "billedMonthly": "Billed monthly",
+        "billedAnnually": "Billed annually",
+        "save20": "Save 20%",
+        "upgradeInfo": "You'll be redirected to PayPal to complete your upgrade. Your new plan will be active immediately after payment.",
+        "cancelButton": "Cancel",
+        "confirmUpgrade": "Confirm Upgrade",
+        "cancelTitle": "Cancel Subscription",
+        "cancelSubtitle": "We're sorry to see you go",
+        "warningTitle": "Important",
+        "warningMessage": "Your subscription will remain active until {date}",
+        "whenToCancel": "When would you like to cancel?",
+        "endOfPeriod": "At the end of billing period",
+        "endOfPeriodDescription": "Continue using all features until {date}",
+        "recommended": "Recommended",
+        "immediately": "Immediately",
+        "immediatelyDescription": "Cancel now and lose access to all features",
+        "reasonLabel": "Reason for cancellation",
+        "optional": "optional",
+        "reasonPlaceholder": "Help us improve by telling us why you're cancelling...",
+        "whatHappensNext": "What happens next?",
+        "point1": "You'll receive a confirmation email",
+        "point2": "Your data will be retained for 30 days",
+        "point3": "You can reactivate anytime before deletion",
+        "keepSubscription": "Keep Subscription",
+        "confirmCancel": "Confirm Cancellation"
+      }
+    },
+    "pendingPaymentTitle": "Payment Required",
+    "pastDueTitle": "Payment Past Due",
+    "canceledTitle": "Subscription Canceled",
+    "statusTitle": "Billing Status",
+    "defaultMessage": "Please check your billing status",
+    "completePayment": "Complete Payment",
+    "updatePayment": "Update Payment Method",
+    "reactivate": "Reactivate Subscription",
+    "manageSubscription": "Manage Subscription",
+    "suspensionCountdown": "Your account will be suspended in {days} days",
+    "needHelp": "Need help?",
+    "contactSupport": "Contact Support",
+    "paymentRequired": "Payment Required",
+    "contactSupportForPaymentLink": "Please contact support to get your payment link",
+    "updateRequired": "Update Required",
+    "contactSupportForPaymentUpdate": "Please contact support to update your payment method",
+    "reactivationRequired": "Reactivation Required",
+    "contactSupportForReactivation": "Please contact support to reactivate your subscription",
+    "errorCheckingStatus": "Failed to check billing status. Please try again.",
+    "pending": {
+      "title": "Complete Your Payment",
+      "description": "Your clinic account has been created, but payment has not been completed yet.",
+      "instructions": "To activate your account and access all features, please complete the payment process.",
+      "action": "Complete Payment Now"
+    },
+    "pastDue": {
+      "title": "Payment Past Due",
+      "description": "Your payment is overdue. Please update your payment method to continue using the platform.",
+      "instructions": "Update your payment method through PayPal to restore full access to your account.",
+      "action": "Update Payment Method",
+      "warning": "Your account may be suspended if payment is not received soon."
+    },
+    "canceled": {
+      "title": "Subscription Canceled",
+      "description": "Your subscription has been canceled and access to the platform is restricted.",
+      "instructions": "To regain access to your clinic portal, you can reactivate your subscription.",
+      "action": "Reactivate Subscription",
+      "dataRetention": "Your data is preserved and will be available when you reactivate."
+    }
   }
 }

@@ -48,7 +48,7 @@
         <div v-if="showSwipeCard" class="relative">
           <div
             ref="swipeCardRef"
-            class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6 rounded-lg shadow-lg touch-manipulation"
+            class="bg-gradient-to-r from-mint-500 to-mint-400 text-white p-6 rounded-lg shadow-lg touch-manipulation"
           >
             <h3 class="text-lg font-semibold mb-2">Swipe Me Left!</h3>
             <p class="text-blue-100">

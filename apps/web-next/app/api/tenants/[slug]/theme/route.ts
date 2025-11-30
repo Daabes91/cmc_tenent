@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { dbQuery } from '@/lib/db'
 import { z } from 'zod'
 import type { UpdateThemeRequest, UpdateThemeResponse, ApiErrorResponse } from '@/lib/theme-types'
 
@@ -98,9 +98,11 @@ export async function POST(
     const { themeId } = validationResult.data
     
     // Verify theme exists before assignment
-    const theme = await prisma.theme.findUnique({
-      where: { id: themeId }
-    })
+    const themeResult = await dbQuery<{ id: string; key: string; name: string; status: string }>(
+      'SELECT id, "key" as key, name, status FROM "Theme" WHERE id = $1',
+      [themeId]
+    )
+    const theme = themeResult.rows[0]
     
     if (!theme) {
       return NextResponse.json(
@@ -118,41 +120,51 @@ export async function POST(
     }
     
     // Update tenant themeId in database
-    const updatedTenant = await prisma.tenant.update({
-      where: { slug },
-      data: { themeId },
-      select: {
-        id: true,
-        slug: true,
-        domain: true,
-        status: true,
-        themeId: true,
-        theme: {
-          select: {
-            id: true,
-            key: true,
-            name: true
-          }
-        },
-        updatedAt: true
-      }
-    })
+    const updatedTenantResult = await dbQuery<{
+      id: string
+      slug: string
+      domain: string | null
+      status: string
+      themeId: string | null
+      updatedAt: string
+    }>(
+      `
+        UPDATE tenants
+        SET "themeId" = $1, updated_at = NOW()
+        WHERE slug = $2
+        RETURNING id, slug, domain, status, "themeId" as "themeId", updated_at as "updatedAt"
+      `,
+      [themeId, slug]
+    )
+    
+    const updatedTenant = updatedTenantResult.rows[0]
+    
+    if (!updatedTenant) {
+      return NextResponse.json(
+        { error: 'Tenant not found' },
+        { status: 404 }
+      )
+    }
     
     // Return updated tenant data
-    return NextResponse.json(updatedTenant)
+    return NextResponse.json({
+      ...updatedTenant,
+      theme: {
+        id: theme.id,
+        key: theme.key,
+        name: theme.name
+      }
+    })
     
   } catch (error) {
     console.error('Error updating tenant theme:', error)
     
     // Handle Prisma-specific errors
-    if (error instanceof Error) {
-      // Tenant not found
-      if (error.message.includes('Record to update not found')) {
-        return NextResponse.json(
-          { error: 'Tenant not found' },
-          { status: 404 }
-        )
-      }
+    if (error instanceof Error && error.message.includes('Record to update not found')) {
+      return NextResponse.json(
+        { error: 'Tenant not found' },
+        { status: 404 }
+      )
     }
     
     return NextResponse.json(

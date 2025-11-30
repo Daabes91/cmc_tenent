@@ -39,6 +39,10 @@ export interface PatientProfileResponse {
   phone: string;
   profileImageUrl?: string | null;
   dateOfBirth?: string | null;
+  googleId?: string | null;
+  googleEmail?: string | null;
+  authProvider?: string;
+  hasPassword?: boolean;
 }
 
 export interface PatientProfileUpdateRequest {
@@ -235,6 +239,8 @@ export interface ClinicSettings {
   zipCode: string;
   country: string;
   logoUrl?: string | null;
+  faviconUrl?: string | null;
+  faviconImageId?: string | null;
   slotDurationMinutes: number;
   workingHours: {
     monday: string;

@@ -1,5 +1,13 @@
 import { fileURLToPath } from "node:url";
 
+const defaultPublicApiBase = (process.env.NUXT_PUBLIC_API_BASE ?? "http://localhost:8080/admin").replace(/\/+$/, "");
+const defaultPrivateApiBase = (
+  process.env.NUXT_PRIVATE_API_BASE ??
+  process.env.NUXT_PUBLIC_API_BASE ??
+  "http://localhost:8080/admin"
+).replace(/\/+$/, "");
+const defaultPublicBase = (process.env.NUXT_PUBLIC_PUBLIC_API_BASE ?? "http://localhost:8080/public").replace(/\/+$/, "");
+
 const tailwindConfigAlias = fileURLToPath(new URL("./tailwind-config", import.meta.url));
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
@@ -18,7 +26,7 @@ export default defineNuxtConfig({
         }
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/admin-panel/admin-favicon.ico' }
+        { rel: 'icon', type: 'image/png', href: 'https://imagedelivery.net/K88oXEK4nwOFUDLZaSq1vg/6c79054b-5ecc-4a97-be03-441518f70200/public' }
       ]
     }
   },
@@ -49,10 +57,10 @@ export default defineNuxtConfig({
     vueI18n: "./i18n.config.ts"
   },
   runtimeConfig: {
-    apiBase: process.env.NUXT_PRIVATE_API_BASE ?? "http://api:8080/admin",
+    apiBase: defaultPrivateApiBase,
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE ?? "http://localhost:8080/admin",
-      publicApiBase: process.env.NUXT_PUBLIC_PUBLIC_API_BASE ?? "http://localhost:8080",
+      apiBase: defaultPublicApiBase,
+      publicApiBase: defaultPublicBase,
       defaultTenantSlug: process.env.NUXT_PUBLIC_DEFAULT_TENANT?.toLowerCase() ?? "default",
       webUrl: process.env.NUXT_PUBLIC_WEB_URL ?? "http://localhost:3001"
     }

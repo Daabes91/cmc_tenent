@@ -63,7 +63,7 @@
       <!-- Main Content -->
       <div v-else-if="metrics" class="space-y-8">
       <!-- Key Metrics -->
-      <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
         <UCard class="transition-shadow shadow-sm hover:shadow-lg">
           <div class="flex items-start justify-between">
             <div>
@@ -131,6 +131,31 @@
             </div>
             <div class="rounded-lg bg-amber-100 p-3 text-amber-600">
               <UIcon name="i-lucide-piggy-bank" class="h-6 w-6" />
+            </div>
+          </div>
+        </UCard>
+
+        <UCard class="transition-shadow shadow-sm hover:shadow-lg">
+          <div class="flex items-start justify-between">
+            <div class="w-full">
+              <p class="text-sm text-slate-500">{{ t('reports.metrics.expenses.label') }}</p>
+              <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
+                {{ formatCurrency(metrics.totalExpenses ?? 0) }}
+              </p>
+              <p class="mt-2 text-xs text-slate-500 flex items-center gap-2" v-if="hasExpenseData">
+                <UIcon name="i-lucide-list" class="h-4 w-4 text-slate-400" />
+                {{ t('reports.metrics.expenses.topCategories') }}
+              </p>
+              <div v-if="hasExpenseData" class="mt-2 space-y-1">
+                <div v-for="item in topExpenseCategories" :key="item.categoryName" class="flex items-center justify-between text-sm">
+                  <span class="text-slate-700 dark:text-slate-200 truncate">{{ item.categoryName }}</span>
+                  <span class="font-semibold text-slate-900 dark:text-white">{{ formatCurrency(item.amount) }}</span>
+                </div>
+              </div>
+              <p v-else class="mt-2 text-xs text-slate-500">{{ t('reports.metrics.expenses.empty') }}</p>
+            </div>
+            <div class="rounded-lg bg-slate-100 p-3 text-slate-600 dark:bg-slate-800/60 dark:text-slate-200">
+              <UIcon name="i-lucide-wallet" class="h-6 w-6" />
             </div>
           </div>
         </UCard>
@@ -643,6 +668,11 @@ interface RevenuePoint {
   amount: number;
 }
 
+interface CategoryExpense {
+  categoryName: string;
+  amount: number;
+}
+
 interface ReportMetrics {
   totalAppointments: number;
   todayAppointments: number;
@@ -669,6 +699,9 @@ interface ReportMetrics {
   activeTreatmentPlans: number;
   revenueThisMonth: number;
   revenueLastMonth: number;
+  // Expenses
+  totalExpenses?: number;
+  expensesByCategory?: CategoryExpense[];
   // Multi-currency support
   revenueThisMonthByCurrency?: Record<string, number>;
   revenueLastMonthByCurrency?: Record<string, number>;
@@ -748,7 +781,15 @@ const reportsFallback: ReportMetrics = {
   followUpVisitsThisMonth: 52,
   activeTreatmentPlans: 38,
   revenueThisMonth: 18450,
-  revenueLastMonth: 17210
+  revenueLastMonth: 17210,
+  totalExpenses: 8200,
+  expensesByCategory: [
+    { categoryName: "Supplies", amount: 3200 },
+    { categoryName: "Utilities", amount: 1800 },
+    { categoryName: "Rent", amount: 1500 },
+    { categoryName: "Staff Training", amount: 700 },
+    { categoryName: "Other", amount: 1000 }
+  ]
 };
 
 const { data: metrics, pending: loading, error: fetchError, refresh: refreshMetrics } = await useAsyncData(
@@ -938,6 +979,9 @@ const revenueMomentum = computed(() => {
     positive: delta >= 0
   };
 });
+
+const topExpenseCategories = computed(() => metrics.value?.expensesByCategory?.slice(0, 3) ?? []);
+const hasExpenseData = computed(() => (metrics.value?.totalExpenses ?? 0) > 0);
 
 const formatPercent = (value?: number) => `${Number(value ?? 0).toFixed(1)}%`;
 

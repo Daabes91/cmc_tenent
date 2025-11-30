@@ -22,6 +22,10 @@ public class TenantEntity {
     @Column(nullable = false, length = 32)
     private TenantStatus status = TenantStatus.ACTIVE;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "billing_status", nullable = false, length = 50)
+    private BillingStatus billingStatus = BillingStatus.PENDING_PAYMENT;
+
     @Column(name = "custom_domain", length = 255)
     private String customDomain;
 
@@ -80,6 +84,14 @@ public class TenantEntity {
 
     public void setStatus(TenantStatus status) {
         this.status = status;
+    }
+
+    public BillingStatus getBillingStatus() {
+        return billingStatus;
+    }
+
+    public void setBillingStatus(BillingStatus billingStatus) {
+        this.billingStatus = billingStatus;
     }
 
     public String getCustomDomain() {

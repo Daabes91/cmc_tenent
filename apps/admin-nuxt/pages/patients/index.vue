@@ -187,6 +187,24 @@
                 {{ t('patients.list.filters.clear') }}
               </UButton>
             </div>
+
+            <div class="w-full">
+               <USelectMenu
+                  v-model="selectedTags"
+                  :options="availableTags"
+                  option-attribute="name"
+                  value-attribute="id"
+                  multiple
+                  placeholder="Filter by tags"
+                  searchable
+                  class="w-full"
+               >
+                 <template #label>
+                    <span v-if="selectedTags.length" class="truncate">{{ selectedTags.length }} tags selected</span>
+                    <span v-else class="text-gray-500">Filter by tags</span>
+                 </template>
+               </USelectMenu>
+            </div>
           </div>
         </div>
       </div>
@@ -403,6 +421,30 @@
                   {{ statusTableText(row) }}
                 </UBadge>
               </template>
+              <template #tags-data="{ row }">
+                <div class="flex flex-wrap gap-1">
+                  <UBadge
+                    v-for="tag in row.tags?.slice(0, 2) || []"
+                    :key="tag.id"
+                    :color="tag.color ? undefined : 'gray'"
+                    :variant="tag.color ? 'solid' : 'soft'"
+                    :style="tag.color ? { backgroundColor: tag.color, borderColor: tag.color, color: '#fff' } : undefined"
+                    size="xs"
+                    class="rounded-full"
+                  >
+                    {{ tag.name }}
+                  </UBadge>
+                  <UBadge
+                    v-if="(row.tags?.length || 0) > 2"
+                    color="gray"
+                    variant="soft"
+                    size="xs"
+                    class="rounded-full"
+                  >
+                    +{{ row.tags.length - 2 }}
+                  </UBadge>
+                </div>
+              </template>
               <template #age-data="{ row }">
                 <span class="text-xs text-slate-600 dark:text-slate-300">
                   {{ row.ageYears != null ? t('patients.list.table.ageValue', { count: formatNumber(row.ageYears) }) : t('patients.list.labels.notAvailable') }}
@@ -517,6 +559,7 @@
 <script setup lang="ts">
 import type { PatientAdmin } from "@/types/patients";
 import { useI18n } from "vue-i18n";
+import { useTagService, type Tag } from "@/services/tag.service";
 
 const { t, locale } = useI18n();
 
@@ -524,6 +567,7 @@ useHead(() => ({ title: t("patients.list.meta.title") }));
 
 const toast = useToast();
 const { fetcher, request } = useAdminApi();
+const { listTags } = useTagService();
 const router = useRouter();
 
 const page = ref(1);
@@ -533,13 +577,30 @@ const totalPages = computed(() => Math.max(1, Math.ceil(totalItems.value / pageS
 
 const { data, pending, refresh: baseRefresh } = await useAsyncData(
   () => `admin-patients-${page.value}`,
-  () => fetchPatients()
+  () => fetchPatients(),
+  {
+    watch: [page],
+    // Fetch on client so the request is visible and up-to-date after navigation
+    server: false
+  }
 );
 
 async function fetchPatients() {
+  const params: any = {
+    page: page.value - 1,
+    size: pageSize.value,
+  };
+  
+  if (selectedTags.value.length > 0) {
+    params.tags = selectedTags.value.join(',');
+  }
+
   const response = await fetcher<any>(
-    `/patients?page=${page.value - 1}&size=${pageSize.value}`,
-    { content: [], totalElements: 0, totalPages: 0, number: 0, size: pageSize.value }
+    '/patients',
+    { 
+      params,
+      content: [], totalElements: 0, totalPages: 0, number: 0, size: pageSize.value 
+    }
   );
 
   if (Array.isArray(response)) {
@@ -578,6 +639,21 @@ watch(page, async (next, previous) => {
       color: "red",
       icon: "i-lucide-alert-triangle"
     });
+  }
+});
+
+onMounted(async () => {
+  if (!patients.value.length) {
+    try {
+      await baseRefresh();
+    } catch (error: any) {
+      toast.add({
+        title: t("patients.list.toasts.loadError.title"),
+        description: error?.data?.message ?? error?.message ?? t("patients.common.unexpectedError"),
+        color: "red",
+        icon: "i-lucide-alert-triangle"
+      });
+    }
   }
 });
 
@@ -829,6 +905,16 @@ type ViewMode = "table" | "cards";
 
 const viewMode = ref<ViewMode>("table");
 const sortOption = ref<"newest" | "oldest" | "name">("newest");
+const selectedTags = ref<number[]>([]);
+const availableTags = ref<Tag[]>([]);
+
+onMounted(async () => {
+  try {
+    availableTags.value = await listTags();
+  } catch (e) {
+    console.error("Failed to load tags", e);
+  }
+});
 
 const QUICK_FILTER_DEFS = [
   { value: "all", icon: "i-lucide-users" },
@@ -862,6 +948,7 @@ const activeFiltersCount = computed(() => {
   if (search.value.trim()) count += 1;
   if (quickFilter.value !== "all") count += 1;
   if (sortOption.value !== "newest") count += 1;
+  if (selectedTags.value.length > 0) count += 1;
   return count;
 });
 
@@ -942,6 +1029,7 @@ const paginationSummary = computed(() =>
 const columns = computed(() => [
   { key: "fullName", label: t("patients.list.table.columns.patient") },
   { key: "contact", label: t("patients.list.table.columns.contact") },
+  { key: "tags", label: "Tags" },
   { key: "status", label: t("patients.list.table.columns.profile"), class: "w-24 sm:w-28" },
   { key: "age", label: t("patients.list.table.columns.age"), class: "w-20 text-right sm:text-left" },
   { key: "actions", label: t("patients.list.table.columns.actions"), class: "w-24 text-right" }
@@ -989,14 +1077,16 @@ const deleteOpen = ref(false);
 const deleteTarget = ref<{ id: number; fullName: string } | null>(null);
 const deleting = ref(false);
 
-watch([search, quickFilter, sortOption], () => {
+watch([search, quickFilter, sortOption, selectedTags], () => {
   page.value = 1;
+  refresh();
 });
 
 function resetFilters() {
   search.value = "";
   quickFilter.value = "all";
   sortOption.value = "newest";
+  selectedTags.value = [];
 }
 
 function openCreate() {

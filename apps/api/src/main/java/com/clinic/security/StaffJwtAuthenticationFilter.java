@@ -51,6 +51,9 @@ public class StaffJwtAuthenticationFilter extends OncePerRequestFilter {
         return path.equals("/admin/auth/login")
             || path.equals("/admin/auth/logout")
             || path.equals("/admin/auth/refresh")
+            || path.equals("/admin/auth/forgot-password")
+            || path.equals("/admin/auth/validate-reset-token")
+            || path.equals("/admin/auth/reset-password")
             || path.startsWith("/admin/setup/");
     }
 

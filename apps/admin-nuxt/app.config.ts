@@ -1,7 +1,8 @@
 export default defineAppConfig({
   ui: {
     strategy: "override",
-    primary: "violet",
+    primary: "mint",
+    secondary: "evergreen",
     gray: "slate",
     formGroup: {
       label: {
@@ -35,7 +36,7 @@ export default defineAppConfig({
     },
     input: {
       rounded: "rounded-xl",
-      base: "block w-full text-sm text-slate-900 transition-all duration-200 bg-white border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 placeholder:text-slate-400 disabled:bg-slate-50 disabled:cursor-not-allowed dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-violet-400 dark:focus:ring-violet-500/30 dark:disabled:bg-slate-800",
+      base: "block w-full text-sm text-slate-900 transition-all duration-200 bg-white border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 placeholder:text-slate-400 disabled:bg-slate-50 disabled:cursor-not-allowed dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-mint-400 dark:focus:ring-mint-500/30 dark:disabled:bg-slate-800",
       size: {
         sm: "h-9 pl-10 pr-3 text-sm",
         md: "h-10 pl-10 pr-3.5 text-sm",
@@ -44,7 +45,7 @@ export default defineAppConfig({
     },
     textarea: {
       rounded: "rounded-xl",
-      base: "block w-full text-sm text-slate-900 transition-all duration-200 bg-white border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 placeholder:text-slate-400 disabled:bg-slate-50 disabled:cursor-not-allowed dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-violet-400 dark:focus:ring-violet-500/30 dark:disabled:bg-slate-800",
+      base: "block w-full text-sm text-slate-900 transition-all duration-200 bg-white border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 placeholder:text-slate-400 disabled:bg-slate-50 disabled:cursor-not-allowed dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-mint-400 dark:focus:ring-mint-500/30 dark:disabled:bg-slate-800",
       size: {
         sm: "px-3 py-2 text-sm",
         md: "px-3.5 py-2.5 text-sm",
@@ -93,7 +94,7 @@ export default defineAppConfig({
     },
     selectMenu: {
       rounded: "rounded-xl",
-      trigger: "h-10 pr-10 pl-3.5 text-sm bg-white border border-slate-300 text-slate-900 transition-all duration-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 dark:focus:border-violet-400 dark:focus:ring-violet-500/30",
+      trigger: "h-10 pr-10 pl-3.5 text-sm bg-white border border-slate-300 text-slate-900 transition-all duration-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 dark:focus:border-mint-400 dark:focus:ring-mint-500/30",
       icon: {
         trailing: {
           wrapper: "absolute inset-y-0 end-3 flex items-center text-slate-400 dark:text-slate-500"
@@ -139,10 +140,10 @@ export default defineAppConfig({
       },
       progress: {
         base: "absolute bottom-0 start-0 end-0 h-1.5",
-        background: "bg-gradient-to-r from-violet-500 via-violet-600 to-violet-500 dark:from-violet-400 dark:via-violet-500 dark:to-violet-400"
+        background: "bg-gradient-to-r from-mint-500 via-mint-600 to-mint-500 dark:from-mint-400 dark:via-mint-500 dark:to-mint-400"
       },
       default: {
-        color: "violet",
+        color: "mint",
         timeout: 5000,
         closeButton: {
           icon: "i-lucide-x",
@@ -154,7 +155,7 @@ export default defineAppConfig({
         },
         actionButton: {
           size: "sm",
-          color: "violet",
+          color: "mint",
           variant: "soft",
           class: "mt-3"
         }

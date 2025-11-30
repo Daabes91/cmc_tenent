@@ -48,15 +48,7 @@ export default function LoginPage() {
           {/* Left Column - Form */}
           <div className="order-2 lg:order-1">
             <div className="max-w-md">
-              {/* Logo/Brand */}
-              <Link href="/" className="inline-flex items-center gap-2 mb-8 group">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <span className="text-xl font-bold text-slate-900 dark:text-slate-100">{commonT('clinicName')}</span>
-              </Link>
+            
 
               {/* Header */}
               <div className="mb-8">

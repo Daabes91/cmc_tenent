@@ -23,7 +23,7 @@
               >
                 {{ t('treatmentPlans.detail.back.list') }}
               </UButton>
-              <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
+              <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-mint-600 to-mint-400 shadow-lg">
                 <UIcon name="i-lucide-clipboard-heart" class="h-6 w-6 text-white" />
               </div>
               <div>
@@ -102,7 +102,7 @@
 
         <!-- Progress Section -->
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-          <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
+          <div class="bg-gradient-to-r from-mint-600 to-mint-400 px-6 py-4">
             <div class="flex items-center gap-3">
               <UIcon name="i-lucide-trending-up" class="h-5 w-5 text-white" />
               <div>
@@ -205,7 +205,7 @@
 
         <!-- Scheduled Follow-Up Visits -->
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-          <div class="bg-gradient-to-r from-violet-500 to-purple-600 px-6 py-4">
+          <div class="bg-gradient-to-r from-mint-500 to-mint-400 px-6 py-4">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <UIcon name="i-lucide-calendar-clock" class="h-5 w-5 text-white" />

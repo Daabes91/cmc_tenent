@@ -10,6 +10,10 @@ public record PatientProfileResponse(
         String email,
         String phone,
         String profileImageUrl,
-        LocalDate dateOfBirth
+        LocalDate dateOfBirth,
+        String googleId,
+        String googleEmail,
+        String authProvider,
+        Boolean hasPassword
 ) {
 }

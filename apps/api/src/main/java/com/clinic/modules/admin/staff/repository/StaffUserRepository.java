@@ -21,6 +21,8 @@ public interface StaffUserRepository extends JpaRepository<StaffUser, Long> {
 
     List<StaffUser> findAllByTenantId(Long tenantId);
 
+    long countByTenantId(Long tenantId);
+
     @Query("""
             select s from StaffUser s
             where s.tenant.id = :tenantId

@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-mint-500 to-mint-300 shadow-lg">
               <UIcon name="i-lucide-calendar-check" class="h-6 w-6 text-white" />
             </div>
             <div>
@@ -101,7 +101,7 @@
             <div class="space-y-6">
               <!-- Assignment Details -->
               <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-                <div class="bg-gradient-to-r from-violet-500 to-indigo-600 px-6 py-4">
+                <div class="bg-gradient-to-r from-mint-500 to-mint-300 px-6 py-4">
                   <div class="flex items-center gap-3">
                     <UIcon name="i-lucide-calendar-check" class="h-5 w-5 text-white" />
                     <div>
@@ -177,14 +177,13 @@
                       </UFormGroup>
                       <UFormGroup :label="t('appointments.detail.fields.slotDuration')" :hint="t('appointments.detail.hints.slotDuration')">
                         <UInput
-                          :model-value="form.slotDurationMinutes"
+                          v-model="form.slotDurationMinutes"
                           type="number"
                           min="5"
                           max="240"
                           step="5"
                           size="lg"
                           icon="i-lucide-timer"
-                          disabled
                         />
                       </UFormGroup>
                     </div>
@@ -311,7 +310,7 @@
 
               <!-- Treatment Plan Card -->
               <div v-if="appointment?.treatmentPlanId" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
+                <div class="bg-gradient-to-r from-mint-600 to-mint-400 px-6 py-4">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                       <UIcon name="i-lucide-clipboard-list" class="h-5 w-5 text-white" />
@@ -425,10 +424,10 @@
           <!-- Appointment Avatar -->
           <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 p-6 text-center">
             <div class="relative inline-block">
-              <div class="h-20 w-20 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg">
+              <div class="h-20 w-20 rounded-full bg-gradient-to-br from-mint-500 to-mint-300 flex items-center justify-center shadow-lg">
                 <UIcon name="i-lucide-calendar-check" class="h-10 w-10 text-white" />
               </div>
-              <div class="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+              <div class="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-gradient-to-br from-mint-500 to-mint-300 flex items-center justify-center">
                 <UIcon name="i-lucide-clock" class="h-4 w-4 text-white" />
               </div>
             </div>
@@ -466,8 +465,8 @@
                   </div>
                 </li>
                 <li class="flex items-center gap-3">
-                  <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
-                    <UIcon name="i-lucide-clipboard-list" class="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-mint-100 dark:bg-mint-900/20">
+                    <UIcon name="i-lucide-clipboard-list" class="h-4 w-4 text-mint-600 dark:text-mint-400" />
                   </div>
                   <div class="flex flex-col">
                     <span class="text-xs text-slate-500 dark:text-slate-400">{{ t("appointments.detail.labels.service") }}</span>

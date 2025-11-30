@@ -23,6 +23,7 @@ public class CloudflareImageProperties {
     private String allowedExtensions;
     private int imageQuality = 85;
     private boolean autoOptimize = true;
+    private boolean mockMode = false;
 
     public String getAccountId() {
         return accountId;
@@ -95,5 +96,13 @@ public class CloudflareImageProperties {
 
     public void setAutoOptimize(boolean autoOptimize) {
         this.autoOptimize = autoOptimize;
+    }
+
+    public boolean isMockMode() {
+        return mockMode;
+    }
+
+    public void setMockMode(boolean mockMode) {
+        this.mockMode = mockMode;
     }
 }

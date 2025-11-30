@@ -1,6 +1,34 @@
 import defaultTheme from "tailwindcss/defaultTheme";
 import forms from "@tailwindcss/forms";
 
+const brandMint = {
+  50: "#e6f6ed",
+  100: "#c4edd6",
+  200: "#96deb7",
+  300: "#63cc93",
+  400: "#34b16d",
+  500: "#00a43c",
+  600: "#008b35",
+  700: "#006f2c",
+  800: "#005223",
+  900: "#003b1a",
+  950: "#01250f"
+};
+
+const evergreen = {
+  50: "#e7f0ea",
+  100: "#c6dfcf",
+  200: "#9ac2a8",
+  300: "#6ca382",
+  400: "#4a8765",
+  500: "#326b4c",
+  600: "#25533c",
+  700: "#1b3e2d",
+  800: "#132a20",
+  900: "#0a1813",
+  950: "#040c08"
+};
+
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: "class",
@@ -35,19 +63,9 @@ export default {
         }
       },
       colors: {
-        violet: {
-          50: "#e6fbfa",
-          100: "#c5f4f1",
-          200: "#9ce8e4",
-          300: "#6cd7d4",
-          400: "#3dc3be",
-          500: "#13b0a9",
-          600: "#109189",
-          700: "#0d7b72",
-          800: "#0d7377",
-          900: "#0a5755",
-          950: "#063d3b"
-        }
+        mint: brandMint,
+        evergreen,
+        violet: brandMint
       }
     }
   },

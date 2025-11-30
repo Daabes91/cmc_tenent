@@ -88,7 +88,7 @@
             :class="[
               'flex items-center justify-center rounded-lg transition-colors duration-200',
               'hover:bg-slate-100 dark:hover:bg-white/10',
-              'focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2',
+              'focus:outline-none focus:ring-2 focus:ring-mint-500 focus:ring-offset-2',
               'touch-manipulation',
               getTouchTargetClass()
             ]"
@@ -98,9 +98,9 @@
               icon="i-lucide-user"
               :ui="{ 
                 rounded: 'rounded-lg', 
-                background: 'bg-gradient-to-br from-violet-500 to-violet-700' 
+                background: 'bg-gradient-to-br from-mint-500 to-mint-400' 
               }"
-              class="ring-2 ring-violet-500/30 dark:ring-white/20"
+              class="ring-2 ring-mint-500/30 dark:ring-white/20"
             />
           </button>
         </UDropdown>
@@ -144,7 +144,13 @@
                   :alt="clinicName"
                   class="h-full w-full object-cover"
                 />
-                <span v-else>🦷</span>
+                <img
+                  v-else
+                  src="https://imagedelivery.net/K88oXEK4nwOFUDLZaSq1vg/6c79054b-5ecc-4a97-be03-441518f70200/public"
+                  :alt="clinicName || 'Clinic logo'"
+                  class="h-full w-full object-cover"
+                  loading="lazy"
+                />
               </div>
               <div>
                 <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ clinicName }}</span>
@@ -436,7 +442,7 @@ const quickActions = computed<QuickAction[]>(() => [
 const mobileNavUi = computed(() => ({
   wrapper: 'space-y-2',
   base: 'group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 touch-manipulation min-h-[48px]',
-  active: 'bg-gradient-to-r from-violet-500 to-violet-700 text-white shadow-lg shadow-violet-600/40',
+  active: 'bg-gradient-to-r from-mint-500 to-mint-400 text-white shadow-lg shadow-mint-600/40',
   inactive: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white',
   icon: {
     base: 'h-5 w-5 flex-shrink-0 transition-transform duration-200',

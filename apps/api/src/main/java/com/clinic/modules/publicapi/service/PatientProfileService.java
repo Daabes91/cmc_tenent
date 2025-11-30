@@ -56,7 +56,8 @@ public class PatientProfileService {
                     throw conflict("Another account already uses this email address in this clinic.");
                 });
 
-        patient.updateDetails(firstName, lastName, email, phone, request.dateOfBirth());
+        patient.updateDetails(firstName, lastName, email, phone, request.dateOfBirth(), patient.getNotes(),
+                patient.getDriveFolderUrl());
 
         // Update profile image URL if provided
         if (request.profileImageUrl() != null) {
@@ -85,6 +86,7 @@ public class PatientProfileService {
     }
 
     private PatientProfileResponse toResponse(PatientEntity patient) {
+        var globalPatient = patient.getGlobalPatient();
         return new PatientProfileResponse(
                 patient.getId(),
                 patient.getExternalId(),
@@ -93,7 +95,11 @@ public class PatientProfileService {
                 patient.getEmail(),
                 patient.getPhone(),
                 patient.getProfileImageUrl(),
-                patient.getDateOfBirth()
+                patient.getDateOfBirth(),
+                patient.getGoogleId(),
+                globalPatient != null ? globalPatient.getGoogleEmail() : null,
+                globalPatient != null ? globalPatient.getAuthProvider().name() : "LOCAL",
+                globalPatient != null && globalPatient.getPasswordHash() != null
         );
     }
 

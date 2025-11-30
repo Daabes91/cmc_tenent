@@ -154,6 +154,12 @@ public class AdminAuthController {
                     java.util.Collections.emptySet(),
                     java.util.Collections.emptySet(),
                     java.util.Collections.emptySet(),
+                    java.util.Collections.emptySet(),
+                    java.util.Collections.emptySet(),
+                    java.util.Collections.emptySet(),
+                    java.util.Collections.emptySet(),
+                    java.util.Collections.emptySet(),
+                    java.util.Collections.emptySet(),
                     java.util.Collections.emptySet()
             );
         }

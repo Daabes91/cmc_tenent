@@ -26,8 +26,8 @@ export const useAppointmentNotifications = () => {
     if (process.client && 'Notification' in window && Notification.permission === 'granted') {
       const notification = new Notification(title, {
         body,
-        icon: '/admin-favicon.ico',
-        badge: '/admin-favicon.ico',
+        icon: 'https://imagedelivery.net/K88oXEK4nwOFUDLZaSq1vg/6c79054b-5ecc-4a97-be03-441518f70200/public',
+        badge: 'https://imagedelivery.net/K88oXEK4nwOFUDLZaSq1vg/6c79054b-5ecc-4a97-be03-441518f70200/public',
         tag: `appointment-${appointmentId}`,
         requireInteraction: false,
         silent: !preferences.value.soundEnabled

@@ -1,0 +1,462 @@
+/**
+ * Mobile Responsiveness Utilities
+ * 
+ * Ensures compliance with Requirements 11.1-11.4:
+ * - 11.1: Display all sections on mobile (320px+)
+ * - 11.2: Readable font sizes (minimum 16px for body text)
+ * - 11.3: Touch-friendly CTA buttons (minimum 44px height)
+ * - 11.4: Image optimization with lazy loading
+ */
+
+/* ===================================
+   Font Size Utilities (Requirement 11.2)
+   =================================== */
+
+/* Ensure minimum 16px for body text on mobile */
+.text-mobile-body {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.text-mobile-small {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.text-mobile-large {
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+/* Override Tailwind's text-sm on mobile for body content */
+@media (max-width: 640px) {
+  .mobile-text-base {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Ensure headings are readable on mobile */
+  h1, .text-4xl, .text-5xl {
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+  }
+
+  h2, .text-3xl {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+  }
+
+  h3, .text-2xl {
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+  }
+}
+
+/* ===================================
+   Touch Target Utilities (Requirement 11.3)
+   =================================== */
+
+/* Minimum 44px height for touch targets */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.touch-target-lg {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* Ensure buttons meet touch target requirements */
+.btn-mobile {
+  min-height: 44px;
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+.btn-mobile-lg {
+  min-height: 48px;
+  padding: 14px 32px;
+  font-size: 16px;
+}
+
+/* Apply touch targets to all interactive elements on mobile */
+@media (max-width: 768px) {
+  button,
+  a[role="button"],
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  .btn {
+    min-height: 44px;
+  }
+
+  /* Ensure proper spacing between touch targets */
+  button + button,
+  a[role="button"] + a[role="button"] {
+    margin-top: 12px;
+  }
+}
+
+/* ===================================
+   Mobile Layout Utilities (Requirement 11.1)
+   =================================== */
+
+/* Container padding for mobile */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Ensure sections have proper spacing on mobile */
+.section-mobile {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+  .section-mobile {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-mobile {
+    padding-top: 8rem;
+    padding-bottom: 8rem;
+  }
+}
+
+/* Mobile-first grid utilities */
+.grid-mobile-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .grid-mobile-1 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-mobile-1 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ===================================
+   Image Optimization (Requirement 11.4)
+   =================================== */
+
+/* Ensure images are responsive */
+.img-responsive {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.img-cover {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.img-contain {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+}
+
+/* Lazy loading placeholder */
+.img-loading {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.06) 25%,
+    rgba(0, 0, 0, 0.15) 50%,
+    rgba(0, 0, 0, 0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ===================================
+   Mobile Navigation
+   =================================== */
+
+/* Ensure mobile menu is accessible */
+@media (max-width: 768px) {
+  .mobile-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    z-index: 50;
+    overflow-y: auto;
+  }
+
+  .mobile-menu-item {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+}
+
+/* ===================================
+   Form Elements
+   =================================== */
+
+/* Ensure form inputs are touch-friendly */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="search"],
+  textarea,
+  select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px 16px;
+  }
+
+  /* Prevent iOS zoom on focus */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    font-size: 16px;
+  }
+}
+
+/* ===================================
+   Accessibility Enhancements
+   =================================== */
+
+/* Focus visible for keyboard navigation */
+@media (max-width: 768px) {
+  *:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  /* Ensure focus is visible on touch devices */
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+/* ===================================
+   Performance Optimizations
+   =================================== */
+
+/* Reduce animations on mobile for performance */
+@media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
+  * {
+    animation-duration: 0.5s !important;
+    transition-duration: 0.3s !important;
+  }
+}
+
+/* Disable complex animations on low-end devices */
+@media (max-width: 768px) {
+  .animate-float,
+  .animate-pulse-glow,
+  .animate-wave-slow,
+  .animate-wave-medium,
+  .animate-wave-fast {
+    animation: none;
+  }
+}
+
+/* ===================================
+   Typography Enhancements
+   =================================== */
+
+/* Improve readability on mobile */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  /* Ensure proper text wrapping */
+  h1, h2, h3, h4, h5, h6 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+}
+
+/* ===================================
+   Spacing Utilities
+   =================================== */
+
+/* Consistent spacing on mobile */
+.space-mobile-sm {
+  margin-bottom: 1rem;
+}
+
+.space-mobile-md {
+  margin-bottom: 1.5rem;
+}
+
+.space-mobile-lg {
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .space-mobile-sm {
+    margin-bottom: 1.5rem;
+  }
+
+  .space-mobile-md {
+    margin-bottom: 2rem;
+  }
+
+  .space-mobile-lg {
+    margin-bottom: 3rem;
+  }
+}
+
+/* ===================================
+   Card Components
+   =================================== */
+
+/* Ensure cards are touch-friendly */
+@media (max-width: 768px) {
+  .card {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .card-clickable {
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .card-clickable:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
+  }
+}
+
+/* ===================================
+   Table Responsiveness
+   =================================== */
+
+/* Make tables scrollable on mobile */
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-responsive table {
+    min-width: 600px;
+  }
+
+  /* Add scroll indicator */
+  .table-responsive::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to left, rgba(255, 255, 255, 0.9), transparent);
+    pointer-events: none;
+  }
+}
+
+/* ===================================
+   Modal/Dialog on Mobile
+   =================================== */
+
+@media (max-width: 768px) {
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .modal-content {
+    padding: 1.5rem;
+  }
+
+  .modal-close {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ===================================
+   Safe Area Insets (iOS)
+   =================================== */
+
+/* Support for iPhone notch and home indicator */
+@supports (padding: max(0px)) {
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .safe-area-left {
+    padding-left: max(1rem, env(safe-area-inset-left));
+  }
+
+  .safe-area-right {
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}
+
+/* ===================================
+   Print Styles
+   =================================== */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+  }
+}

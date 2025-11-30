@@ -2,6 +2,7 @@ package com.clinic.modules.saas.controller;
 
 import com.clinic.modules.saas.dto.AnalyticsResponse;
 import com.clinic.modules.saas.dto.SystemMetricsResponse;
+import com.clinic.modules.saas.dto.TenantMetricsResponse;
 import com.clinic.modules.saas.service.MetricsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,17 @@ public class MetricsController {
     public ResponseEntity<SystemMetricsResponse> getSystemMetrics() {
         log.debug("GET /saas/metrics/system - fetching system metrics");
         SystemMetricsResponse metrics = metricsService.getSystemMetrics();
+        return ResponseEntity.ok(metrics);
+    }
+
+    /**
+     * Retrieve metrics for a specific tenant.
+     */
+    @GetMapping("/metrics/tenants/{tenantId}")
+    @PreAuthorize("hasRole('SAAS_MANAGER')")
+    public ResponseEntity<TenantMetricsResponse> getTenantMetrics(@PathVariable Long tenantId) {
+        log.debug("GET /saas/metrics/tenants/{} - fetching tenant metrics", tenantId);
+        TenantMetricsResponse metrics = metricsService.getTenantMetrics(tenantId);
         return ResponseEntity.ok(metrics);
     }
 

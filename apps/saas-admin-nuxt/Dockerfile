@@ -7,18 +7,19 @@ ARG NUXT_PUBLIC_APP_URL
 ARG NUXT_PUBLIC_ENABLE_ANALYTICS
 ARG NUXT_PUBLIC_ENABLE_AUDIT_LOGS
 
-FROM node:20-alpine AS deps
+FROM node:20-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
 
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 ARG NUXT_PUBLIC_API_BASE
 ARG NUXT_PUBLIC_SAAS_API_BASE
 ARG NUXT_PUBLIC_APP_NAME
 ARG NUXT_PUBLIC_APP_URL
 ARG NUXT_PUBLIC_ENABLE_ANALYTICS
 ARG NUXT_PUBLIC_ENABLE_AUDIT_LOGS
+RUN apt-get update && apt-get install -y --no-install-recommends python3 build-essential && rm -rf /var/lib/apt/lists/*
 ENV NUXT_PUBLIC_API_BASE=${NUXT_PUBLIC_API_BASE}
 ENV NUXT_PUBLIC_SAAS_API_BASE=${NUXT_PUBLIC_SAAS_API_BASE}
 ENV NUXT_PUBLIC_APP_NAME=${NUXT_PUBLIC_APP_NAME}
@@ -31,7 +32,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . ./
 RUN npm run build
 
-FROM node:20-alpine AS runner
+FROM node:20-bookworm-slim AS runner
 ARG NUXT_PUBLIC_API_BASE
 ARG NUXT_PUBLIC_SAAS_API_BASE
 ARG NUXT_PUBLIC_APP_NAME

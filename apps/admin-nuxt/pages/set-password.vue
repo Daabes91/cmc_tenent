@@ -1,9 +1,9 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 flex items-center justify-center p-4">
+  <div class="min-h-screen bg-gradient-to-br from-mint-50 via-mint-100 to-mint-200 flex items-center justify-center p-4">
     <div class="w-full max-w-md">
       <!-- Logo/Header -->
       <div class="text-center mb-8">
-        <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-purple-600 text-white shadow-lg mb-4">
+        <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-mint-600 to-mint-400 text-white shadow-lg mb-4">
           <UIcon name="i-lucide-key" class="h-8 w-8" />
         </div>
         <h1 class="text-3xl font-bold text-slate-900">Set Your Password</h1>
@@ -21,7 +21,7 @@
           <UButton
             class="mt-6"
             size="lg"
-            color="violet"
+            color="primary"
             @click="navigateTo('/login')"
           >
             Go to Login
@@ -114,7 +114,7 @@
           <UButton
             type="submit"
             size="lg"
-            color="violet"
+            color="primary"
             block
             :loading="loading"
             :disabled="!isFormValid"
