@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "NODE_OPTIONS=--max-old-space-size=4096 nuxt build",
+    "start": "NODE_ENV=production node .output/server/index.mjs",
     "preview": "nuxt preview",
     "test": "vitest --run",
     "test:watch": "vitest"
