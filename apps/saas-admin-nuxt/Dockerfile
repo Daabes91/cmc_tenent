@@ -10,7 +10,8 @@ ARG NUXT_PUBLIC_ENABLE_AUDIT_LOGS
 FROM node:20-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci
+# Use npm install to tolerate missing or regenerated lockfiles in CI/build.
+RUN npm install
 
 FROM node:20-bookworm-slim AS builder
 ARG NUXT_PUBLIC_API_BASE
