@@ -1,18 +1,23 @@
 import { Pool, QueryResult } from 'pg'
 
 const connectionString = process.env.DATABASE_URL
+let pool: Pool | null = null
 
-if (!connectionString) {
-  throw new Error('DATABASE_URL environment variable is required for database access')
+function getPool(): Pool {
+  if (!connectionString) {
+    throw new Error('DATABASE_URL environment variable is required for database access')
+  }
+
+  if (!pool) {
+    pool = new Pool({ connectionString })
+  }
+
+  return pool
 }
-
-const pool = new Pool({
-  connectionString,
-})
 
 export async function dbQuery<T>(
   text: string,
   params: Array<string | number | null> = []
 ): Promise<QueryResult<T>> {
-  return pool.query<T>(text, params)
+  return getPool().query<T>(text, params)
 }
