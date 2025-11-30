@@ -9,6 +9,10 @@ jobs:
   deploy_web_next:
     name: Deploy Public Web (web-next)
     runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_WEB_PROJECT_ID: ${{ secrets.VERCEL_WEB_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,17 +23,28 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build web
         run: pnpm --filter web-next build
+      - name: Verify Vercel credentials
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_WEB_PROJECT_ID" ]; then
+            echo "Missing Vercel secrets (VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_WEB_PROJECT_ID)."
+            echo "Please add them in repository settings to allow deployment."
+            exit 1
+          fi
       - name: Deploy to Vercel
         run: |
           pnpm dlx vercel deploy --prod \
             --cwd apps/web-next \
-            --token ${{ secrets.VERCEL_TOKEN }} \
-            --scope ${{ secrets.VERCEL_ORG_ID }} \
-            --project ${{ secrets.VERCEL_WEB_PROJECT_ID }}
+            --token "$VERCEL_TOKEN" \
+            --scope "$VERCEL_ORG_ID" \
+            --project "$VERCEL_WEB_PROJECT_ID"
 
   deploy_admin_nuxt:
     name: Deploy Admin App (admin-nuxt)
     runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_ADMIN_PROJECT_ID: ${{ secrets.VERCEL_ADMIN_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -40,13 +55,20 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build admin
         run: pnpm --filter admin-nuxt build
+      - name: Verify Vercel credentials
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_ADMIN_PROJECT_ID" ]; then
+            echo "Missing Vercel secrets (VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_ADMIN_PROJECT_ID)."
+            echo "Please add them in repository settings to allow deployment."
+            exit 1
+          fi
       - name: Deploy to Vercel
         run: |
           pnpm dlx vercel deploy --prod \
             --cwd apps/admin-nuxt \
-            --token ${{ secrets.VERCEL_TOKEN }} \
-            --scope ${{ secrets.VERCEL_ORG_ID }} \
-            --project ${{ secrets.VERCEL_ADMIN_PROJECT_ID }}
+            --token "$VERCEL_TOKEN" \
+            --scope "$VERCEL_ORG_ID" \
+            --project "$VERCEL_ADMIN_PROJECT_ID"
 
   deploy_api:
     name: Deploy API
