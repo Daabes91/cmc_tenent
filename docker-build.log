@@ -1,0 +1,501 @@
+#1 [internal] load local bake definitions
+#1 reading from stdin 3.56kB done
+#1 DONE 0.0s
+
+#2 [saas-landing internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.29kB done
+#2 DONE 0.0s
+
+#3 [web internal] load build definition from Dockerfile
+#3 transferring dockerfile: 1.65kB done
+#3 DONE 0.0s
+
+#4 [admin internal] load build definition from Dockerfile
+#4 transferring dockerfile: 906B done
+#4 DONE 0.0s
+
+#5 [saas-admin internal] load build definition from Dockerfile
+#5 transferring dockerfile: 1.69kB 0.0s done
+#5 DONE 0.0s
+
+#6 [api internal] load build definition from Dockerfile
+#6 transferring dockerfile: 520B done
+#6 DONE 0.0s
+
+#7 [saas-admin] resolve image config for docker-image://docker.io/docker/dockerfile:1
+#7 ...
+
+#8 [api internal] load metadata for docker.io/library/eclipse-temurin:21-jdk-jammy
+#8 DONE 0.7s
+
+#7 [saas-admin] resolve image config for docker-image://docker.io/docker/dockerfile:1
+#7 DONE 0.7s
+
+#9 [api internal] load metadata for docker.io/library/eclipse-temurin:21-jre-jammy
+#9 DONE 0.7s
+
+#10 [api internal] load .dockerignore
+#10 transferring context: 2B done
+#10 DONE 0.0s
+
+#11 [saas-landing internal] load metadata for docker.io/library/node:20-alpine
+#11 DONE 0.7s
+
+#12 [web] docker-image://docker.io/docker/dockerfile:1@sha256:b6afd42430b15f2d2a4c5a02b919e98a525b785b1aaff16747d2f623364e39b6
+#12 resolve docker.io/docker/dockerfile:1@sha256:b6afd42430b15f2d2a4c5a02b919e98a525b785b1aaff16747d2f623364e39b6 0.0s done
+#12 CACHED
+
+#13 [saas-landing internal] load .dockerignore
+#13 transferring context: 2B done
+#13 DONE 0.0s
+
+#14 [api builder 1/6] FROM docker.io/library/eclipse-temurin:21-jdk-jammy@sha256:81ad1240d91eeafe1ab4154e9ed2310b67cb966caad1d235232ae10abcb1fae2
+#14 resolve docker.io/library/eclipse-temurin:21-jdk-jammy@sha256:81ad1240d91eeafe1ab4154e9ed2310b67cb966caad1d235232ae10abcb1fae2 0.0s done
+#14 DONE 0.0s
+
+#15 [api stage-1 1/4] FROM docker.io/library/eclipse-temurin:21-jre-jammy@sha256:2843f155a9fe5aab6a73a71a9f65c38143e8e929366a1a7787f07c2a89c26887
+#15 resolve docker.io/library/eclipse-temurin:21-jre-jammy@sha256:2843f155a9fe5aab6a73a71a9f65c38143e8e929366a1a7787f07c2a89c26887 0.0s done
+#15 DONE 0.0s
+
+#16 [saas-landing builder 1/7] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+#16 resolve docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435 0.0s done
+#16 DONE 0.0s
+
+#17 [api internal] load build context
+#17 transferring context: 41.11kB 0.1s done
+#17 DONE 0.1s
+
+#18 [saas-landing internal] load build context
+#18 transferring context: 49.84kB 0.1s done
+#18 DONE 0.1s
+
+#19 [api builder 2/6] WORKDIR /workspace
+#19 CACHED
+
+#20 [api builder 3/6] COPY build.gradle.kts settings.gradle.kts gradlew ./
+#20 CACHED
+
+#21 [api builder 4/6] COPY gradle ./gradle
+#21 CACHED
+
+#22 [api builder 5/6] COPY src ./src
+#22 CACHED
+
+#23 [saas-landing builder 3/7] RUN corepack enable && corepack prepare pnpm@8.15.0 --activate
+#23 CACHED
+
+#24 [saas-landing builder 2/7] WORKDIR /app
+#24 CACHED
+
+#25 [saas-landing builder 4/7] COPY package.json ./
+#25 CACHED
+
+#11 [web internal] load metadata for docker.io/library/node:20-alpine
+#11 DONE 0.9s
+
+#16 [web builder 1/7] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+#16 resolve docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435 0.0s done
+#16 DONE 0.0s
+
+#26 [saas-admin internal] load .dockerignore
+#26 transferring context: 163B done
+#26 DONE 0.0s
+
+#27 [admin internal] load .dockerignore
+#27 transferring context: 344B 0.0s done
+#27 DONE 0.0s
+
+#28 [saas-landing builder 5/7] RUN pnpm install --no-frozen-lockfile
+#28 ...
+
+#16 [admin builder 1/7] FROM docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435
+#16 resolve docker.io/library/node:20-alpine@sha256:6178e78b972f79c335df281f4b7674a2d85071aae2af020ffa39f0a770265435 0.0s done
+#16 DONE 0.0s
+
+#29 [saas-admin internal] load build context
+#29 transferring context: 5.69kB 0.0s done
+#29 DONE 0.0s
+
+#30 [saas-admin deps 3/4] COPY package.json package-lock.json* ./
+#30 CACHED
+
+#31 [saas-admin deps 4/4] RUN npm ci
+#31 CACHED
+
+#32 [saas-admin builder 3/5] COPY --from=deps /app/node_modules ./node_modules
+#32 CACHED
+
+#24 [saas-admin builder 2/7] WORKDIR /app
+#24 CACHED
+
+#33 [saas-admin builder 4/5] COPY . ./
+#33 CACHED
+
+#34 [web internal] load build context
+#34 transferring context: 185.34kB 0.3s done
+#34 DONE 0.3s
+
+#35 [web deps 3/5] WORKDIR /app
+#35 CACHED
+
+#36 [web builder 2/7] RUN apk add --no-cache tar xz gzip
+#36 CACHED
+
+#37 [web deps 5/5] RUN corepack enable && corepack prepare pnpm@10.22.0 --activate && pnpm install --no-frozen-lockfile
+#37 CACHED
+
+#38 [web deps 4/5] COPY package.json .
+#38 CACHED
+
+#39 [web builder 3/7] RUN corepack enable && corepack prepare pnpm@10.22.0 --activate
+#39 CACHED
+
+#40 [web builder 4/7] WORKDIR /app
+#40 CACHED
+
+#41 [web deps 2/5] RUN apk add --no-cache tar xz gzip
+#41 CACHED
+
+#42 [web builder 5/7] COPY --from=deps /app/node_modules ./node_modules
+#42 CACHED
+
+#43 [admin deps 4/4] RUN corepack enable && pnpm install
+#43 CACHED
+
+#44 [admin deps 3/4] COPY package.json .
+#44 CACHED
+
+#24 [admin builder 2/7] WORKDIR /app
+#24 CACHED
+
+#45 [admin builder 3/5] COPY --from=deps /app/node_modules ./node_modules
+#45 CACHED
+
+#46 [admin builder 4/5] COPY . .
+#46 DONE 2.4s
+
+#47 [web builder 6/7] COPY . .
+#47 DONE 2.4s
+
+#48 [web builder 7/7] RUN pnpm install --no-frozen-lockfile && npx prisma generate && pnpm run build
+#48 0.533 ! Corepack is about to download https://registry.npmjs.org/pnpm/-/pnpm-8.15.0.tgz
+#48 4.366 Scope: all 6 workspace projects
+#48 4.545 Lockfile is up to date, resolution step is skipped
+#48 4.824 Progress: resolved 1, reused 0, downloaded 0, added 0
+#48 ...
+
+#49 [api builder 6/6] RUN ./gradlew bootJar
+#49 0.692 Downloading https://services.gradle.org/distributions/gradle-8.6-bin.zip
+#49 2.472 ............10%.............20%............30%.............40%.............50%............60%.............70%.............80%............90%.............100%
+#49 ...
+
+#48 [web builder 7/7] RUN pnpm install --no-frozen-lockfile && npx prisma generate && pnpm run build
+#48 5.422 Packages: +1207 -18
+#48 5.422 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+#48 5.833 Progress: resolved 1207, reused 0, downloaded 0, added 0
+#48 6.908 Progress: resolved 1207, reused 0, downloaded 14, added 10
+#48 ...
+
+#50 [saas-admin builder 5/5] RUN npm run build
+#50 0.800 
+#50 0.800 > saas-admin-nuxt@1.0.0 build
+#50 0.800 > nuxt build
+#50 0.800 
+#50 1.523 [nuxi] Nuxt 3.12.0 (with Nitro 2.12.9, Vite 6.4.1 and Vue 3.5.24)
+#50 3.339 [nuxt:tailwindcss] ℹ Using default Tailwind CSS file
+#50 5.188 
+#50 5.188  WARN  Locale en-US uses deprecated iso property, this will be replaced with language in v9
+#50 5.188 
+#50 5.188 
+#50 5.188  WARN  Locale ar uses deprecated iso property, this will be replaced with language in v9
+#50 5.188 
+#50 6.968 ℹ Nuxt Icon server bundle mode is set to local
+#50 8.145 ✔ Nuxt Icon discovered local-installed 2 collections: heroicons, lucide
+#50 8.610 [nuxi] ℹ Building for Nitro preset: node-server
+#50 ...
+
+#49 [api builder 6/6] RUN ./gradlew bootJar
+#49 10.33 
+#49 10.33 Welcome to Gradle 8.6!
+#49 10.33 
+#49 10.33 Here are the highlights of this release:
+#49 10.33  - Configurable encryption key for configuration cache
+#49 10.33  - Build init improvements
+#49 10.33  - Build authoring improvements
+#49 10.33 
+#49 10.33 For more details see https://docs.gradle.org/8.6/release-notes.html
+#49 10.33 
+#49 10.73 Starting a Gradle Daemon (subsequent builds will be faster)
+#49 ...
+
+#28 [saas-landing builder 5/7] RUN pnpm install --no-frozen-lockfile
+#28 1.429  WARN  deprecated critters@0.0.25: Ownership of Critters has moved to the Nuxt team, who will be maintaining the project going forward. If you'd like to keep using Critters, please switch to the actively-maintained fork at https://github.com/danielroe/beasties
+#28 1.431 Progress: resolved 1, reused 0, downloaded 0, added 0
+#28 1.971 
+#28 1.971    ╭───────────────────────────────────────────────────────────────────╮
+#28 1.971    │                                                                   │
+#28 1.971    │                Update available! 8.15.0 → 10.22.0.                │
+#28 1.971    │   Changelog: https://github.com/pnpm/pnpm/releases/tag/v10.22.0   │
+#28 1.971    │     Run "corepack prepare pnpm@10.22.0 --activate" to update.     │
+#28 1.971    │                                                                   │
+#28 1.971    │      Follow @pnpmjs for updates: https://twitter.com/pnpmjs       │
+#28 1.971    │                                                                   │
+#28 1.971    ╰───────────────────────────────────────────────────────────────────╯
+#28 1.971 
+#28 2.438 Progress: resolved 31, reused 0, downloaded 18, added 0
+#28 3.451 Progress: resolved 56, reused 0, downloaded 44, added 0
+#28 4.475 Progress: resolved 58, reused 0, downloaded 53, added 0
+#28 5.465 Progress: resolved 58, reused 0, downloaded 56, added 0
+#28 7.008 Progress: resolved 59, reused 0, downloaded 58, added 0
+#28 8.008 Progress: resolved 108, reused 0, downloaded 99, added 0
+#28 9.008 Progress: resolved 133, reused 0, downloaded 124, added 0
+#28 10.19 Progress: resolved 150, reused 0, downloaded 133, added 0
+#28 11.29 Progress: resolved 173, reused 0, downloaded 150, added 0
+#28 ...
+
+#48 [web builder 7/7] RUN pnpm install --no-frozen-lockfile && npx prisma generate && pnpm run build
+#48 7.764 
+#48 7.764    ╭───────────────────────────────────────────────────────────────────╮
+#48 7.764    │                                                                   │
+#48 7.764    │                Update available! 8.15.0 → 10.22.0.                │
+#48 7.764    │   Changelog: https://github.com/pnpm/pnpm/releases/tag/v10.22.0   │
+#48 7.764    │     Run "corepack prepare pnpm@10.22.0 --activate" to update.     │
+#48 7.764    │                                                                   │
+#48 7.764    │      Follow @pnpmjs for updates: https://twitter.com/pnpmjs       │
+#48 7.764    │                                                                   │
+#48 7.764    ╰───────────────────────────────────────────────────────────────────╯
+#48 7.764 
+#48 7.929 Progress: resolved 1207, reused 0, downloaded 88, added 86
+#48 8.976 Progress: resolved 1207, reused 0, downloaded 146, added 145
+#48 9.972 Progress: resolved 1207, reused 0, downloaded 270, added 270
+#48 ...
+
+#51 [admin builder 5/5] RUN corepack enable && pnpm install --no-frozen-lockfile && pnpm run build
+#51 0.792 ! Corepack is about to download https://registry.npmjs.org/pnpm/-/pnpm-8.15.0.tgz
+#51 4.537 Scope: all 6 workspace projects
+#51 4.761 Lockfile is up to date, resolution step is skipped
+#51 5.051 Progress: resolved 1, reused 0, downloaded 0, added 0
+#51 5.729 Packages: +1207 -18
+#51 5.729 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+#51 6.057 Progress: resolved 1207, reused 0, downloaded 0, added 0
+#51 7.061 Progress: resolved 1207, reused 0, downloaded 26, added 23
+#51 7.797 
+#51 7.797    ╭───────────────────────────────────────────────────────────────────╮
+#51 7.797    │                                                                   │
+#51 7.797    │                Update available! 8.15.0 → 10.22.0.                │
+#51 7.797    │   Changelog: https://github.com/pnpm/pnpm/releases/tag/v10.22.0   │
+#51 7.797    │     Run "corepack prepare pnpm@10.22.0 --activate" to update.     │
+#51 7.797    │                                                                   │
+#51 7.797    │      Follow @pnpmjs for updates: https://twitter.com/pnpmjs       │
+#51 7.797    │                                                                   │
+#51 7.797    ╰───────────────────────────────────────────────────────────────────╯
+#51 7.797 
+#51 8.224 Progress: resolved 1207, reused 0, downloaded 86, added 83
+#51 9.228 Progress: resolved 1207, reused 0, downloaded 179, added 178
+#51 ...
+
+#50 [saas-admin builder 5/5] RUN npm run build
+#50 12.19 ℹ Building client...
+#50 12.21 ℹ vite v5.4.21 building for production...
+#50 12.26 ℹ transforming...
+#50 ...
+
+#28 [saas-landing builder 5/7] RUN pnpm install --no-frozen-lockfile
+#28 12.29 Progress: resolved 197, reused 0, downloaded 171, added 0
+#28 13.30 Progress: resolved 245, reused 0, downloaded 206, added 0
+#28 14.30 Progress: resolved 285, reused 0, downloaded 242, added 0
+#28 15.12 Packages: +294
+#28 15.12 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#28 15.31 Progress: resolved 317, reused 0, downloaded 295, added 8
+#28 16.31 Progress: resolved 317, reused 0, downloaded 295, added 293
+#28 16.41 Progress: resolved 317, reused 0, downloaded 295, added 294, done
+#28 16.62 .../sharp@0.33.5/node_modules/sharp install$ node install/check
+#28 16.76 .../sharp@0.33.5/node_modules/sharp install: Done
+#28 18.06 
+#28 18.06 dependencies:
+#28 18.06 + @emotion/is-prop-valid 1.4.0
+#28 18.06 + @hookform/resolvers 3.10.0 (5.2.2 is available)
+#28 18.06 + @radix-ui/react-accordion 1.2.12
+#28 18.06 + @radix-ui/react-alert-dialog 1.1.15
+#28 18.06 + @radix-ui/react-aspect-ratio 1.1.8
+#28 18.06 + @radix-ui/react-avatar 1.1.11
+#28 18.06 + @radix-ui/react-checkbox 1.3.3
+#28 18.06 + @radix-ui/react-collapsible 1.1.12
+#28 18.06 + @radix-ui/react-context-menu 2.2.16
+#28 18.06 + @radix-ui/react-dialog 1.1.15
+#28 18.06 + @radix-ui/react-dropdown-menu 2.1.16
+#28 18.06 + @radix-ui/react-hover-card 1.1.15
+#28 18.06 + @radix-ui/react-label 2.1.8
+#28 18.06 + @radix-ui/react-menubar 1.1.16
+#28 18.06 + @radix-ui/react-navigation-menu 1.2.14
+#28 18.06 + @radix-ui/react-popover 1.1.15
+#28 18.06 + @radix-ui/react-progress 1.1.8
+#28 18.06 + @radix-ui/react-radio-group 1.3.8
+#28 18.06 + @radix-ui/react-scroll-area 1.2.10
+#28 18.06 + @radix-ui/react-select 2.2.6
+#28 18.06 + @radix-ui/react-separator 1.1.8
+#28 18.06 + @radix-ui/react-slider 1.3.6
+#28 18.06 + @radix-ui/react-slot 1.2.4
+#28 18.06 + @radix-ui/react-switch 1.2.6
+#28 18.06 + @radix-ui/react-tabs 1.1.13
+#28 18.06 + @radix-ui/react-toast 1.2.15
+#28 18.06 + @radix-ui/react-toggle 1.1.10
+#28 18.06 + @radix-ui/react-toggle-group 1.1.11
+#28 18.06 + @radix-ui/react-tooltip 1.2.8
+#28 18.06 + autoprefixer 10.4.22
+#28 18.06 + class-variance-authority 0.7.1
+#28 18.06 + clsx 2.1.1
+#28 18.06 + cmdk 1.0.4 (1.1.1 is available)
+#28 18.06 + date-fns 4.1.0
+#28 18.06 + embla-carousel-react 8.5.1 (8.6.0 is available)
+#28 18.06 + framer-motion 12.23.24
+#28 18.06 + input-otp 1.4.1 (1.4.2 is available)
+#28 18.06 + lucide-react 0.454.0 (0.554.0 is available)
+#28 18.06 + next 15.2.4 (16.0.3 is available)
+#28 18.06 + next-themes 0.4.6
+#28 18.06 + react 19.2.0
+#28 18.06 + react-day-picker 8.10.1 (9.11.1 is available)
+#28 18.06 + react-dom 19.2.0
+#28 18.06 + react-hook-form 7.66.1
+#28 18.06 + react-resizable-panels 2.1.9 (3.0.6 is available)
+#28 18.06 + recharts 2.15.0 (3.4.1 is available)
+#28 18.06 + sonner 1.7.4 (2.0.7 is available)
+#28 18.06 + tailwind-merge 2.6.0 (3.4.0 is available)
+#28 18.06 + tailwindcss-animate 1.0.7
+#28 18.06 + vaul 0.9.9 (1.1.2 is available)
+#28 18.06 + zod 3.25.76 (4.1.12 is available)
+#28 18.06 
+#28 18.06 devDependencies:
+#28 18.06 + @types/node 22.19.1 (24.10.1 is available)
+#28 18.06 + @types/react 19.2.6
+#28 18.06 + @types/react-dom 19.2.3
+#28 18.06 + critters 0.0.25 deprecated
+#28 18.06 + loader-utils 3.3.1
+#28 18.06 + postcss 8.5.6
+#28 18.06 + tailwindcss 3.4.18 (4.1.17 is available)
+#28 18.06 + typescript 5.9.3
+#28 18.06 
+#28 18.06  WARN  Issues with peer dependencies found
+#28 18.06 .
+#28 18.06 ├─┬ react-day-picker 8.10.1
+#28 18.06 │ ├── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.0
+#28 18.06 │ └── ✕ unmet peer date-fns@"^2.28.0 || ^3.0.0": found 4.1.0
+#28 18.06 └─┬ vaul 0.9.9
+#28 18.06   ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.0
+#28 18.06   └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.0
+#28 18.06 
+#28 18.06 Done in 17.6s
+#28 DONE 19.7s
+
+#51 [admin builder 5/5] RUN corepack enable && pnpm install --no-frozen-lockfile && pnpm run build
+#51 10.23 Progress: resolved 1207, reused 0, downloaded 301, added 299
+#51 11.25 Progress: resolved 1207, reused 0, downloaded 402, added 401
+#51 12.25 Progress: resolved 1207, reused 0, downloaded 505, added 504
+#51 13.25 Progress: resolved 1207, reused 0, downloaded 585, added 584
+#51 14.26 Progress: resolved 1207, reused 0, downloaded 727, added 727
+#51 15.26 Progress: resolved 1207, reused 0, downloaded 820, added 820
+#51 16.27 Progress: resolved 1207, reused 0, downloaded 856, added 854
+#51 ...
+
+#52 [saas-landing builder 6/7] COPY . .
+#52 DONE 3.0s
+
+#51 [admin builder 5/5] RUN corepack enable && pnpm install --no-frozen-lockfile && pnpm run build
+#51 17.27 Progress: resolved 1207, reused 0, downloaded 880, added 879
+#51 18.29 Progress: resolved 1207, reused 0, downloaded 904, added 903
+#51 19.29 Progress: resolved 1207, reused 0, downloaded 918, added 918
+#51 20.32 Progress: resolved 1207, reused 0, downloaded 934, added 933
+#51 ...
+
+#48 [web builder 7/7] RUN pnpm install --no-frozen-lockfile && npx prisma generate && pnpm run build
+#48 10.98 Progress: resolved 1207, reused 0, downloaded 362, added 360
+#48 11.98 Progress: resolved 1207, reused 0, downloaded 463, added 462
+#48 13.00 Progress: resolved 1207, reused 0, downloaded 552, added 548
+#48 14.00 Progress: resolved 1207, reused 0, downloaded 682, added 681
+#48 15.00 Progress: resolved 1207, reused 0, downloaded 777, added 776
+#48 16.00 Progress: resolved 1207, reused 0, downloaded 842, added 842
+#48 17.02 Progress: resolved 1207, reused 0, downloaded 862, added 862
+#48 18.25 Progress: resolved 1207, reused 0, downloaded 879, added 873
+#48 19.25 Progress: resolved 1207, reused 0, downloaded 895, added 895
+#48 20.30 Progress: resolved 1207, reused 0, downloaded 905, added 902
+#48 ...
+
+#51 [admin builder 5/5] RUN corepack enable && pnpm install --no-frozen-lockfile && pnpm run build
+#51 21.44 Progress: resolved 1207, reused 0, downloaded 940, added 939
+#51 22.52 Progress: resolved 1207, reused 0, downloaded 947, added 947
+#51 ...
+
+#53 [saas-landing builder 7/7] RUN pnpm build
+#53 1.839 
+#53 1.839 > saas-landing@0.1.0 build /app
+#53 1.839 > next build
+#53 1.839 
+#53 1.989 node:internal/modules/cjs/loader:1210
+#53 1.989   throw err;
+#53 1.989   ^
+#53 1.989 
+#53 1.989 Error: Cannot find module '/app/node_modules/next/dist/bin/next'
+#53 1.989     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+#53 1.989     at Module._load (node:internal/modules/cjs/loader:1038:27)
+#53 1.989     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+#53 1.989     at node:internal/main/run_main_module:28:49 {
+#53 1.989   code: 'MODULE_NOT_FOUND',
+#53 1.989   requireStack: []
+#53 1.989 }
+#53 1.989 
+#53 1.989 Node.js v20.19.5
+#53 2.003  ELIFECYCLE  Command failed with exit code 1.
+#53 ERROR: process "/bin/sh -c pnpm build" did not complete successfully: exit code: 1
+
+#48 [web builder 7/7] RUN pnpm install --no-frozen-lockfile && npx prisma generate && pnpm run build
+#48 21.45 Progress: resolved 1207, reused 0, downloaded 914, added 913
+#48 22.61 Progress: resolved 1207, reused 0, downloaded 919, added 918
+#48 ...
+
+#49 [api builder 6/6] RUN ./gradlew bootJar
+#49 CANCELED
+
+#50 [saas-admin builder 5/5] RUN npm run build
+#50 CANCELED
+
+#48 [web builder 7/7] RUN pnpm install --no-frozen-lockfile && npx prisma generate && pnpm run build
+#48 CANCELED
+
+#51 [admin builder 5/5] RUN corepack enable && pnpm install --no-frozen-lockfile && pnpm run build
+#51 23.60 Progress: resolved 1207, reused 0, downloaded 961, added 959
+#51 CANCELED
+------
+ > [saas-landing builder 7/7] RUN pnpm build:
+1.989     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+1.989     at Module._load (node:internal/modules/cjs/loader:1038:27)
+1.989     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+1.989     at node:internal/main/run_main_module:28:49 {
+1.989   code: 'MODULE_NOT_FOUND',
+1.989   requireStack: []
+1.989 }
+1.989 
+1.989 Node.js v20.19.5
+2.003  ELIFECYCLE  Command failed with exit code 1.
+------
+Dockerfile:29
+
+--------------------
+
+  27 |     
+
+  28 |     # Build the application
+
+  29 | >>> RUN pnpm build
+
+  30 |     
+
+  31 |     # Production stage
+
+--------------------
+
+target saas-landing: failed to solve: process "/bin/sh -c pnpm build" did not complete successfully: exit code: 1
+
+
+
+View build details: docker-desktop://dashboard/build/default/default/51v9wvik2tx5odsp0kamquwa8
+
