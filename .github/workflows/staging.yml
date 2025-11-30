@@ -18,6 +18,8 @@ jobs:
         with:
           node-version: 20
       - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web-next build
       - name: Verify Vercel credentials
@@ -48,6 +50,8 @@ jobs:
         with:
           node-version: 20
       - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter admin-nuxt build
       - name: Verify Vercel credentials
