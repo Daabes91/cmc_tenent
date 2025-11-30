@@ -28,6 +28,6 @@ ENV NUXT_PUBLIC_API_BASE=${NUXT_PUBLIC_API_BASE}
 ENV NUXT_PRIVATE_API_BASE=${NUXT_PRIVATE_API_BASE}
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=builder /app/apps/admin-nuxt/.output ./.output
+COPY --from=builder /app/.output ./.output
 EXPOSE 3000
 CMD ["node", ".output/server/index.mjs"]
