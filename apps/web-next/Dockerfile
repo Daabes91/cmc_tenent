@@ -41,10 +41,10 @@ ENV DATABASE_URL=${DATABASE_URL}
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=builder /app/apps/web-next/package.json ./package.json
+COPY --from=builder /app/package.json ./package.json
 RUN npm install --omit=dev
-COPY --from=builder /app/apps/web-next/.next ./.next
-COPY --from=builder /app/apps/web-next/public ./public
-COPY --from=builder /app/apps/web-next/next.config.ts ./next.config.ts
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.ts ./next.config.ts
 EXPOSE 3001
 CMD ["npm", "run", "start"]
