@@ -25,6 +25,10 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 9
+      - name: Verify pnpm install
+        run: |
+          npm install -g pnpm@9
+          pnpm --version
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -41,6 +45,10 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 9
+      - name: Verify pnpm install
+        run: |
+          npm install -g pnpm@9
+          pnpm --version
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web-next lint
 
@@ -57,6 +65,10 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 9
+      - name: Verify pnpm install
+        run: |
+          npm install -g pnpm@9
+          pnpm --version
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter admin-nuxt build
 
