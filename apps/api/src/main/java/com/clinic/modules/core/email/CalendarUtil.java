@@ -50,7 +50,7 @@ public class CalendarUtil {
         StringBuilder ics = new StringBuilder();
         ics.append("BEGIN:VCALENDAR\r\n");
         ics.append("VERSION:2.0\r\n");
-        ics.append("PRODID:-//Qadri's Clinic//Appointment System//EN\r\n");
+        ics.append("PRODID:-//Cliniqax's Clinic//Appointment System//EN\r\n");
         ics.append("CALSCALE:GREGORIAN\r\n");
         ics.append("METHOD:REQUEST\r\n");
         ics.append("BEGIN:VEVENT\r\n");

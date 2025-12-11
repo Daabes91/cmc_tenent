@@ -23,23 +23,24 @@ export function BlogCard({ post, searchTerm }: BlogCardProps) {
   });
 
   return (
-    <article className="group bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-[0_30px_55px_rgba(24,226,153,0.15)]">
-      {/* Featured Image */}
-      <Link href={`/blog/${post.slug}`} className="block relative h-56 overflow-hidden">
-        <Image
-          src={post.featuredImage}
-          alt={post.title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-60"></div>
-        
-        {/* Category Badge */}
-        <div className="absolute top-4 left-4 bg-primary text-white text-xs font-medium px-3 py-1 rounded-full">
-          {post.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+    <Link href={`/blog/${post.slug}`} className="group">
+      <article className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-[0_30px_55px_rgba(24,226,153,0.15)]">
+        {/* Featured Image */}
+        <div className="block relative h-56 overflow-hidden">
+          <Image
+            src={post.featuredImage}
+            alt={post.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-60"></div>
+          
+          {/* Category Badge */}
+          <div className="absolute top-4 left-4 bg-primary text-white text-xs font-medium px-3 py-1 rounded-full">
+            {post.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+          </div>
         </div>
-      </Link>
 
       {/* Content */}
       <div className="p-6">
@@ -60,13 +61,11 @@ export function BlogCard({ post, searchTerm }: BlogCardProps) {
 
         {/* Title */}
         <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
-          <Link href={`/blog/${post.slug}`}>
-            {searchTerm ? (
-              <span dangerouslySetInnerHTML={{ __html: highlightSearchTerm(post.title, searchTerm) }} />
-            ) : (
-              post.title
-            )}
-          </Link>
+          {searchTerm ? (
+            <span dangerouslySetInnerHTML={{ __html: highlightSearchTerm(post.title, searchTerm) }} />
+          ) : (
+            post.title
+          )}
         </h3>
 
         {/* Excerpt */}
@@ -119,6 +118,7 @@ export function BlogCard({ post, searchTerm }: BlogCardProps) {
           </div>
         )}
       </div>
-    </article>
+      </article>
+    </Link>
   );
 }

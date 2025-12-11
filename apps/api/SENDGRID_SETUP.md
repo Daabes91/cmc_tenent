@@ -26,7 +26,7 @@ Before you can send emails, you need to verify your sender identity:
 1. Go to **Settings** → **Sender Authentication**
 2. Click **Verify a Single Sender**
 3. Fill in your details:
-   - From Name: `Qadri's Clinic` (or your clinic name)
+   - From Name: `Cliniqax's Clinic` (or your clinic name)
    - From Email Address: `noreply@yourdomain.com`
    - Reply To: `info@yourdomain.com`
 4. Check your email and click the verification link
@@ -44,7 +44,7 @@ Add these variables to your `.env.local` file in `apps/api/`:
 # SendGrid Configuration
 SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 EMAIL_FROM=noreply@yourdomain.com
-EMAIL_FROM_NAME=Qadri's Clinic
+EMAIL_FROM_NAME=Cliniqax's Clinic
 EMAIL_ENABLED=true
 ```
 
@@ -89,7 +89,7 @@ security:
   email:
     sendgrid-api-key: ${SENDGRID_API_KEY:}
     from-email: ${EMAIL_FROM:noreply@clinic.com}
-    from-name: ${EMAIL_FROM_NAME:Qadri's Clinic}
+    from-name: ${EMAIL_FROM_NAME:Cliniqax's Clinic}
     enabled: ${EMAIL_ENABLED:false}
 ```
 

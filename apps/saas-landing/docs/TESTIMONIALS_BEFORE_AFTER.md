@@ -21,8 +21,8 @@ This document shows the transformation from generic SaaS testimonials to healthc
 Quote: "Rolling out CMC Platform gave us a bilingual marketing site, 
         automated reminders, and PayPal checkout in the same week. 
         Our no-show rate dropped 28% immediately."
-Author: Dr. Layla Qadri
-Role: Medical Director, Qadri Dental Group
+Author: Dr. Layla Cliniqax
+Role: Medical Director, Cliniqax Dental Group
 Avatar: Unsplash stock photo
 ```
 
@@ -144,11 +144,11 @@ Avatar: /images/testimonials/dr-aisha-alrashid.jpg
 Quote: "Rolling out this platform gave us a bilingual marketing site, 
         automated reminders, and PayPal checkout in the same week. 
         Our no-show rate dropped 28% immediately."
-Name: Dr. Layla Qadri
+Name: Dr. Layla Cliniqax
 Role: Medical Director
-Clinic Type: Qadri Dental Group
+Clinic Type: Cliniqax Dental Group
 Metric: 28% reduction in no-shows
-Avatar: /images/testimonials/dr-layla-qadri.jpg
+Avatar: /images/testimonials/dr-layla-Cliniqax.jpg
 ```
 
 **Improvements**:

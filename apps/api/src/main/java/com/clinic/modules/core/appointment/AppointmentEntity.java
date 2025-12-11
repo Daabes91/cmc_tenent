@@ -97,6 +97,12 @@ public class AppointmentEntity {
     @Column(name = "source", nullable = false, length = 20)
     private AppointmentSource source = AppointmentSource.WEB;
 
+    @Column(name = "patient_confirmed", nullable = false)
+    private boolean patientConfirmed = false;
+
+    @Column(name = "patient_confirmed_at")
+    private Instant patientConfirmedAt;
+
     protected AppointmentEntity() {
     }
 
@@ -191,6 +197,22 @@ public class AppointmentEntity {
 
     public AppointmentMode getBookingMode() {
         return bookingMode;
+    }
+
+    public boolean isPatientConfirmed() {
+        return patientConfirmed;
+    }
+
+    public void setPatientConfirmed(boolean patientConfirmed) {
+        this.patientConfirmed = patientConfirmed;
+    }
+
+    public Instant getPatientConfirmedAt() {
+        return patientConfirmedAt;
+    }
+
+    public void setPatientConfirmedAt(Instant patientConfirmedAt) {
+        this.patientConfirmedAt = patientConfirmedAt;
     }
 
     public Instant getCreatedAt() {

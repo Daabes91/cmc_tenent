@@ -56,6 +56,7 @@ public class AppointmentService {
     private final ClinicTimezoneConfig clinicTimezoneConfig;
     private final TenantContextHolder tenantContextHolder;
     private final TenantService tenantService;
+    private final AppointmentConfirmationService appointmentConfirmationService;
 
     private static final int DEFAULT_SLOT_DURATION_MINUTES = 30;
 
@@ -69,7 +70,8 @@ public class AppointmentService {
                               ClinicSettingsRepository clinicSettingsRepository,
                               ClinicTimezoneConfig clinicTimezoneConfig,
                               TenantContextHolder tenantContextHolder,
-                              TenantService tenantService) {
+                              TenantService tenantService,
+                              AppointmentConfirmationService appointmentConfirmationService) {
         this.appointmentRepository = appointmentRepository;
         this.doctorRepository = doctorRepository;
         this.patientRepository = patientRepository;
@@ -81,6 +83,7 @@ public class AppointmentService {
         this.clinicTimezoneConfig = clinicTimezoneConfig;
         this.tenantContextHolder = tenantContextHolder;
         this.tenantService = tenantService;
+        this.appointmentConfirmationService = appointmentConfirmationService;
     }
 
     @Transactional(readOnly = true)
@@ -287,7 +290,9 @@ public class AppointmentService {
                 entity.getSlotDurationMinutes(),
                 entity.getPaymentAmount(),
                 paymentMethod,
-                entity.getPaymentCurrency()
+                entity.getPaymentCurrency(),
+                entity.isPatientConfirmed(),
+                entity.getPatientConfirmedAt() != null ? OffsetDateTime.ofInstant(entity.getPatientConfirmedAt(), zoneId) : null
         );
     }
 
@@ -335,7 +340,7 @@ public class AppointmentService {
                 doctor,
                 service,
                 scheduledAt,
-                AppointmentStatus.SCHEDULED,
+                AppointmentStatus.CONFIRMED,
                 bookingMode,
                 normalize(request.notes())
         );
@@ -357,6 +362,9 @@ public class AppointmentService {
         }
 
         AppointmentEntity saved = appointmentRepository.save(appointment);
+
+        // Send confirmation email for newly created appointment
+        sendConfirmationEmail(saved);
 
         // Broadcast notification to connected clients
         notificationService.broadcastNewAppointment(toDto(saved, ZoneId.systemDefault()));
@@ -763,6 +771,8 @@ public class AppointmentService {
                 String appointmentTime = appointmentStartTime.toLocalTime().toString();
                 String consultationType = appointment.getBookingMode().displayName();
 
+                String confirmationLink = appointmentConfirmationService.generateConfirmationLink(appointment);
+
                 emailService.sendAppointmentConfirmation(
                         patient.getEmail(),
                         patientName,
@@ -770,7 +780,8 @@ public class AppointmentService {
                         serviceName,
                         appointmentDate,
                         appointmentTime,
-                        consultationType
+                        consultationType,
+                        confirmationLink
                 );
             }
         } catch (Exception e) {

@@ -276,7 +276,10 @@ export const useSaasApi = () => {
     getTenantPlan: (tenantId: number) =>
       apiCall<any>(`/tenants/${tenantId}/plan`),
 
-    overrideTenantPlan: (tenantId: number, data: { targetTier: string; reason: string }) =>
+    overrideTenantPlan: (
+      tenantId: number,
+      data: { targetTier: string; reason: string; billingCycle?: string }
+    ) =>
       apiCall<void>(`/tenants/${tenantId}/plan/override`, {
         method: 'POST',
         body: JSON.stringify(data)

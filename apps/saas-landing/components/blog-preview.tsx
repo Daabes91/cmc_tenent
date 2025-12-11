@@ -86,16 +86,16 @@ export default function BlogPreview() {
           </div>
           <div className="mt-4 md:mt-0">
             <Button variant="link" className="text-primary dark:text-primary/80 hover:text-primary/70 p-0 h-auto flex items-center gap-1" asChild>
-              <a href="https://github.com/MohamedDjoudir/landing-page-template-2/tree/main/docs" target="_blank" rel="noreferrer">
+              <Link href="/blog">
                 {data.cta} <ArrowRight className="h-4 w-4 ml-1" />
-              </a>
+              </Link>
             </Button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {data.articles.map((article, index) => (
-            <Link href="#" key={index} className="group">
+            <Link href="/blog" key={index} className="group">
               <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-[0_30px_55px_rgba(24,226,153,0.15)]">
                 <div className="relative h-48 overflow-hidden">
                   <Image

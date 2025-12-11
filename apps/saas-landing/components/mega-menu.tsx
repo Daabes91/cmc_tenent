@@ -7,6 +7,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { withBasePath } from "@/lib/base-path"
 
 type MenuItem = {
   icon: React.ReactNode
@@ -38,6 +39,7 @@ type MegaMenuProps = {
 
 export default function MegaMenu({ data }: MegaMenuProps) {
   const [isVisible, setIsVisible] = useState(false)
+  const featuredImage = withBasePath(data.featured.imageSrc || "/placeholder.svg")
 
   // Animation effect when menu appears
   useEffect(() => {
@@ -84,7 +86,7 @@ export default function MegaMenu({ data }: MegaMenuProps) {
           <div className="overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-gray-800 dark:bg-gray-900">
             <div className="relative h-40">
               <Image
-                src={data.featured.imageSrc || "/placeholder.svg"}
+                src={featuredImage}
                 alt={data.featured.title}
                 fill
                 sizes="(min-width: 1024px) 320px, 100vw"

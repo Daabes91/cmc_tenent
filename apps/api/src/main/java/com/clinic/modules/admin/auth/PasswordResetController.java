@@ -4,7 +4,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +17,9 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/admin/auth")
-@Slf4j
 public class PasswordResetController {
+
+    private static final Logger log = LoggerFactory.getLogger(PasswordResetController.class);
 
     private final PasswordResetService passwordResetService;
 

@@ -46,7 +46,7 @@ public class VirtualConsultationTestController {
             emailService.sendVirtualConsultationConfirmation(
                     toEmail,
                     "Test Patient",
-                    "Dr. Ahmad Qadri",
+                    "Dr. Ahmad Cliniqax",
                     "General Consultation",
                     appointmentStart,
                     appointmentEnd,

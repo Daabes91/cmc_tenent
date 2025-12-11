@@ -14,6 +14,9 @@ import { BlogPostTracking } from '@/components/blog/BlogPostTracking';
 import { generateBlogPostingSchema } from '@/lib/seo/structured-data';
 import { BlogPostError, BlogPostParsingError } from '@/components/blog/BlogPostError';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import Link from 'next/link';
+import Image from 'next/image';
+import { withBasePath } from '@/lib/base-path';
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -118,6 +121,30 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         />
         
         <BlogPostTracking postTitle={post.title} postSlug={slug} />
+        <div className="container mx-auto px-4 pt-6 md:pt-10">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="h-10 w-10 relative">
+                <Image
+                  src={withBasePath('/brand-logo.png')}
+                  alt="Cliniqax"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <span className="text-lg font-semibold text-slate-900 dark:text-white">
+                Cliniqax
+              </span>
+            </Link>
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+            >
+              ← Back to blog
+            </Link>
+          </div>
+        </div>
+
         <BlogPost post={post} siteUrl={SITE_URL} />
         <div className="container mx-auto px-4 pb-16">
           <div className="max-w-3xl mx-auto">

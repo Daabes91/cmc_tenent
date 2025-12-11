@@ -330,7 +330,7 @@ public class TokenValidationOnPageLoadIntegrationTest {
                 boolean resetSuccess = passwordResetService.resetPassword(token, "NewPassword123!");
                 assertTrue(resetSuccess, "Token should still be usable after multiple validations");
                 
-            } catch (AssertionError | InterruptedException e) {
+            } catch (AssertionError e) {
                 failures.add("Try " + (i + 1) + " failed: " + e.getMessage());
             }
         }

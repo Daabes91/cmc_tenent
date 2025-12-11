@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
+// Use a relative path so turbopack works with next-intl
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const disallowedBasePaths = new Set([

@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Loader2, Check, X, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -16,7 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { API_BASE_URL, CLINIC_ADMIN_URL } from '@/lib/constants';
+import { API_BASE_URL, PAYPAL_CLIENT_ID } from '@/lib/constants';
 import { trackFormSubmission } from '@/lib/analytics';
 
 // Validation schema
@@ -109,6 +108,10 @@ export function SignupForm() {
   const [subdomainCheckTimeout, setSubdomainCheckTimeout] = useState<NodeJS.Timeout | null>(null);
   const [planOptions, setPlanOptions] = useState<PlanOption[]>([...DEFAULT_PLAN_OPTIONS]);
   const [loadingPlans, setLoadingPlans] = useState(false);
+  const [paypalReady, setPaypalReady] = useState(false);
+  const [paypalError, setPaypalError] = useState<string | null>(null);
+  const paypalButtonsRendered = useRef(false);
+  const paypalContainerRef = useRef<HTMLDivElement | null>(null);
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -123,6 +126,8 @@ export function SignupForm() {
       billingCycle: 'MONTHLY',
     },
   });
+
+
 
   // Debounced subdomain availability check
   const checkSubdomainAvailability = useCallback(async (subdomain: string) => {
@@ -204,6 +209,39 @@ export function SignupForm() {
     fetchPlans();
   }, [form]);
 
+  // Load PayPal JS SDK for inline subscription
+  useEffect(() => {
+    const loadPayPalSdk = async () => {
+      if (!PAYPAL_CLIENT_ID) {
+        setPaypalError('PayPal client ID is not configured.');
+        return;
+      }
+
+      if (typeof window === 'undefined') return;
+      if ((window as any).paypal) {
+        setPaypalReady(true);
+        return;
+      }
+
+      return new Promise<void>((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&intent=subscription&vault=true&components=buttons`;
+        script.async = true;
+        script.onload = () => {
+          setPaypalReady(true);
+          resolve();
+        };
+        script.onerror = () => {
+          setPaypalError('Unable to load PayPal. Please refresh and try again.');
+          reject(new Error('Failed to load PayPal SDK'));
+        };
+        document.body.appendChild(script);
+      });
+    };
+
+    loadPayPalSdk();
+  }, []);
+
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === 'subdomain') {
@@ -235,52 +273,106 @@ export function SignupForm() {
     };
   }, [form, checkSubdomainAvailability, subdomainCheckTimeout]);
 
-  const onSubmit = async (values: SignupFormValues) => {
-    setIsSubmitting(true);
-    setSubmitError(null);
+  // Inline PayPal Buttons rendering
+  useEffect(() => {
+    if (!paypalReady) return;
+    if (paypalButtonsRendered.current) return;
+    if (!paypalContainerRef.current) return;
 
-    try {
-      const selectedPlan = planOptions.find((p) => p.value === values.planTier);
-      if (!selectedPlan) {
-        form.setError('planTier', { type: 'manual', message: 'Please select a valid plan' });
-        setIsSubmitting(false);
-        return;
-      }
-
-      const payload = {
-        ...values,
-        clientBaseUrl: typeof window !== 'undefined' ? window.location.origin : undefined,
-      };
-
-      const response = await fetch(`${API_BASE_URL}/api/public/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        // Track successful form submission
-        trackFormSubmission('signup_form', 'signup');
-        
-        if (data.approvalUrl) {
-          window.location.href = data.approvalUrl;
-        } else {
-          window.location.href = data.adminLoginUrl || CLINIC_ADMIN_URL;
-        }
-      } else {
-        setSubmitError(data.error || 'An error occurred during signup. Please try again.');
-      }
-    } catch (error) {
-      console.error('Signup error:', error);
-      setSubmitError('Unable to connect to the server. Please check your internet connection and try again.');
-    } finally {
-      setIsSubmitting(false);
+    const paypal = (window as any).paypal;
+    if (!paypal) {
+      setPaypalError('PayPal SDK not available. Please refresh and try again.');
+      return;
     }
-  };
+
+    paypal.Buttons({
+      style: {
+        color: 'gold',
+        shape: 'pill',
+        label: 'subscribe',
+        layout: 'vertical',
+      },
+      createSubscription: async () => {
+        setIsSubmitting(true);
+        setSubmitError(null);
+        const valid = await form.trigger();
+        if (!valid) {
+          setIsSubmitting(false);
+          throw new Error('Please fix the highlighted fields.');
+        }
+
+        const values = form.getValues();
+        const selectedPlan = planOptions.find((p) => p.value === values.planTier);
+        if (!selectedPlan) {
+          form.setError('planTier', { type: 'manual', message: 'Please select a valid plan' });
+          setIsSubmitting(false);
+          throw new Error('Plan not selected');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/public/signup/inline`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clinicName: values.clinicName,
+            subdomain: values.subdomain,
+            ownerName: values.ownerName,
+            email: values.email,
+            password: values.password,
+            phone: values.phone,
+            planTier: values.planTier,
+            billingCycle: values.billingCycle,
+            clientBaseUrl: window.location.origin,
+          }),
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.success || !data.subscriptionId) {
+          const errorMessage = data.error || 'Unable to start subscription. Please try again.';
+          setSubmitError(errorMessage);
+          setIsSubmitting(false);
+          throw new Error(errorMessage);
+        }
+
+        // Track successful form submission start
+        trackFormSubmission('signup_form', 'signup_inline_start');
+
+        return data.subscriptionId;
+      },
+      onApprove: async (data: any) => {
+        try {
+          const confirmUrl = `${API_BASE_URL}/api/public/payment-confirmation?subscription_id=${encodeURIComponent(
+            data.subscriptionID
+          )}`;
+          const res = await fetch(confirmUrl, { method: 'GET' });
+          const json = await res.json();
+
+          if (res.ok && json.success && json.redirectUrl) {
+            trackFormSubmission('signup_form', 'signup_inline_success');
+            window.location.href = json.redirectUrl;
+          } else {
+            const msg = json.error || 'Payment verification failed. Please contact support.';
+            setSubmitError(msg);
+          }
+        } catch (err) {
+          console.error('Payment confirmation error:', err);
+          setSubmitError('Unable to verify payment. Please try again.');
+        } finally {
+          setIsSubmitting(false);
+        }
+      },
+      onError: (err: any) => {
+        console.error('PayPal error:', err);
+        setSubmitError('PayPal could not process the payment. Please try again.');
+        setIsSubmitting(false);
+      },
+      onCancel: () => {
+        setIsSubmitting(false);
+        setSubmitError('Payment was cancelled.');
+      },
+    }).render(paypalContainerRef.current);
+
+    paypalButtonsRendered.current = true;
+  }, [paypalReady, form, planOptions]);
 
   const getSubdomainIndicator = () => {
     switch (subdomainStatus) {
@@ -302,7 +394,7 @@ export function SignupForm() {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-foreground">Start Your Free Trial</h2>
         <p className="text-sm text-muted-foreground mt-2">
-          Create your clinic portal in minutes. No credit card required for trial.
+          Create your clinic portal in minutes. Pay securely with PayPal without leaving this page.
         </p>
       </div>
 
@@ -319,7 +411,7 @@ export function SignupForm() {
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
           <FormField
             control={form.control}
             name="planTier"
@@ -394,6 +486,7 @@ export function SignupForm() {
                 <FormControl>
                   <Input
                     placeholder="Happy Dental Clinic"
+                    autoComplete="organization"
                     {...field}
                     disabled={isSubmitting}
                   />
@@ -445,6 +538,7 @@ export function SignupForm() {
                 <FormControl>
                   <Input
                     placeholder="Dr. John Smith"
+                    autoComplete="name"
                     {...field}
                     disabled={isSubmitting}
                   />
@@ -467,6 +561,7 @@ export function SignupForm() {
                   <Input
                     type="email"
                     placeholder="john@happydental.com"
+                    autoComplete="email"
                     {...field}
                     disabled={isSubmitting}
                   />
@@ -489,6 +584,7 @@ export function SignupForm() {
                   <Input
                     type="password"
                     placeholder="••••••••"
+                    autoComplete="new-password"
                     {...field}
                     disabled={isSubmitting}
                   />
@@ -511,6 +607,7 @@ export function SignupForm() {
                   <Input
                     type="tel"
                     placeholder="+1234567890"
+                    autoComplete="tel"
                     {...field}
                     disabled={isSubmitting}
                   />
@@ -523,28 +620,18 @@ export function SignupForm() {
             )}
           />
 
-          <div className="pt-4">
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              disabled={isSubmitting || subdomainStatus === 'unavailable' || subdomainStatus === 'checking'}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating your clinic...
-                </>
-              ) : (
-                'Continue to Payment'
-              )}
-            </Button>
+          <div className="pt-4 space-y-3">
+            {paypalError && (
+              <div className="p-3 rounded-md bg-destructive/10 border border-destructive/30 text-destructive text-sm">
+                {paypalError}
+              </div>
+            )}
+            <div ref={paypalContainerRef} className="flex justify-center" />
+            <p className="text-xs text-center text-muted-foreground">
+              By signing up, you agree to our Terms of Service and Privacy Policy.
+              Your payment is securely processed by PayPal.
+            </p>
           </div>
-
-          <p className="text-xs text-center text-muted-foreground">
-            By signing up, you agree to our Terms of Service and Privacy Policy.
-            You&apos;ll be redirected to PayPal to complete your subscription.
-          </p>
         </form>
       </Form>
     </div>

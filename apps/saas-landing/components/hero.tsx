@@ -12,6 +12,7 @@ import { LogoMarquee } from './LogoMarquee';
 import { useIntersectionAnimation } from '@/hooks/use-intersection-animation';
 import { healthcareCopy } from '@/lib/content/healthcare-copy';
 import { useAnalytics } from '@/hooks/use-analytics';
+import { withBasePath } from '@/lib/base-path';
 
 export default function Hero() {
   const { language } = useLanguage();
@@ -24,6 +25,7 @@ export default function Hero() {
     const hasQuery = heroVideoUrl.includes('?');
     return `${heroVideoUrl}${hasQuery ? '&' : '?'}rel=0&modestbranding=1`;
   }, [heroVideoUrl]);
+  const heroImageSrc = useMemo(() => withBasePath('/images/hero.png'), []);
 
   // Analytics tracking
   const { trackCTA } = useAnalytics();
@@ -121,7 +123,7 @@ export default function Hero() {
               asChild
             >
               <a 
-                href="/signup"
+                href="/landing/signup"
                 aria-label={copy.ctaPrimary}
                 onClick={() => trackCTA(copy.ctaPrimary, 'hero_section')}
               >
@@ -207,7 +209,7 @@ export default function Hero() {
               ) : (
                 <picture>
                   <Image
-                    src="/images/hero.png"
+                    src={heroImageSrc}
                     alt={language === 'ar' 
                       ? 'معاينة لوحة تحكم SaaS تعرض الميزات الرئيسية والواجهة'
                       : 'SaaS Dashboard Preview showing main features and interface'}

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Blog image placeholder</title>
+  <desc id="desc">Fallback image for blog posts</desc>
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f7c30"/>
+      <stop offset="100%" stop-color="#00a33b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" rx="32" ry="32" fill="url(#grad)"/>
+  <rect x="80" y="120" width="1040" height="390" rx="24" ry="24" fill="#ffffff" fill-opacity="0.9"/>
+  <text x="600" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" font-weight="700" fill="#0f7c30">Cliniqax Blog</text>
+  <text x="600" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#0f7c30" fill-opacity="0.8">Image placeholder</text>
+</svg>

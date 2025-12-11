@@ -59,7 +59,11 @@ class AdminBillingControllerTest {
                 null,
                 null,
                 List.of("Unlimited doctors", "Priority support", "Custom branding"),
-                "SUB-123456789"
+                "SUB-123456789",
+                10,
+                5,
+                3L,
+                2L
         );
     }
 
@@ -124,7 +128,11 @@ class AdminBillingControllerTest {
                 PlanTier.BASIC,
                 effectiveDate,
                 List.of("Unlimited doctors", "Priority support"),
-                "SUB-123456789"
+                "SUB-123456789",
+                10,
+                5,
+                3L,
+                2L
         );
 
         when(tenantContextHolder.requireTenantId()).thenReturn(testTenantId);
@@ -161,7 +169,11 @@ class AdminBillingControllerTest {
                 null,
                 null,
                 List.of("Unlimited doctors", "Priority support"),
-                "SUB-123456789"
+                "SUB-123456789",
+                10,
+                5,
+                3L,
+                2L
         );
 
         when(tenantContextHolder.requireTenantId()).thenReturn(testTenantId);

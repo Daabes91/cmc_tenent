@@ -175,7 +175,7 @@ export default function LoginPage() {
               <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                 <Image
                   src="https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1200&auto=format&fit=crop"
-                  alt="Qadri's Clinic - Professional Dental Care"
+                  alt="Cliniqax's Clinic - Professional Dental Care"
                   width={1200}
                   height={800}
                   sizes="(max-width: 1024px) 100vw, 50vw"

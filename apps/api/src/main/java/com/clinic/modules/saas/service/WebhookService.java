@@ -233,6 +233,8 @@ public class WebhookService {
     /**
      * Handle subscription activated event.
      * Updates tenant billing status to active.
+     * Supports redirect-based subscriptions (current flow) and maintains backward compatibility
+     * with existing card-based subscriptions.
      *
      * @param event the webhook event
      */
@@ -249,8 +251,32 @@ public class WebhookService {
                 .orElse(null);
 
         if (subscription == null) {
-            logger.warn("Subscription not found for PayPal subscription ID: {}. Skipping activation.", subscriptionId);
-            return;
+            logger.warn("Subscription not found for PayPal subscription ID: {}. Creating subscription record from webhook.", subscriptionId);
+            if (customId == null || !customId.startsWith("tenant_")) {
+                logger.error("Invalid custom_id in webhook for subscription {}: {}", subscriptionId, customId);
+                return;
+            }
+            Long tenantId;
+            try {
+                tenantId = Long.parseLong(customId.substring(7));
+            } catch (NumberFormatException e) {
+                logger.error("Failed to parse tenant ID from custom_id {} for subscription {}", customId, subscriptionId, e);
+                return;
+            }
+
+            TenantEntity tenant = tenantRepository.findById(tenantId).orElse(null);
+            if (tenant == null) {
+                logger.error("Tenant not found for webhook subscription {} (tenantId {}). Skipping activation.", subscriptionId, tenantId);
+                return;
+            }
+
+            subscription = new SubscriptionEntity();
+            subscription.setTenant(tenant);
+            subscription.setPaypalSubscriptionId(subscriptionId);
+            subscription.setProvider("paypal");
+            subscription.setStatus(resource.getStatus() != null ? resource.getStatus().toUpperCase() : "ACTIVE");
+            subscription.setPlanTier(PlanTier.BASIC); // default when not provided in webhook
+            logger.info("Created subscription from webhook");
         }
 
         // Update subscription status
@@ -457,8 +483,9 @@ public class WebhookService {
     }
 
     /**
-     * Handle payment method update webhook event (PAYMENT.SALE.COMPLETED).
-     * Updates payment method information and records the payment transaction.
+     * Handle payment sale completed webhook event (PAYMENT.SALE.COMPLETED).
+     * Records payment transactions for redirect-based subscriptions (current flow) and maintains
+     * backward compatibility with existing card-based subscriptions.
      *
      * @param event the webhook event
      */
@@ -466,7 +493,7 @@ public class WebhookService {
         PayPalWebhookResource resource = event.getResource();
         String transactionId = resource.getId();
 
-        logger.info("Handling payment method update: {}", transactionId);
+        logger.info("Handling payment sale completed: {}", transactionId);
 
         // Check if transaction already exists
         if (paymentTransactionRepository.findByPaypalTransactionId(transactionId).isPresent()) {
@@ -489,30 +516,49 @@ public class WebhookService {
             return;
         }
 
-        // Try to extract billing agreement ID or subscription ID from custom_id
+        // Try to extract billing agreement ID or subscription ID from custom_id or billing_agreement_id
         String customId = resource.getCustomId();
+        String billingAgreementId = resource.getBillingAgreementId();
         SubscriptionEntity subscription = null;
         
-        if (customId != null) {
-            // Try to find subscription by custom_id (which might be tenant_id)
-            try {
-                Long tenantId = Long.parseLong(customId);
-                subscription = subscriptionRepository.findByTenantId(tenantId).orElse(null);
-            } catch (NumberFormatException e) {
-                logger.debug("Custom ID is not a tenant ID: {}", customId);
+        // First try to find by billing agreement ID (subscription ID)
+        if (billingAgreementId != null) {
+            subscription = subscriptionRepository.findByPaypalSubscriptionId(billingAgreementId).orElse(null);
+            if (subscription != null) {
+                logger.info("Found subscription by billing agreement ID: {}", billingAgreementId);
+            }
+        }
+        
+        // If not found, try to find by custom_id (tenant_id)
+        if (subscription == null && customId != null) {
+            // Try to parse as tenant_id format
+            if (customId.startsWith("tenant_")) {
+                try {
+                    Long tenantId = Long.parseLong(customId.substring(7));
+                    subscription = subscriptionRepository.findByTenantId(tenantId).orElse(null);
+                    if (subscription != null) {
+                        logger.info("Found subscription by custom_id tenant format: {}", customId);
+                    }
+                } catch (NumberFormatException e) {
+                    logger.debug("Failed to parse tenant ID from custom_id: {}", customId);
+                }
+            } else {
+                // Try direct tenant ID
+                try {
+                    Long tenantId = Long.parseLong(customId);
+                    subscription = subscriptionRepository.findByTenantId(tenantId).orElse(null);
+                    if (subscription != null) {
+                        logger.info("Found subscription by custom_id as tenant ID: {}", customId);
+                    }
+                } catch (NumberFormatException e) {
+                    logger.debug("Custom ID is not a tenant ID: {}", customId);
+                }
             }
         }
 
         if (subscription != null) {
             TenantEntity tenant = subscription.getTenant();
             
-            // Update payment method information if available in the webhook
-            // Note: PayPal doesn't always send full payment method details in webhooks
-            // We might need to call PayPal API to get full details
-            String oldPaymentMethod = subscription.getPaymentMethodMask();
-            
-            // For now, just log that a payment was made
-            // In a full implementation, you would call PayPal API to get payment method details
             logger.info("Payment completed for tenant: {}, Amount: {} {}", 
                 tenant.getId(), amountValue, currency);
             
@@ -520,18 +566,12 @@ public class WebhookService {
             auditLogger.logPaymentTransaction(transactionId, subscription.getPaypalSubscriptionId(), 
                 tenant.getId(), amountValue, currency, "COMPLETED");
             
-            // If payment method changed, log it
-            if (oldPaymentMethod != null) {
-                auditLogger.logPaymentMethodUpdate(tenant.getId(), oldPaymentMethod, 
-                    "Payment method used for transaction", "Webhook event: PAYMENT.SALE.COMPLETED");
-            }
-            
             auditLogger.logWebhookProcessed("PAYMENT.SALE.COMPLETED", transactionId, 
                 tenant.getId(), true, "Payment recorded: " + amountValue + " " + currency);
         } else {
             // Subscription not found - log for manual review
-            logger.warn("Could not find subscription for payment transaction: {}. Custom ID: {}", 
-                transactionId, customId);
+            logger.warn("Could not find subscription for payment transaction: {}. Custom ID: {}, Billing Agreement ID: {}", 
+                transactionId, customId, billingAgreementId);
             
             auditLogger.logPaymentTransaction(transactionId, "unknown", null, amountValue, currency, "COMPLETED");
             auditLogger.logWebhookProcessed("PAYMENT.SALE.COMPLETED", transactionId, null, true, 

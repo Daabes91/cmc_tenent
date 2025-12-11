@@ -15,8 +15,8 @@
       </div>
     </div>
 
-    <div class="p-6">
-      <div class="flex items-start gap-6">
+<div class="p-6">
+  <div class="flex items-start gap-6">
         <!-- Plan Icon -->
         <div :class="[
           'w-20 h-20 rounded-xl flex items-center justify-center flex-shrink-0',
@@ -93,6 +93,27 @@
             </div>
           </div>
 
+          <!-- Usage -->
+          <div v-if="usageItems.length" class="pt-4 border-t border-slate-200 dark:border-slate-700">
+            <p class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+              {{ $t('billing.usage') }}
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div
+                v-for="item in usageItems"
+                :key="item.label"
+                class="flex items-center justify-between rounded-lg border px-3 py-2"
+                :class="item.color === 'red' ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20' : item.color === 'amber' ? 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20' : 'border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50'"
+              >
+                <div class="flex items-center gap-2">
+                  <UIcon :name="item.icon" class="w-4 h-4" />
+                  <span class="text-sm font-medium">{{ item.label }}</span>
+                </div>
+                <span class="text-sm font-semibold">{{ item.value }}</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Pending Changes Notice -->
           <div v-if="plan.pendingPlanTier || plan.cancellationDate" class="mt-4 p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
             <div class="flex items-start gap-3">
@@ -142,14 +163,31 @@
 
 <script setup lang="ts">
 const { t } = useI18n()
-
-interface Props {
-  plan: any
-  tenant?: any
-}
-
-defineProps<Props>()
+const props = defineProps<Props>()
 defineEmits(['override'])
+
+const usageItems = computed(() => {
+  const plan = props.plan || {}
+  const items: { label: string; value: string; color: 'red' | 'amber' | 'blue'; icon: string }[] = []
+
+  const addItem = (used?: number, max?: number, label?: string) => {
+    if (max == null || max < 0) return
+    const safeUsed = used ?? 0
+    const ratio = max === 0 ? 1 : safeUsed / max
+    const color = safeUsed >= max ? 'red' : ratio >= 0.8 ? 'amber' : 'blue'
+    items.push({
+      label: label || 'Usage',
+      value: `${safeUsed}/${max}`,
+      color,
+      icon: color === 'red' ? 'i-heroicons-exclamation-triangle' : 'i-heroicons-chart-bar'
+    })
+  }
+
+  addItem(plan.staffUsed, plan.maxStaff, t('billing.staff') || 'Staff')
+  addItem(plan.doctorsUsed, plan.maxDoctors, t('billing.doctors') || 'Doctors')
+
+  return items
+})
 
 const getPlanBgClass = (tier: string) => {
   switch (tier?.toUpperCase()) {

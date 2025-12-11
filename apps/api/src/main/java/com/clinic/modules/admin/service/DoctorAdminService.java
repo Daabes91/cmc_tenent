@@ -8,6 +8,9 @@ import com.clinic.modules.core.service.ClinicServiceEntity;
 import com.clinic.modules.core.service.ClinicServiceRepository;
 import com.clinic.modules.core.tenant.TenantContextHolder;
 import com.clinic.modules.core.tenant.TenantService;
+import com.clinic.modules.saas.config.PlanTierConfig;
+import com.clinic.modules.saas.model.PlanTier;
+import com.clinic.modules.saas.repository.SubscriptionRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,15 +26,21 @@ public class DoctorAdminService {
     private final ClinicServiceRepository serviceRepository;
     private final TenantContextHolder tenantContextHolder;
     private final TenantService tenantService;
+    private final PlanTierConfig planTierConfig;
+    private final SubscriptionRepository subscriptionRepository;
 
     public DoctorAdminService(DoctorRepository doctorRepository,
                               ClinicServiceRepository serviceRepository,
                               TenantContextHolder tenantContextHolder,
-                              TenantService tenantService) {
+                              TenantService tenantService,
+                              PlanTierConfig planTierConfig,
+                              SubscriptionRepository subscriptionRepository) {
         this.doctorRepository = doctorRepository;
         this.serviceRepository = serviceRepository;
         this.tenantContextHolder = tenantContextHolder;
         this.tenantService = tenantService;
+        this.planTierConfig = planTierConfig;
+        this.subscriptionRepository = subscriptionRepository;
     }
 
     @Transactional(readOnly = true)
@@ -54,6 +63,7 @@ public class DoctorAdminService {
     @Transactional
     public DoctorAdminResponse createDoctor(DoctorUpsertRequest request) {
         Long tenantId = currentTenantId();
+        enforceDoctorLimit(tenantId);
         String fullNameEn = requireName(request.fullNameEn());
         DoctorEntity doctor = new DoctorEntity(
                 fullNameEn,
@@ -213,6 +223,40 @@ public class DoctorAdminService {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    /**
+     * Enforce doctor limit based on the tenant's active plan.
+     */
+    private void enforceDoctorLimit(Long tenantId) {
+        int maxDoctors = resolveMaxDoctors(tenantId);
+        if (maxDoctors < 0) {
+            return; // Unlimited
+        }
+        long currentCount = doctorRepository.countByTenantId(tenantId);
+        if (currentCount >= maxDoctors) {
+            PlanTier tier = resolvePlanTier(tenantId);
+            String planName = tier != null ? tier.name() : "UNKNOWN";
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Doctor limit reached for plan " + planName + " (" + maxDoctors + " doctors allowed)"
+            );
+        }
+    }
+
+    private int resolveMaxDoctors(Long tenantId) {
+        PlanTier tier = resolvePlanTier(tenantId);
+        PlanTierConfig.PlanTierDetails details = tier != null ? planTierConfig.getPlanDetails(tier) : null;
+        if (details == null) {
+            return -1;
+        }
+        return details.getMaxDoctors();
+    }
+
+    private PlanTier resolvePlanTier(Long tenantId) {
+        return subscriptionRepository.findByTenantId(tenantId)
+                .map(subscription -> subscription.getPlanTier() != null ? subscription.getPlanTier() : PlanTier.BASIC)
+                .orElse(PlanTier.BASIC);
     }
 
     private Long currentTenantId() {

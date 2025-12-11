@@ -459,7 +459,7 @@
               <UButton block color="sky" variant="soft" icon="i-lucide-calendar-plus">
                 {{ t('patients.details.quickActions.createPlan') }}
               </UButton>
-              <UButton block color="emerald" variant="outline" icon="i-lucide-mail">
+              <UButton block color="emerald" variant="outline" icon="i-lucide-mail" @click="openReminderModal">
                 {{ t('patients.details.quickActions.sendReminder') }}
               </UButton>
               <UButton block color="gray" variant="outline" icon="i-lucide-file-text">
@@ -473,7 +473,53 @@
 
     </div>
 
+    <!-- Reminder Modal -->
+    <UModal v-model="showReminderModal" :ui="{ width: 'sm:max-w-lg' }">
+      <UCard>
+        <template #header>
+          <div class="flex items-center gap-3">
+            <UIcon name="i-lucide-mail" class="h-5 w-5 text-emerald-600" />
+            <div>
+              <p class="text-base font-semibold text-slate-900 dark:text-white">
+                {{ t('patients.details.reminder.title') }}
+              </p>
+              <p class="text-sm text-slate-500 dark:text-slate-400">
+                {{ t('patients.details.reminder.subtitle') }}
+              </p>
+            </div>
+          </div>
+        </template>
 
+        <div class="space-y-4">
+          <UFormGroup :label="t('patients.details.reminder.subject')" :error="reminderSubjectError">
+            <UInput
+              v-model="reminderSubject"
+              size="lg"
+              :placeholder="t('patients.details.reminder.subjectPlaceholder')"
+            />
+          </UFormGroup>
+
+          <UFormGroup :label="t('patients.details.reminder.body')" :error="reminderBodyError">
+            <UTextarea
+              v-model="reminderBody"
+              :rows="6"
+              :placeholder="t('patients.details.reminder.bodyPlaceholder')"
+            />
+          </UFormGroup>
+        </div>
+
+        <template #footer>
+          <div class="flex justify-end gap-3">
+            <UButton color="gray" variant="ghost" @click="closeReminderModal" :disabled="reminderSending">
+              {{ t('common.actions.cancel') }}
+            </UButton>
+            <UButton color="emerald" :loading="reminderSending" @click="sendReminder">
+              {{ t('patients.details.reminder.send') }}
+            </UButton>
+          </div>
+        </template>
+      </UCard>
+    </UModal>
   </div>
 </template>
 
@@ -498,6 +544,11 @@ const route = useRoute()
 const { request } = useAdminApi()
 const treatmentPlansApi = useTreatmentPlans()
 const { listTags, createTag } = useTagService()
+
+const showReminderModal = ref(false)
+const reminderSubject = ref('')
+const reminderBody = ref('')
+const reminderSending = ref(false)
 
 useHead(() => ({ title: t('patients.details.meta.headTitle') }))
 
@@ -675,6 +726,60 @@ const handleCreateTag = async (name: string) => {
   }
 }
 
+const openReminderModal = () => {
+  reminderSubjectError.value = null
+  reminderBodyError.value = null
+  if (!reminderSubject.value) {
+    reminderSubject.value = t('patients.details.reminder.defaultSubject')
+  }
+  if (!reminderBody.value) {
+    reminderBody.value = t('patients.details.reminder.defaultBody', { name: patientName.value || t('patients.common.patient') })
+  }
+  showReminderModal.value = true
+}
+
+const closeReminderModal = () => {
+  showReminderModal.value = false
+  reminderSending.value = false
+}
+
+const sendReminder = async () => {
+  reminderSubjectError.value = null
+  reminderBodyError.value = null
+  const subject = reminderSubject.value?.trim()
+  const body = reminderBody.value?.trim()
+
+  if (!subject) {
+    reminderSubjectError.value = t('patients.details.reminder.subjectRequired')
+  }
+  if (!body) {
+    reminderBodyError.value = t('patients.details.reminder.bodyRequired')
+  }
+  if (!subject || !body) return
+
+  reminderSending.value = true
+  try {
+    await request(`/patients/${patientId.value}/reminder-email`, {
+      method: "POST",
+      body: { subject, body }
+    })
+    toast.add({
+      title: t('patients.details.reminder.toastSuccess.title'),
+      description: t('patients.details.reminder.toastSuccess.description'),
+      color: "green"
+    })
+    closeReminderModal()
+  } catch (err: any) {
+    toast.add({
+      title: t('patients.details.reminder.toastError.title'),
+      description: err?.data?.message ?? err?.message ?? t('common.errors.unexpected'),
+      color: "red"
+    })
+  } finally {
+    reminderSending.value = false
+  }
+}
+
 watchEffect(() => {
   if (!patient.value) return
   form.firstName = patient.value.firstName ?? ""
@@ -690,6 +795,8 @@ watchEffect(() => {
 
 const saving = ref(false)
 const errors = ref<Record<string, string>>({})
+const reminderSubjectError = ref<string | null>(null)
+const reminderBodyError = ref<string | null>(null)
 
 // Methods
 // Validation functions

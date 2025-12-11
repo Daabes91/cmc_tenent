@@ -37,6 +37,10 @@ export interface TenantPlan {
   pendingPlanEffectiveDate: string | null;
   features: string[];
   paypalSubscriptionId: string;
+  maxStaff?: number;
+  maxDoctors?: number;
+  staffUsed?: number;
+  doctorsUsed?: number;
 }
 
 export interface PlanChangeRequest {

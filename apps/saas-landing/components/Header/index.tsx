@@ -20,6 +20,7 @@ import {
   PenSquare,
 } from "lucide-react"
 import {PATIENT_WEB_URL, API_DOCS_URL, SAAS_ADMIN_URL, SALES_EMAIL} from '@/lib/constants';
+import { withBasePath } from '@/lib/base-path';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -114,13 +115,13 @@ export default function Header() {
         },
         {
           title: "Clinic Operations",
-          items: [
-            {
-              icon: <Users className="h-5 w-5" />,
-              title: "Admin workspace",
-              description: "Manage patients, services, and staff in one place",
-              href: SAAS_ADMIN_URL,
-            },
+        items: [
+          {
+            icon: <Users className="h-5 w-5" />,
+            title: "Admin workspace",
+            description: "Manage patients, services, and staff in one place",
+            href: SAAS_ADMIN_URL,
+          },
             {
               icon: <LineChart className="h-5 w-5" />,
               title: "Automation & reminders",
@@ -141,7 +142,7 @@ export default function Header() {
         description: "Browse the live demo experience and imagine it with your branding and domain.",
         ctaText: "Open live demo",
         ctaLink: `${PATIENT_WEB_URL}?tenant=demo`,
-        imageSrc: "/images/dashboard.png",
+        imageSrc: withBasePath("/images/dashboard.png"),
       },
     },
     resources: {
@@ -160,7 +161,7 @@ export default function Header() {
               icon: <BookText className="h-5 w-5" />,
               title: "Playbooks",
               description: "Marketing, operations, and automation guides",
-              href: "https://github.com/MohamedDjoudir/landing-page-template-2/tree/main/docs",
+              href: "/blog",
             },
             {
               icon: <PenSquare className="h-5 w-5" />,
@@ -183,13 +184,13 @@ export default function Header() {
               icon: <LifeBuoy className="h-5 w-5" />,
               title: "Implementation help",
               description: "White-glove onboarding & migration",
-              href: "mailto:support@cmc.health",
+              href: "mailto:info@cliniqax.com",
             },
             {
               icon: <Stethoscope className="h-5 w-5" />,
               title: "Clinic playbooks",
               description: "Webinars, demos, and best practices",
-              href: "#blog",
+              href: "/blog",
             },
           ],
         },
@@ -199,7 +200,7 @@ export default function Header() {
         description: "Talk to our team for a guided tour and tailored launch plan.",
         ctaText: "Talk to us",
         ctaLink: `mailto:${SALES_EMAIL}`,
-        imageSrc: "/images/webinar.png",
+        imageSrc: withBasePath("/images/webinar.png"),
       },
     },
   }

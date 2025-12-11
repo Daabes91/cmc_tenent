@@ -2,22 +2,22 @@ package com.clinic.modules.saas.dto;
 
 /**
  * DTO for clinic signup response.
- * Contains the PayPal approval URL and tenant ID for the signup flow.
+ * Contains the tenant ID and PayPal approval URL for the redirect-based flow.
  */
 public class SignupResponse {
 
     private boolean success;
-    private String approvalUrl;
     private Long tenantId;
+    private String approvalUrl;
     private String error;
 
     public SignupResponse() {
     }
 
-    public SignupResponse(boolean success, String approvalUrl, Long tenantId) {
+    public SignupResponse(boolean success, Long tenantId, String approvalUrl) {
         this.success = success;
-        this.approvalUrl = approvalUrl;
         this.tenantId = tenantId;
+        this.approvalUrl = approvalUrl;
     }
 
     public SignupResponse(boolean success, String error) {
@@ -27,8 +27,8 @@ public class SignupResponse {
 
     // Static factory methods for convenience
 
-    public static SignupResponse success(String approvalUrl, Long tenantId) {
-        return new SignupResponse(true, approvalUrl, tenantId);
+    public static SignupResponse success(Long tenantId, String approvalUrl) {
+        return new SignupResponse(true, tenantId, approvalUrl);
     }
 
     public static SignupResponse error(String error) {
@@ -45,20 +45,20 @@ public class SignupResponse {
         this.success = success;
     }
 
-    public String getApprovalUrl() {
-        return approvalUrl;
-    }
-
-    public void setApprovalUrl(String approvalUrl) {
-        this.approvalUrl = approvalUrl;
-    }
-
     public Long getTenantId() {
         return tenantId;
     }
 
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public String getApprovalUrl() {
+        return approvalUrl;
+    }
+
+    public void setApprovalUrl(String approvalUrl) {
+        this.approvalUrl = approvalUrl;
     }
 
     public String getError() {

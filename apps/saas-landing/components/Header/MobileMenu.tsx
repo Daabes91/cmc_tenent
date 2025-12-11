@@ -185,7 +185,7 @@ export default function MobileMenu({
                   <ChevronRight className="ml-auto h-3 w-3 text-gray-500 group-hover:text-gray-300 transition-colors" />
                 </Link>
                 <Link
-                  href="#blog"
+                  href="/blog"
                   className="flex items-center py-2 px-3 text-slate-700 dark:text-gray-200 rounded-lg hover:bg-slate-100 dark:hover:bg-gray-800 transition-all duration-200 group"
                   onClick={() => setIsMenuOpen(false)}
                 >

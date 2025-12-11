@@ -111,7 +111,7 @@ export const healthcareCopy: HealthcareContent = {
           clinicType: "Family Medicine Practice",
           quote: "This platform transformed how we manage our clinic. We've reduced scheduling conflicts by 80% and our patients love the online booking feature.",
           metric: "80% reduction in scheduling conflicts",
-          avatar: "/images/testimonials/dr-sarah-johnson.jpg"
+          avatar: "/images/testimonials/dr-sarah-johnson.svg"
         },
         {
           name: "Michael Chen",
@@ -119,7 +119,7 @@ export const healthcareCopy: HealthcareContent = {
           clinicType: "Dental Clinic",
           quote: "The billing automation alone has saved us 15 hours per week. Our staff can now focus on patient care instead of paperwork.",
           metric: "15 hours saved per week",
-          avatar: "/images/testimonials/michael-chen.jpg"
+          avatar: "/images/testimonials/michael-chen.svg"
         },
         {
           name: "Dr. Aisha Al-Rashid",
@@ -127,15 +127,15 @@ export const healthcareCopy: HealthcareContent = {
           clinicType: "Physical Therapy Center",
           quote: "Patient satisfaction scores increased by 35% after implementing the patient portal. Communication has never been easier.",
           metric: "35% increase in patient satisfaction",
-          avatar: "/images/testimonials/dr-aisha-alrashid.jpg"
+          avatar: "/images/testimonials/dr-aisha-alrashid.svg"
         },
         {
-          name: "Dr. Layla Qadri",
+          name: "Dr. Layla Cliniqax",
           role: "Medical Director",
-          clinicType: "Qadri Dental Group",
+          clinicType: "Cliniqax Dental Group",
           quote: "Rolling out this platform gave us a bilingual marketing site, automated reminders, and PayPal checkout in the same week. Our no-show rate dropped 28% immediately.",
           metric: "28% reduction in no-shows",
-          avatar: "/images/testimonials/dr-layla-qadri.jpg"
+          avatar: "/images/testimonials/dr-layla-Cliniqax.svg"
         },
         {
           name: "Sameer Haddad",
@@ -143,7 +143,7 @@ export const healthcareCopy: HealthcareContent = {
           clinicType: "Shifa Health Network",
           quote: "Tenant isolation and the SAAS admin let us manage 11 locations without spinning up a new stack every time. Finance finally has a single source of truth for revenue.",
           metric: "11 locations managed seamlessly",
-          avatar: "/images/testimonials/sameer-haddad.jpg"
+          avatar: "/images/testimonials/sameer-haddad.svg"
         }
       ]
     },
@@ -392,7 +392,7 @@ export const healthcareCopy: HealthcareContent = {
           clinicType: "عيادة طب الأسرة",
           quote: "حولت هذه المنصة طريقة إدارتنا للعيادة. لقد قللنا تضارب المواعيد بنسبة 80٪ ويحب مرضانا ميزة الحجز عبر الإنترنت.",
           metric: "انخفاض بنسبة 80٪ في تضارب المواعيد",
-          avatar: "/images/testimonials/dr-sarah-johnson.jpg"
+          avatar: "/images/testimonials/dr-sarah-johnson.svg"
         },
         {
           name: "مايكل تشين",
@@ -400,7 +400,7 @@ export const healthcareCopy: HealthcareContent = {
           clinicType: "عيادة الأسنان",
           quote: "أتمتة الفوترة وحدها وفرت لنا 15 ساعة في الأسبوع. يمكن لموظفينا الآن التركيز على رعاية المرضى بدلاً من الأعمال الورقية.",
           metric: "توفير 15 ساعة في الأسبوع",
-          avatar: "/images/testimonials/michael-chen.jpg"
+          avatar: "/images/testimonials/michael-chen.svg"
         },
         {
           name: "د. عائشة الرشيد",
@@ -408,7 +408,7 @@ export const healthcareCopy: HealthcareContent = {
           clinicType: "مركز العلاج الطبيعي",
           quote: "زادت درجات رضا المرضى بنسبة 35٪ بعد تطبيق بوابة المريض. لم يكن التواصل أسهل من أي وقت مضى.",
           metric: "زيادة بنسبة 35٪ في رضا المرضى",
-          avatar: "/images/testimonials/dr-aisha-alrashid.jpg"
+          avatar: "/images/testimonials/dr-aisha-alrashid.svg"
         },
         {
           name: "د. ليلى قادري",
@@ -416,7 +416,7 @@ export const healthcareCopy: HealthcareContent = {
           clinicType: "مجموعة قادري لطب الأسنان",
           quote: "أعطانا إطلاق هذه المنصة موقعاً تسويقياً ثنائي اللغة، وتذكيرات تلقائية، ودفع PayPal في نفس الأسبوع. انخفض معدل عدم الحضور لدينا بنسبة 28٪ على الفور.",
           metric: "انخفاض بنسبة 28٪ في عدم الحضور",
-          avatar: "/images/testimonials/dr-layla-qadri.jpg"
+          avatar: "/images/testimonials/dr-layla-Cliniqax.svg"
         },
         {
           name: "سمير حداد",
@@ -424,7 +424,7 @@ export const healthcareCopy: HealthcareContent = {
           clinicType: "شبكة الشفاء الصحية",
           quote: "عزل المستأجرين ومسؤول SAAS يتيح لنا إدارة 11 موقعاً دون إنشاء مجموعة جديدة في كل مرة. أخيراً لدى المالية مصدر واحد للحقيقة للإيرادات.",
           metric: "إدارة 11 موقعاً بسلاسة",
-          avatar: "/images/testimonials/sameer-haddad.jpg"
+          avatar: "/images/testimonials/sameer-haddad.svg"
         }
       ]
     },

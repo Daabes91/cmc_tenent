@@ -37,7 +37,7 @@ public class SubscriptionDataMigrationService {
     /**
      * Migrate payment method details from PayPal for all subscriptions.
      * This method fetches subscription details from PayPal API and updates
-     * the payment_method_mask and payment_method_type fields.
+     * the payment_method_mask field.
      * 
      * @return Number of subscriptions successfully updated
      */
@@ -89,7 +89,6 @@ public class SubscriptionDataMigrationService {
                 extractAndSetPaymentMethod(subscription, paypalDetails);
             } else {
                 // No details available, use default
-                subscription.setPaymentMethodType("PAYPAL");
                 subscription.setPaymentMethodMask("PayPal Account");
             }
             
@@ -101,7 +100,6 @@ public class SubscriptionDataMigrationService {
                 subscription.getId(), e.getMessage());
             
             // Set default values if PayPal API call fails
-            subscription.setPaymentMethodType("PAYPAL");
             subscription.setPaymentMethodMask("PayPal Account");
             subscriptionRepository.save(subscription);
         }
@@ -168,7 +166,6 @@ public class SubscriptionDataMigrationService {
                     card.get("last_digits").toString() : 
                     (card.get("last4") != null ? card.get("last4").toString() : "****");
                 
-                subscription.setPaymentMethodType("CREDIT_CARD");
                 subscription.setPaymentMethodMask(brand + " ****" + lastDigits);
                 return;
             }
@@ -180,7 +177,6 @@ public class SubscriptionDataMigrationService {
                 String email = paypal.get("email_address") != null ? 
                     maskEmail(paypal.get("email_address").toString()) : "PayPal Account";
                 
-                subscription.setPaymentMethodType("PAYPAL");
                 subscription.setPaymentMethodMask(email);
                 return;
             }
@@ -192,14 +188,12 @@ public class SubscriptionDataMigrationService {
             Map<String, Object> subscriber = (Map<String, Object>) subscriberObj;
             Object emailObj = subscriber.get("email_address");
             if (emailObj != null) {
-                subscription.setPaymentMethodType("PAYPAL");
                 subscription.setPaymentMethodMask(maskEmail(emailObj.toString()));
                 return;
             }
         }
         
         // Default fallback
-        subscription.setPaymentMethodType("PAYPAL");
         subscription.setPaymentMethodMask("PayPal Account");
     }
 

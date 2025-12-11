@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { supportsMutationObserver, prefersReducedMotion, supportsCSSAnimations } from '@/lib/browser-compat';
+import { withBasePath } from '@/lib/base-path';
 
 interface LogoMarqueeProps {
   logos: string[];
@@ -84,7 +85,7 @@ export const LogoMarquee: React.FC<LogoMarqueeProps> = ({
             role="listitem"
           >
             <Image
-              src={`/images/logos/${logo}.png`}
+              src={withBasePath(`/images/logos/${logo}.png`)}
               alt={`${logo.replace(/-/g, ' ')} logo`}
               width={120}
               height={32}

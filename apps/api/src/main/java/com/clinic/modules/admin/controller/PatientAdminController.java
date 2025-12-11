@@ -5,6 +5,7 @@ import com.clinic.api.ApiResponseFactory;
 import com.clinic.modules.admin.dto.PatientAdminResponse;
 import com.clinic.modules.admin.dto.PatientUpsertRequest;
 import com.clinic.modules.admin.service.PatientAdminService;
+import com.clinic.modules.core.email.EmailService;
 import com.clinic.modules.core.tag.TagEntity;
 import com.clinic.modules.core.tag.TagService;
 import jakarta.validation.Valid;
@@ -27,10 +28,12 @@ public class PatientAdminController {
 
         private final PatientAdminService patientAdminService;
         private final TagService tagService;
+        private final EmailService emailService;
 
-        public PatientAdminController(PatientAdminService patientAdminService, TagService tagService) {
+        public PatientAdminController(PatientAdminService patientAdminService, TagService tagService, EmailService emailService) {
                 this.patientAdminService = patientAdminService;
                 this.tagService = tagService;
+                this.emailService = emailService;
         }
 
         @GetMapping
@@ -104,6 +107,49 @@ public class PatientAdminController {
                                 ApiResponseFactory.success(
                                                 "PATIENT_DELETED",
                                                 "Patient deleted successfully."));
+        }
+
+        @PostMapping("/{id}/reminder-email")
+        @PreAuthorize("@permissionService.canView('patients')")
+        public ResponseEntity<ApiResponse<String>> sendReminderEmail(
+                        @PathVariable Long id,
+                        @RequestBody ReminderEmailRequest request) {
+                PatientAdminResponse patient = patientAdminService.getPatient(id);
+                if (patient.email() == null || patient.email().isBlank()) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                                        ApiResponseFactory.errorWithType("PATIENT_EMAIL_MISSING",
+                                                        "Patient has no email on file.", List.of()));
+                }
+
+                String subject = (request.subject() != null && !request.subject().isBlank())
+                                ? request.subject().trim()
+                                : "Appointment Reminder";
+                String body = (request.body() != null && !request.body().isBlank())
+                                ? request.body().trim()
+                                : "This is a reminder for your upcoming appointment.";
+
+                String patientName = ((patient.firstName() != null ? patient.firstName() : "") + " " +
+                                (patient.lastName() != null ? patient.lastName() : "")).trim();
+                if (patientName.isBlank()) {
+                        patientName = "Patient";
+                }
+
+                String html = "<p>Dear " + patientName + ",</p>"
+                                + "<p>" + body + "</p>"
+                                + "<p>Thank you,<br/>" + "Clinic Team" + "</p>";
+
+                emailService.sendCustomEmail(patient.email(), subject, html);
+
+                return ResponseEntity.ok(
+                                ApiResponseFactory.success(
+                                                "REMINDER_SENT",
+                                                "Reminder email sent.",
+                                                "sent"));
+        }
+
+        public record ReminderEmailRequest(
+                        String subject,
+                        String body) {
         }
 
         @GetMapping("/tags")

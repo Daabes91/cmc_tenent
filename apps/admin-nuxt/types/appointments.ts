@@ -10,6 +10,8 @@ export type AppointmentAdmin = {
   followUpVisitNumber?: number | null;
   paymentCollected?: boolean;
   patientAttended?: boolean | null;
+  patientConfirmed?: boolean;
+  patientConfirmedAt?: string | null;
   slotDurationMinutes?: number | null;
   paymentAmount?: number | null;
   paymentMethod?: string | null;

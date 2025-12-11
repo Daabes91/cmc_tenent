@@ -262,6 +262,7 @@ export interface ClinicSettings {
   heroImageUrl?: string | null;
   heroVideoId?: string | null;
   whyChoose?: WhyChooseContent;
+  ecommerceEnabled?: boolean;
 }
 
 // Hero Media types
@@ -299,4 +300,92 @@ export interface InsuranceCompany {
   logoUrl: string | null;
   websiteUrl: string | null;
   description: string | null;
+}
+
+// E-commerce types
+export interface ProductImage {
+  id: number;
+  imageUrl: string;
+  altText?: string | null;
+  isMain?: boolean | null;
+  sortOrder?: number | null;
+}
+
+export interface Product {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  shortDescription?: string | null;
+  price?: number | null;
+  compareAtPrice?: number | null;
+  currency?: string | null;
+  images?: ProductImage[];
+  mainImageUrl?: string | null;
+  status?: string;
+  isVisible?: boolean;
+}
+
+export type CarouselPlacement =
+  | 'HEADER'
+  | 'HERO'
+  | 'SIDEBAR'
+  | 'FOOTER'
+  | 'CATEGORY_PAGE'
+  | 'PRODUCT_PAGE'
+  | 'HOME_PAGE'
+  | string;
+
+export interface PublicCarouselItem {
+  id: number;
+  contentType: 'IMAGE' | 'PRODUCT' | 'CATEGORY' | 'BRAND' | 'OFFER' | 'VIEW_ALL_PRODUCTS';
+  title?: string | null;
+  subtitle?: string | null;
+  imageUrl?: string | null;
+  linkUrl?: string | null;
+  ctaText?: string | null;
+  sortOrder?: number | null;
+  product?: {
+    id: number;
+    name: string;
+    slug: string;
+    price?: number | null;
+    compareAtPrice?: number | null;
+    currency?: string | null;
+    shortDescription?: string | null;
+    mainImageUrl?: string | null;
+    images?: string[];
+    inStock?: boolean | null;
+  };
+}
+
+export interface PublicCarousel {
+  id: number;
+  name: string;
+  slug: string;
+  type: 'PRODUCT' | 'VIEW_ALL_PRODUCTS' | 'IMAGE' | 'CATEGORY' | 'BRAND' | 'OFFER' | 'TESTIMONIAL' | 'BLOG' | 'MIXED';
+  placement: CarouselPlacement;
+  platform?: 'WEB' | 'MOBILE' | string;
+  maxItems?: number | null;
+  items: PublicCarouselItem[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CartResponse {
+  id?: number | null;
+  session_id?: string | null;
+  items?: Array<{
+    id: number;
+    productId: number;
+    quantity: number;
+    product?: Product;
+    price?: number;
+    currency?: string;
+  }>;
+  subtotal?: any;
+  tax_amount?: any;
+  total_amount?: any;
+  item_count?: number;
+  total_quantity?: number;
 }

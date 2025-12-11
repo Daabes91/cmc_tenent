@@ -7,10 +7,12 @@ import com.clinic.modules.core.settings.ClinicSettingsEntity;
 import com.clinic.modules.core.settings.ClinicSettingsRepository;
 import com.clinic.modules.core.tenant.TenantContextHolder;
 import com.clinic.modules.core.tenant.TenantService;
+import com.clinic.modules.ecommerce.service.EcommerceFeatureService;
 import com.clinic.util.YouTubeUrlValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Currency;
@@ -24,6 +26,7 @@ public class ClinicSettingsService {
     private final ClinicTimezoneConfig clinicTimezoneConfig;
     private final TenantContextHolder tenantContextHolder;
     private final TenantService tenantService;
+    private final EcommerceFeatureService ecommerceFeatureService;
 
     @Value("${paypal.client-id:}")
     private String paypalClientId;
@@ -49,17 +52,21 @@ public class ClinicSettingsService {
     public ClinicSettingsService(ClinicSettingsRepository settingsRepository,
                                  ClinicTimezoneConfig clinicTimezoneConfig,
                                  TenantContextHolder tenantContextHolder,
-                                 TenantService tenantService) {
+                                 TenantService tenantService,
+                                 EcommerceFeatureService ecommerceFeatureService) {
         this.settingsRepository = settingsRepository;
         this.clinicTimezoneConfig = clinicTimezoneConfig;
         this.tenantContextHolder = tenantContextHolder;
         this.tenantService = tenantService;
+        this.ecommerceFeatureService = ecommerceFeatureService;
     }
 
     public ClinicSettingsResponse getSettings() {
         ClinicSettingsEntity settings = loadOrCreateSettings();
+        Long tenantId = tenantContextHolder.requireTenantId();
+        boolean ecommerceEnabled = ecommerceFeatureService.isEcommerceEnabled(tenantId);
 
-        return mapToResponse(settings);
+        return mapToResponse(settings, ecommerceEnabled);
     }
 
     @Transactional
@@ -121,6 +128,12 @@ public class ClinicSettingsService {
         }
         if (request.emailEnabled() != null) {
             settings.setEmailEnabled(request.emailEnabled());
+        }
+        if (request.reminderEnabled() != null) {
+            settings.setReminderEnabled(request.reminderEnabled());
+        }
+        if (request.reminderHoursBefore() != null) {
+            settings.setReminderHoursBefore(request.reminderHoursBefore());
         }
 
         // Update PayPal settings
@@ -216,8 +229,21 @@ public class ClinicSettingsService {
             }
         }
 
+        // Handle ecommerce feature toggle
+        Long tenantId = tenantContextHolder.requireTenantId();
+        boolean currentEcommerceEnabled = ecommerceFeatureService.isEcommerceEnabled(tenantId);
+        
+        if (request.ecommerceEnabled() != null && request.ecommerceEnabled() != currentEcommerceEnabled) {
+            if (request.ecommerceEnabled()) {
+                ecommerceFeatureService.enableEcommerce(tenantId);
+            } else {
+                ecommerceFeatureService.disableEcommerce(tenantId);
+            }
+        }
+
         ClinicSettingsEntity saved = settingsRepository.save(settings);
-        return mapToResponse(saved);
+        boolean finalEcommerceEnabled = ecommerceFeatureService.isEcommerceEnabled(tenantId);
+        return mapToResponse(saved, finalEcommerceEnabled);
     }
 
     private ClinicSettingsEntity loadOrCreateSettings() {
@@ -227,11 +253,11 @@ public class ClinicSettingsService {
     }
 
     private ClinicSettingsEntity createDefaultSettings(Long tenantId) {
-        ClinicSettingsEntity settings = new ClinicSettingsEntity("Qadri's Clinic");
+        ClinicSettingsEntity settings = new ClinicSettingsEntity("Cliniqax's Clinic");
         settings.setTenant(tenantService.requireTenant(tenantId));
-        settings.setClinicName("Qadri's Clinic");
+        settings.setClinicName("Cliniqax's Clinic");
         settings.setPhone("+1 (555) 123-4567");
-        settings.setEmail("info@qadrisclinic.com");
+        settings.setEmail("info@Cliniqaxsclinic.com");
         settings.setMondayHours("9:00 AM - 5:00 PM");
         settings.setTuesdayHours("9:00 AM - 5:00 PM");
         settings.setWednesdayHours("9:00 AM - 5:00 PM");
@@ -243,11 +269,15 @@ public class ClinicSettingsService {
         settings.setLocale("en-AE");
         settings.setSlotDurationMinutes(30);
         settings.setTimezone(clinicTimezoneConfig.getZoneId());
-        settings.setSendgridApiKey(defaultSendgridApiKey);
-        settings.setEmailFrom(defaultEmailFrom);
-        settings.setEmailFromName(defaultEmailFromName);
-        settings.setEmailEnabled(defaultEmailEnabled);
-        settings.setWhyChooseTitleEn("Why Choose Qadri's Clinic?");
+        // Do not prefill email delivery credentials; leave empty/disabled by default
+        settings.setSendgridApiKey(null);
+        settings.setEmailFrom(null);
+        settings.setEmailFromName(null);
+        // Let global config decide email enablement (null = fallback to security.email.enabled)
+        settings.setEmailEnabled(null);
+        settings.setReminderEnabled(Boolean.FALSE);
+        settings.setReminderHoursBefore(24);
+        settings.setWhyChooseTitleEn("Why Choose Cliniqax's Clinic?");
         settings.setWhyChooseTitleAr("لماذا تختار عيادة قدري؟");
         settings.setWhyChooseSubtitleEn("We combine cutting-edge technology with compassionate care to deliver exceptional dental experiences.");
         settings.setWhyChooseSubtitleAr("نجمع بين أحدث التقنيات والرعاية الإنسانية لنقدم تجربة أسنان استثنائية.");
@@ -256,7 +286,7 @@ public class ClinicSettingsService {
         return settingsRepository.save(settings);
     }
 
-    private ClinicSettingsResponse mapToResponse(ClinicSettingsEntity entity) {
+    private ClinicSettingsResponse mapToResponse(ClinicSettingsEntity entity, boolean ecommerceEnabled) {
         var workingHours = new ClinicSettingsResponse.WorkingHours(
                 entity.getMondayHours(),
                 entity.getTuesdayHours(),
@@ -277,11 +307,14 @@ public class ClinicSettingsService {
         String resolvedPaypalEnvironment = resolveOrDefault(entity.getPaypalEnvironment(), paypalEnvironment);
         String resolvedPaypalClientId = resolveOrDefault(entity.getPaypalClientId(), paypalClientId);
         String resolvedPaypalClientSecret = resolveOrDefault(entity.getPaypalClientSecret(), paypalClientSecret);
-        String resolvedSendgridKey = resolveOrDefault(entity.getSendgridApiKey(), defaultSendgridApiKey);
-        String resolvedEmailFrom = resolveOrDefault(entity.getEmailFrom(), defaultEmailFrom);
-        String resolvedEmailFromName = resolveOrDefault(entity.getEmailFromName(), defaultEmailFromName);
-        Boolean resolvedEmailEnabled = entity.getEmailEnabled() != null ? entity.getEmailEnabled() : defaultEmailEnabled;
+        // Do not expose env defaults for email credentials; return only tenant-set values or null
+        String resolvedSendgridKey = StringUtils.hasText(entity.getSendgridApiKey()) ? entity.getSendgridApiKey() : null;
+        String resolvedEmailFrom = StringUtils.hasText(entity.getEmailFrom()) ? entity.getEmailFrom() : null;
+        String resolvedEmailFromName = StringUtils.hasText(entity.getEmailFromName()) ? entity.getEmailFromName() : null;
+        Boolean resolvedEmailEnabled = entity.getEmailEnabled();
         String resolvedTimezone = resolveOrDefault(entity.getTimezone(), clinicTimezoneConfig.getZoneId());
+        Boolean resolvedReminderEnabled = entity.getReminderEnabled();
+        Integer resolvedReminderHours = entity.getReminderHoursBefore();
 
         return new ClinicSettingsResponse(
                 entity.getId(),
@@ -314,6 +347,8 @@ public class ClinicSettingsService {
                 resolvedEmailFrom,
                 resolvedEmailFromName,
                 resolvedEmailEnabled,
+                resolvedReminderEnabled,
+                resolvedReminderHours,
                 entity.getHeroMediaType(),
                 entity.getHeroImageUrl(),
                 entity.getHeroVideoId(),
@@ -330,7 +365,8 @@ public class ClinicSettingsService {
                                         feature.getIcon()
                                 ))
                                 .toList()
-                )
+                ),
+                ecommerceEnabled
         );
     }
 

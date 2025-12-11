@@ -158,7 +158,7 @@ export default function Faq() {
         <div className="mt-12 text-center">
           <p className="text-slate-600 dark:text-gray-400">
             {copy.contact}{" "}
-            <a href="mailto:support@cmc.health" className="text-primary dark:text-primary/80 hover:text-primary/70 dark:hover:text-primary font-medium">
+            <a href="mailto:info@cliniqax.com" className="text-primary dark:text-primary/80 hover:text-primary/70 dark:hover:text-primary font-medium">
               {copy.contactLink}
             </a>
           </p>

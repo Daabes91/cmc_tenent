@@ -40,8 +40,15 @@ export function useTenantSlug() {
     state.value = normalized || defaultTenant;
   };
 
+  const resetTenantSlug = () => {
+    state.value = defaultTenant;
+    cookie.value = defaultTenant;
+  };
+
   return {
     tenantSlug: computed(() => state.value || defaultTenant),
+    defaultTenant,
     setTenantSlug,
+    resetTenantSlug,
   };
 }

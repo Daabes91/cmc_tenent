@@ -29,6 +29,15 @@ public class CorsConfig {
         CorsConfiguration saasCors = baseCorsConfiguration();
         applyOrigins(saasCors, securityProperties.cors().adminOrigins());
 
+        // Fallback CORS for any other paths: merge public + admin origins
+        CorsConfiguration mergedCors = baseCorsConfiguration();
+        mergedCors.setAllowedOrigins(null); // reset before applying
+        mergedCors.setAllowedOriginPatterns(null);
+        applyOrigins(mergedCors, mergeOrigins(
+                securityProperties.cors().publicOrigins(),
+                securityProperties.cors().adminOrigins()
+        ));
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/public/**", publicCors);
         source.registerCorsConfiguration("/api/public/**", publicCors);
@@ -36,6 +45,8 @@ public class CorsConfig {
         source.registerCorsConfiguration("/api/admin/**", adminCors);
         source.registerCorsConfiguration("/saas/**", saasCors);
         source.registerCorsConfiguration("/api/saas/**", saasCors);
+        // Catch-all so endpoints like /auth/** or other paths are covered
+        source.registerCorsConfiguration("/**", mergedCors);
         return source;
     }
 
@@ -49,9 +60,15 @@ public class CorsConfig {
     }
 
     private void applyOrigins(CorsConfiguration configuration, List<String> origins) {
-        // Add explicitly configured origins
-        configuration.setAllowedOrigins(origins);
-        configuration.setAllowedOriginPatterns(origins);
+        // If "*" is provided, allow any origin (use patterns so browser echoes Origin when credentials are used)
+        if (origins != null && origins.stream().anyMatch(o -> "*".equals(o))) {
+            configuration.setAllowedOrigins(List.of());
+            configuration.setAllowedOriginPatterns(List.of("*"));
+        } else {
+            // Add explicitly configured origins
+            configuration.setAllowedOrigins(origins);
+            configuration.setAllowedOriginPatterns(origins);
+        }
         
         // Development: Allow localhost with any port
         configuration.addAllowedOriginPattern("http://localhost:*");
@@ -74,5 +91,16 @@ public class CorsConfig {
             configuration.addAllowedOriginPattern("http://" + baseDomain);
             configuration.addAllowedOriginPattern("https://" + baseDomain);
         }
+    }
+
+    private List<String> mergeOrigins(List<String> a, List<String> b) {
+        // Defensive merge to handle nulls
+        List<String> merged = new java.util.ArrayList<>();
+        if (a != null) merged.addAll(a);
+        if (b != null) merged.addAll(b);
+        if (merged.isEmpty()) {
+            merged.add("*");
+        }
+        return merged;
     }
 }

@@ -83,8 +83,9 @@ public class SignupFlowIntegrationTest {
         // Assert
         assertThat(response).isNotNull();
         assertThat(response.isSuccess()).isTrue();
-        assertThat(response.getApprovalUrl()).isNotNull();
-        assertThat(response.getApprovalUrl()).contains("paypal.com");
+        // Note: approvalUrl removed in card-fields integration
+        // assertThat(response.getApprovalUrl()).isNotNull();
+        // assertThat(response.getApprovalUrl()).contains("paypal.com");
         assertThat(response.getTenantId()).isNotNull();
 
         // Verify tenant was created

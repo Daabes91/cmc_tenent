@@ -208,8 +208,6 @@ const form = ref({
   phone: '',
   dateOfBirth: '',
   profileImageUrl: '',
-  dateOfBirth: '',
-  profileImageUrl: '',
   notes: '',
   tags: [] as number[]
 })
@@ -344,7 +342,6 @@ const handleSave = async () => {
       email: form.value.email.trim() || null,
       phone: form.value.phone.trim() || null,
       dateOfBirth: form.value.dateOfBirth || null,
-      profileImageUrl: form.value.profileImageUrl.trim() || null,
       profileImageUrl: form.value.profileImageUrl.trim() || null,
       notes: form.value.notes.trim() || null,
       tagIds: form.value.tags

@@ -42,7 +42,8 @@ public class PatientJwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getServletPath().startsWith("/public/");
+        String path = request.getServletPath();
+        return !(path.startsWith("/public/") || path.startsWith("/api/public/"));
     }
 
     @Override

@@ -60,6 +60,7 @@ public class PayPalConfigEntity {
         this.id = id;
     }
 
+
     public String getClientId() {
         return clientId;
     }

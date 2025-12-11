@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+  <title id="title">Author placeholder</title>
+  <desc id="desc">Fallback avatar for blog authors</desc>
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f7c30"/>
+      <stop offset="100%" stop-color="#00a33b"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="320" rx="32" ry="32" fill="url(#grad)"/>
+  <circle cx="160" cy="128" r="64" fill="#fff" fill-opacity="0.9"/>
+  <rect x="76" y="208" width="168" height="72" rx="24" fill="#fff" fill-opacity="0.9"/>
+  <text x="160" y="238" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#0f7c30">A</text>
+</svg>

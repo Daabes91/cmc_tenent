@@ -27,6 +27,13 @@ export function useBillingPlan() {
       return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
     }
 
+    if (typeof value === 'number') {
+      // Accept seconds or ms; if seconds, multiply by 1000
+      const millis = value < 4_000_000_000 ? value * 1000 : value;
+      const parsed = new Date(millis);
+      return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+    }
+
     if (Array.isArray(value) && value.length >= 3) {
       const [year, month, day, hour = 0, minute = 0, second = 0] = value.map(Number);
       const parsed = new Date(Date.UTC(year, (month || 1) - 1, day || 1, hour, minute, second));
@@ -38,6 +45,10 @@ export function useBillingPlan() {
 
   const normalizePlanResponse = (plan: TenantPlan): TenantPlan => ({
     ...plan,
+    maxStaff: plan.maxStaff ?? -1,
+    maxDoctors: plan.maxDoctors ?? -1,
+    staffUsed: plan.staffUsed ?? 0,
+    doctorsUsed: plan.doctorsUsed ?? 0,
     renewalDate: normalizeDateValue((plan as any).renewalDate),
     cancellationDate: normalizeDateValue((plan as any).cancellationDate),
     cancellationEffectiveDate: normalizeDateValue((plan as any).cancellationEffectiveDate),

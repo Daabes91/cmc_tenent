@@ -36,6 +36,19 @@
 
       <div class="mt-8 grid gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2">
+          <UAlert
+            v-if="usageAlert"
+            :color="usageAlert.color"
+            :icon="usageAlert.isBlocking ? 'i-lucide-alert-triangle' : 'i-lucide-info'"
+            variant="subtle"
+            class="mb-4"
+          >
+            <template #title>
+              {{ usageAlert.isBlocking ? (t('billing.limitReached') || 'Plan limit reached') : (t('billing.usageUpdate') || 'Usage update') }}
+            </template>
+            {{ usageAlert.message }}
+          </UAlert>
+
           <PlanCard
             :plan="billingPlanData"
             :loading="billingPlanLoading"
@@ -154,12 +167,28 @@ const normalizePlanStatus = (status?: string | null) => {
   if (!status) return 'pending';
   const normalized = status.toLowerCase().replace(/[\s-]+/g, '_');
   if (normalized === 'cancelled') return 'canceled';
-  if (normalized === 'trial' || normalized === 'trialing') return 'active';
-  if (['active', 'past_due', 'canceled', 'pending'].includes(normalized)) {
+  if (normalized === 'trial' || normalized === 'trialing') return 'trial';
+  if (['active', 'past_due', 'canceled', 'pending', 'trial'].includes(normalized)) {
     return normalized;
   }
   return 'pending';
 };
+
+const resolvedPlanPrice = computed(() => {
+  const price = billingPlan.value?.price;
+  if (price && price > 0) return price;
+
+  const catalog = planCatalog.value.length ? planCatalog.value : fallbackPlanCatalog;
+  const match = catalog.find((plan) => plan.tier === billingPlan.value?.planTier);
+  return match?.price ?? 0;
+});
+
+const resolvedPlanCurrency = computed(() => {
+  if (billingPlan.value?.currency) return billingPlan.value.currency;
+  const catalog = planCatalog.value.length ? planCatalog.value : fallbackPlanCatalog;
+  const match = catalog.find((plan) => plan.tier === billingPlan.value?.planTier);
+  return match?.currency || 'USD';
+});
 
 const billingPlanData = computed(() => {
   if (!billingPlan.value) return null;
@@ -167,9 +196,9 @@ const billingPlanData = computed(() => {
     tenantId: billingPlan.value.tenantId,
     planTier: billingPlan.value.planTier,
     tierName: billingPlan.value.planTierName,
-    price: billingPlan.value.price,
-    currency: billingPlan.value.currency,
-    billingCycle: (billingPlan.value.billingCycle || 'MONTHLY').toUpperCase() as 'MONTHLY' | 'ANNUAL',
+    price: resolvedPlanPrice.value,
+    currency: resolvedPlanCurrency.value,
+    billingCycle: (billingPlan.value.billingCycle || 'MONTHLY').toUpperCase() as 'MONTHLY' | 'ANNUAL' | 'TRIAL',
     renewalDate: billingPlan.value.renewalDate || '',
     paymentMethodMask: billingPlan.value.paymentMethodMask,
     paymentMethodType: billingPlan.value.paymentMethodType,
@@ -178,7 +207,11 @@ const billingPlanData = computed(() => {
     cancellationEffectiveDate: billingPlan.value.cancellationEffectiveDate,
     pendingPlanTier: billingPlan.value.pendingPlanTier,
     pendingPlanEffectiveDate: billingPlan.value.pendingPlanEffectiveDate,
-    features: billingPlan.value.features
+    features: billingPlan.value.features,
+    maxStaff: billingPlan.value.maxStaff,
+    maxDoctors: billingPlan.value.maxDoctors,
+    staffUsed: billingPlan.value.staffUsed,
+    doctorsUsed: billingPlan.value.doctorsUsed
   };
 });
 
@@ -192,6 +225,38 @@ const availablePlanTiers = computed(() => {
   const currentIndex = tierOrder.indexOf(currentTier);
 
   return tiers.filter(tier => tierOrder.indexOf(tier.value) > currentIndex);
+});
+
+const usageAlert = computed(() => {
+  const plan = billingPlan.value;
+  if (!plan) return null;
+
+  const entries: string[] = [];
+  let severity: 'red' | 'amber' | 'blue' | null = null;
+
+  const register = (used: number, max: number, label: string) => {
+    if (max == null || max < 0) return;
+    const ratio = max === 0 ? 1 : used / max;
+    entries.push(`${used}/${max} ${label} used`);
+    if (used >= max) {
+      severity = 'red';
+    } else if (ratio >= 0.8 && severity !== 'red') {
+      severity = 'amber';
+    } else if (!severity) {
+      severity = 'blue';
+    }
+  };
+
+  register(plan.staffUsed ?? 0, plan.maxStaff ?? -1, t('billing.staffSeats') || 'Staff seats');
+  register(plan.doctorsUsed ?? 0, plan.maxDoctors ?? -1, t('billing.doctors') || 'Doctors');
+
+  if (!entries.length) return null;
+
+  return {
+    color: severity || 'blue',
+    message: entries.join(' · '),
+    isBlocking: severity === 'red'
+  };
 });
 
 onMounted(() => {

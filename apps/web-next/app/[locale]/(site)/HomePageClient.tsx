@@ -10,6 +10,8 @@ import type {Service, InsuranceCompany, HeroMedia, WhyChooseContent, LocalizedTe
 import {useLocalizedPageTitle} from '@/hooks/usePageTitle';
 import {YouTubeEmbed} from '@/components/YouTubeEmbed';
 import {HeroSectionErrorBoundary} from '@/components/HeroSectionErrorBoundary';
+import { useEcommerceFeature, usePublicCarousels } from '@/hooks/useEcommerce';
+import { CarouselRail } from '@/components/CarouselRail';
 
 const BookingSlider = dynamic(() => import('@/components/BookingSlider'), {
   ssr: false,
@@ -71,6 +73,10 @@ export default function Home() {
     en: 'Home',
     ar: 'الرئيسية'
   });
+
+  const { enabled: ecommerceEnabled } = useEcommerceFeature();
+  const { carousels, isLoading: loadingCarousels } = usePublicCarousels(ecommerceEnabled);
+  const homePageCarousels = useMemo(() => carousels, [carousels]);
 
   useEffect(() => {
     const loadServices = async () => {
@@ -491,6 +497,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {ecommerceEnabled && homePageCarousels.length > 0 && (
+        <CarouselRail title="Featured products" carousels={homePageCarousels} />
+      )}
 
       <section
         id="booking-section"

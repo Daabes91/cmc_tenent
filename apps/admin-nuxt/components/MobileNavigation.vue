@@ -326,23 +326,38 @@ const handleQuickAction = (action: QuickAction) => {
 // Open patient-facing website with tenant slug
 const config = useRuntimeConfig();
 const { tenantSlug } = useTenantSlug();
+
+const buildTenantHostname = (slug: string, hostname: string) => {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return hostname;
+  }
+
+  const parts = hostname.split('.');
+  if (parts.length >= 3) {
+    const baseDomain = parts.slice(-2).join('.');
+    return `${slug}.${baseDomain}`;
+  }
+
+  return `${slug}.${hostname}`;
+};
+
 const openWebsite = () => {
   const baseUrl = config.public.webUrl;
 
-  // Build URL with tenant slug subdomain
-  // For local: http://daabes.localhost:3001
-  // For production: https://daabes.yourdomain.com
   try {
     const url = new URL(baseUrl);
     const slug = tenantSlug.value;
 
-    // Check if hostname already includes the tenant slug
-    if (!url.hostname.startsWith(`${slug}.`)) {
-      // Insert tenant slug as subdomain
-      url.hostname = `${slug}.${url.hostname}`;
+    // For localhost, just open the base URL (subdomain routing doesn't work well in localhost)
+    // For production, use subdomain routing
+    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+      // Just open the base URL for localhost
+      window.open(url.toString(), '_blank');
+    } else {
+      // Production: Build URL with tenant slug subdomain
+      url.hostname = buildTenantHostname(slug, url.hostname);
+      window.open(url.toString(), '_blank');
     }
-
-    window.open(url.toString(), '_blank');
   } catch (error) {
     // Fallback to base URL if URL construction fails
     console.error('Failed to construct tenant URL:', error);

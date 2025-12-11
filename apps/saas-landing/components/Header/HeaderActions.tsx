@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import {SAAS_ADMIN_URL, PATIENT_WEB_URL, SALES_EMAIL} from '@/lib/constants';
+import {SAAS_ADMIN_URL, PATIENT_WEB_URL, SALES_EMAIL , CLINIC_ADMIN_URL} from '@/lib/constants';
 import {ModeToggle} from '@/components/mode-toggle';
 import {LanguageToggle} from '@/components/LanguageToggle';
 import {useLanguage} from '@/contexts/LanguageContext';
@@ -33,7 +33,7 @@ export default function HeaderActions({
   return (
     <div className="flex items-center gap-3">
       <a
-        href={SAAS_ADMIN_URL}
+        href={CLINIC_ADMIN_URL}
         target="_blank"
         rel="noreferrer"
        className="hidden md:block text-sm font-medium text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-gray-900 transition"
@@ -44,7 +44,7 @@ export default function HeaderActions({
         className="hidden md:flex bg-primary text-primary-foreground hover:bg-primary/90"
         asChild
       >
-        <a href="/signup">
+        <a href="/landing/signup">
           {text.getStarted}
         </a>
       </Button>

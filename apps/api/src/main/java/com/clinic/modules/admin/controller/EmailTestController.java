@@ -34,7 +34,8 @@ public class EmailTestController {
                     "General Consultation",
                     LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE),
                     LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME),
-                    "IN_PERSON"
+                    "IN_PERSON",
+                    null
             );
 
             return ResponseEntity.ok(Map.of(

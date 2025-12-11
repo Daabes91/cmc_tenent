@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.time.Instant;
 import java.util.List;
 
-@Repository
+@Repository("treatmentPaymentRepository")
 public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
 
     List<PaymentEntity> findByPaymentDateBetween(Instant start, Instant end);

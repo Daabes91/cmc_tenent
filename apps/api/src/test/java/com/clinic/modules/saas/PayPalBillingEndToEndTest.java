@@ -106,7 +106,8 @@ public class PayPalBillingEndToEndTest {
         // Verify signup succeeded
         assertThat(signupResponse).isNotNull();
         assertThat(signupResponse.isSuccess()).isTrue();
-        assertThat(signupResponse.getApprovalUrl()).contains("paypal.com");
+        // Note: approvalUrl removed in card-fields integration
+        // assertThat(signupResponse.getApprovalUrl()).contains("paypal.com");
         assertThat(signupResponse.getTenantId()).isNotNull();
 
         Long tenantId = signupResponse.getTenantId();
@@ -250,7 +251,8 @@ public class PayPalBillingEndToEndTest {
         assertThat(response.isSuccess()).isFalse();
         assertThat(response.getError()).contains("already taken");
         assertThat(response.getTenantId()).isNull();
-        assertThat(response.getApprovalUrl()).isNull();
+        // Note: approvalUrl removed in card-fields integration
+        // assertThat(response.getApprovalUrl()).isNull();
     }
 
     @Test

@@ -5,6 +5,7 @@ import { motion, useInView, useAnimation } from "framer-motion"
 import { ArrowRight, CheckCircle, ChevronRight } from "lucide-react"
 import Image from "next/image"
 import {useLanguage} from '@/contexts/LanguageContext';
+import { withBasePath } from '@/lib/base-path';
 
 const content = {
   en: {
@@ -118,6 +119,10 @@ const content = {
 export default function HowItWorks() {
   const {language} = useLanguage();
   const data = content[language];
+  const stepsWithBasePath = data.steps.map(step => ({
+    ...step,
+    image: withBasePath(step.image),
+  }));
   // Refs for scroll triggering
   const sectionRef = useRef(null)
   const isInView = useInView(sectionRef, { once: false, amount: 0.1 })
@@ -202,7 +207,7 @@ export default function HowItWorks() {
           
           {/* Steps container */}
           <div className="space-y-20 md:space-y-32">
-            {data.steps.map((step, index) => (
+            {stepsWithBasePath.map((step, index) => (
               <motion.div
                 key={index}
                 variants={{
@@ -259,10 +264,10 @@ export default function HowItWorks() {
                         </div>
                         
                         {/* Image without hover animation */}
-                        <div className="relative shrink-0 md:w-1/2 aspect-[4/3] rounded-lg overflow-hidden">
+                          <div className="relative shrink-0 md:w-1/2 aspect-[4/3] rounded-lg overflow-hidden">
                           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-mintlify-blue/10 z-10" />
                           <Image
-                            src={step.image || "/placeholder.svg"}
+                            src={step.image || withBasePath("/placeholder.svg")}
                             alt={step.title}
                             fill
                             className="object-cover"
@@ -287,7 +292,7 @@ export default function HowItWorks() {
             <div className="relative inline-block">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary to-mintlify-blue rounded-lg blur-md opacity-70" />
             <a 
-              href="mailto:implementation@cmc.health" 
+              href="mailto:info@cliniqax.com" 
               className="relative inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-mintlify-gradient text-white font-medium text-lg hover:opacity-90 transition-all shadow-[0_30px_60px_rgba(24,226,153,0.3)]"
             >
               {data.cta} <ArrowRight className="h-5 w-5" />

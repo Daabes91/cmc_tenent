@@ -35,10 +35,13 @@ public record ClinicSettingsResponse(
         String emailFrom,
         String emailFromName,
         Boolean emailEnabled,
+        Boolean reminderEnabled,
+        Integer reminderHoursBefore,
         String heroMediaType,
         String heroImageUrl,
         String heroVideoId,
-        WhyChoose whyChoose
+        WhyChoose whyChoose,
+        Boolean ecommerceEnabled
 ) {
     public record WorkingHours(
             String monday,

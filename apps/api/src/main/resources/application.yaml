@@ -147,5 +147,6 @@ saas:
 # Application Configuration
 app:
   base-url: ${APP_BASE_URL:http://localhost:3000}
+  public-api-url: ${PUBLIC_API_URL:http://localhost:8080}
   admin-url: ${APP_ADMIN_URL:http://localhost:3000}
   marketing-url: ${APP_MARKETING_URL:${APP_BASE_URL:http://localhost:3000}}

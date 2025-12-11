@@ -2,7 +2,7 @@
 
 import {Link, usePathname} from '@/navigation';
 import {useState, useMemo, useRef, useEffect} from 'react';
-import {Menu, X, ChevronDown} from 'lucide-react';
+import {Menu, X, ChevronDown, ShoppingCart} from 'lucide-react';
 import {useAuth} from '@/hooks/useAuth';
 import {useTranslations, useLocale} from 'next-intl';
 import {api} from '@/lib/api';
@@ -157,6 +157,16 @@ export function Header() {
               ع
             </Link>
           </div>
+
+          {/* Cart (always visible; backend enforces e-commerce gating) */}
+          <Link
+            href="/cart"
+            className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 shadow-sm transition hover:bg-blue-100 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-100"
+            aria-label="View cart"
+          >
+            <ShoppingCart className="h-5 w-5" />
+            <span>Cart</span>
+          </Link>
 
           {/* Theme Toggle */}
           <ThemeToggle />

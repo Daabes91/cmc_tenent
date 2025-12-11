@@ -1,7 +1,7 @@
 package com.clinic.modules.admin.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
@@ -15,10 +15,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class CloudflareImageService {
+
+    private static final Logger log = LoggerFactory.getLogger(CloudflareImageService.class);
 
     private final RestTemplate restTemplate;
 
@@ -30,6 +30,10 @@ public class CloudflareImageService {
 
     @Value("${security.cloudflare.images.delivery-url}")
     private String deliveryUrl;
+
+    public CloudflareImageService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     public CloudflareImageUploadResponse uploadImage(MultipartFile file) throws IOException {
         String url = String.format("https://api.cloudflare.com/client/v4/accounts/%s/images/v1", accountId);
@@ -63,12 +67,7 @@ public class CloudflareImageService {
                     
                     log.info("Successfully uploaded image to Cloudflare: {}", imageId);
                     
-                    return CloudflareImageUploadResponse.builder()
-                            .success(true)
-                            .imageId(imageId)
-                            .url(publicUrl)
-                            .deliveryUrl(deliveryUrl)
-                            .build();
+                    return new CloudflareImageUploadResponse(true, imageId, publicUrl, deliveryUrl);
                 } else {
                     List<Map<String, Object>> errors = (List<Map<String, Object>>) responseBody.get("errors");
                     String errorMessage = errors != null && !errors.isEmpty() 
@@ -86,12 +85,33 @@ public class CloudflareImageService {
         }
     }
 
-    @lombok.Data
-    @lombok.Builder
     public static class CloudflareImageUploadResponse {
-        private boolean success;
-        private String imageId;
-        private String url;
-        private String deliveryUrl;
+        private final boolean success;
+        private final String imageId;
+        private final String url;
+        private final String deliveryUrl;
+
+        public CloudflareImageUploadResponse(boolean success, String imageId, String url, String deliveryUrl) {
+            this.success = success;
+            this.imageId = imageId;
+            this.url = url;
+            this.deliveryUrl = deliveryUrl;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getImageId() {
+            return imageId;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public String getDeliveryUrl() {
+            return deliveryUrl;
+        }
     }
 }

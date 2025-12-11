@@ -8,6 +8,7 @@ import { API_DOCS_URL } from '@/lib/constants'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { healthcareCopy } from '@/lib/content/healthcare-copy'
 import { useAnalytics } from '@/hooks/use-analytics'
+import { withBasePath } from '@/lib/base-path'
 
 export default function Integrations() {
   const { language } = useLanguage();
@@ -15,12 +16,19 @@ export default function Integrations() {
   const integrationsData = healthcareCopy[language].integrations;
   
   // Map healthcare integrations with fallback logos
-  const integrations = integrationsData.items.map(item => ({
-    name: item.name,
-    category: item.category,
-    description: item.description,
-    logo: item.logo || `https://cdn.simpleicons.org/${item.name.toLowerCase().replace(/\s+/g, '')}`
-  }));
+  const integrations = integrationsData.items.map(item => {
+    const logo =
+      item.logo?.startsWith('/')
+        ? withBasePath(item.logo)
+        : item.logo || `https://cdn.simpleicons.org/${item.name.toLowerCase().replace(/\s+/g, '')}`;
+
+    return {
+      name: item.name,
+      category: item.category,
+      description: item.description,
+      logo,
+    };
+  });
 
 
   const containerVariants = {
@@ -82,7 +90,7 @@ export default function Integrations() {
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-mintlify-blue/20 rounded-full blur-md group-hover:opacity-100 opacity-0 transition-opacity duration-300"></div>
                   <div className="bg-slate-100 dark:bg-gray-800 rounded-full p-2 w-12 h-12 flex items-center justify-center">
                     <Image
-                      src={integration.logo || "/placeholder.svg"}
+                      src={integration.logo || withBasePath("/placeholder.svg")}
                       alt={integration.name}
                       width={40}
                       height={40}

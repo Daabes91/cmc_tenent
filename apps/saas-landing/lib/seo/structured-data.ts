@@ -83,7 +83,7 @@ export interface BlogPostingSchema {
  * Generate Organization structured data
  */
 export function generateOrganizationSchema(): OrganizationSchema {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cliniqax.com/landing';
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'ClinicPro';
 
   return {

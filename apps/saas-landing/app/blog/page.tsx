@@ -4,10 +4,13 @@
  * Displays all published blog posts with filtering, search, and pagination.
  */
 
+import Link from 'next/link';
+import Image from 'next/image';
 import { Metadata } from 'next';
 import { getAllBlogPosts } from '@/lib/blog';
 import { BlogList } from '@/components/blog/BlogList';
 import { BookOpen } from 'lucide-react';
+import { withBasePath } from '@/lib/base-path';
 
 export const metadata: Metadata = {
   title: 'Blog - Healthcare Practice Management Insights',
@@ -24,7 +27,29 @@ export default async function BlogPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-      <div className="container mx-auto px-4 py-16 md:py-24">
+      <div className="container mx-auto px-4 pt-8 md:pt-12">
+        <div className="flex items-center justify-between gap-4 mb-10">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="h-10 w-10 relative">
+              <Image
+                src={withBasePath('/brand-logo.png')}
+                alt="Cliniqax"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <span className="text-lg font-semibold text-slate-900 dark:text-white">
+              Cliniqax
+            </span>
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+          >
+            ← Back to homepage
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="max-w-3xl mx-auto text-center mb-16">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">

@@ -103,7 +103,7 @@
 
 ---
 
-### Card 4: Dr. Layla Qadri
+### Card 4: Dr. Layla Cliniqax
 
 **Visual Layout**:
 ```
@@ -118,16 +118,16 @@
 │                                         │
 │ [📈 28% reduction in no-shows]          │
 │                                         │
-│ [👤] Dr. Layla Qadri                    │
+│ [👤] Dr. Layla Cliniqax                    │
 │      Medical Director                   │
-│      Qadri Dental Group                 │
+│      Cliniqax Dental Group                 │
 └─────────────────────────────────────────┘
 ```
 
 **Content**:
-- **Name**: Dr. Layla Qadri
+- **Name**: Dr. Layla Cliniqax
 - **Role**: Medical Director
-- **Clinic Type**: Qadri Dental Group
+- **Clinic Type**: Cliniqax Dental Group
 - **Quote**: "Rolling out this platform gave us a bilingual marketing site, automated reminders, and PayPal checkout in the same week. Our no-show rate dropped 28% immediately."
 - **Metric**: 28% reduction in no-shows
 - **Focus**: Rapid deployment and appointment management

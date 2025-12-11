@@ -68,6 +68,12 @@ class SubscriptionServiceTest {
     @Mock
     private PayPalCircuitBreaker circuitBreaker;
 
+    @Mock
+    private com.clinic.modules.admin.staff.repository.StaffUserRepository staffUserRepository;
+
+    @Mock
+    private com.clinic.modules.core.doctor.DoctorRepository doctorRepository;
+
     private SubscriptionService subscriptionService;
 
     private TenantEntity testTenant;
@@ -84,7 +90,9 @@ class SubscriptionServiceTest {
                 metricsService,
                 alertService,
                 planTierConfig,
-                circuitBreaker
+                circuitBreaker,
+                staffUserRepository,
+                doctorRepository
         );
 
         // Setup test tenant using constructor

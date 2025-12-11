@@ -1,6 +1,8 @@
 package com.clinic.modules.saas.model;
 
 import com.clinic.modules.core.tenant.TenantEntity;
+import com.clinic.modules.saas.json.LocalDateTimeToEpochMillisSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -37,15 +39,19 @@ public class SubscriptionEntity {
     private String status;
 
     @Column(name = "current_period_start")
+    @JsonSerialize(using = LocalDateTimeToEpochMillisSerializer.class)
     private LocalDateTime currentPeriodStart;
 
     @Column(name = "current_period_end")
+    @JsonSerialize(using = LocalDateTimeToEpochMillisSerializer.class)
     private LocalDateTime currentPeriodEnd;
 
     @Column(name = "created_at", nullable = false, updatable = false)
+    @JsonSerialize(using = LocalDateTimeToEpochMillisSerializer.class)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
+    @JsonSerialize(using = LocalDateTimeToEpochMillisSerializer.class)
     private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
@@ -53,18 +59,18 @@ public class SubscriptionEntity {
     private PlanTier planTier;
 
     @Column(name = "renewal_date")
+    @JsonSerialize(using = LocalDateTimeToEpochMillisSerializer.class)
     private LocalDateTime renewalDate;
 
     @Column(name = "payment_method_mask", length = 100)
     private String paymentMethodMask;
 
-    @Column(name = "payment_method_type", length = 50)
-    private String paymentMethodType;
-
     @Column(name = "cancellation_date")
+    @JsonSerialize(using = LocalDateTimeToEpochMillisSerializer.class)
     private LocalDateTime cancellationDate;
 
     @Column(name = "cancellation_effective_date")
+    @JsonSerialize(using = LocalDateTimeToEpochMillisSerializer.class)
     private LocalDateTime cancellationEffectiveDate;
 
     @Enumerated(EnumType.STRING)
@@ -72,6 +78,7 @@ public class SubscriptionEntity {
     private PlanTier pendingPlanTier;
 
     @Column(name = "pending_plan_effective_date")
+    @JsonSerialize(using = LocalDateTimeToEpochMillisSerializer.class)
     private LocalDateTime pendingPlanEffectiveDate;
 
     @PrePersist
@@ -181,14 +188,6 @@ public class SubscriptionEntity {
 
     public void setPaymentMethodMask(String paymentMethodMask) {
         this.paymentMethodMask = paymentMethodMask;
-    }
-
-    public String getPaymentMethodType() {
-        return paymentMethodType;
-    }
-
-    public void setPaymentMethodType(String paymentMethodType) {
-        this.paymentMethodType = paymentMethodType;
     }
 
     public LocalDateTime getCancellationDate() {

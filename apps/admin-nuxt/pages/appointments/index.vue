@@ -388,6 +388,9 @@
                   <UBadge :color="statusColor(row.status)" variant="soft" size="sm">
                     {{ formatStatus(row.status) }}
                   </UBadge>
+                  <UBadge :color="patientConfirmationColor(row.patientConfirmed)" variant="outline" size="xs">
+                    {{ patientConfirmationLabel(row.patientConfirmed) }}
+                  </UBadge>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-4 text-sm text-slate-600 dark:text-slate-300">
@@ -516,9 +519,14 @@
               </UBadge>
             </template>
             <template #status-data="{ row }">
-              <UBadge :color="statusColor(row.status)" variant="soft" size="sm">
-                {{ formatStatus(row.status) }}
-              </UBadge>
+              <div class="flex flex-col gap-1 items-start">
+                <UBadge :color="statusColor(row.status)" variant="soft" size="sm">
+                  {{ formatStatus(row.status) }}
+                </UBadge>
+                <UBadge :color="patientConfirmationColor(row.patientConfirmed)" variant="outline" size="xs">
+                  {{ patientConfirmationLabel(row.patientConfirmed) }}
+                </UBadge>
+              </div>
             </template>
             <template #actions-data="{ row }">
               <div class="flex justify-end gap-1" @click.stop>
@@ -772,6 +780,8 @@ const rows = computed(() => {
     scheduledAtRaw: appt.scheduledAt,
     paymentCollected: Boolean(appt.paymentCollected),
     patientAttended: appt.patientAttended ?? null,
+    patientConfirmed: appt.patientConfirmed ?? false,
+    patientConfirmedAt: appt.patientConfirmedAt || null,
     paymentAmount: appt.paymentAmount ?? null,
     paymentCurrency: appt.paymentCurrency ?? null,
     paymentMethod: appt.paymentMethod ?? null
@@ -793,6 +803,8 @@ const tableRows = computed(() => rows.value.map(row => ({
   scheduledTime: formatTime(row.scheduledAtRaw),
   paymentCollected: row.paymentCollected,
   patientAttended: row.patientAttended,
+  patientConfirmed: row.patientConfirmed,
+  patientConfirmedAt: row.patientConfirmedAt,
   paymentAmount: row.paymentAmount,
   paymentCurrency: row.paymentCurrency,
   paymentMethod: row.paymentMethod
@@ -971,6 +983,14 @@ const modeLabels = computed(() => ({
   VIRTUAL_CONSULTATION: t("appointments.modes.virtual"),
   CLINIC_VISIT: t("appointments.modes.clinic")
 }));
+
+function patientConfirmationColor(confirmed: boolean | undefined) {
+  return confirmed ? "green" : "gray";
+}
+
+function patientConfirmationLabel(confirmed: boolean | undefined) {
+  return confirmed ? t("appointments.status.patientConfirmed") : t("appointments.status.patientPending");
+}
 
 function formatStatus(status: string | undefined) {
   if (!status) return "";

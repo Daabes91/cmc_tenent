@@ -79,15 +79,22 @@
           <div class="flex items-center gap-3">
             <UIcon 
               name="i-heroicons-credit-card" 
-              class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0"
-            />
-            <span class="text-gray-600 dark:text-gray-300">
-              {{ $t('billing.plan.paymentMethod') }}:
-            </span>
-            <span class="font-medium text-gray-900 dark:text-white">
-              {{ plan?.paymentMethodMask || $t('billing.plan.noPaymentMethod') }}
-            </span>
-          </div>
+            class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0"
+          />
+          <span class="text-gray-600 dark:text-gray-300">
+            {{ $t('billing.plan.paymentMethod') }}:
+          </span>
+          <span class="font-medium text-gray-900 dark:text-white">
+            {{ paymentMethodDisplay }}
+          </span>
+          <UBadge
+            v-if="paymentMethodTypeDisplay"
+            color="gray"
+            size="xs"
+          >
+            {{ paymentMethodTypeDisplay }}
+          </UBadge>
+        </div>
           <UButton
             size="xs"
             variant="ghost"
@@ -168,11 +175,11 @@ interface PlanDetails {
   tierName: string;
   price: number;
   currency: string;
-  billingCycle: 'MONTHLY' | 'ANNUAL';
+  billingCycle: 'MONTHLY' | 'ANNUAL' | 'TRIAL';
   renewalDate: string;
   paymentMethodMask?: string;
   paymentMethodType?: string;
-  status: 'active' | 'past_due' | 'canceled' | 'pending';
+  status: 'active' | 'past_due' | 'canceled' | 'pending' | 'trial';
   cancellationDate?: string;
   cancellationEffectiveDate?: string;
   pendingPlanTier?: string;
@@ -204,6 +211,9 @@ const resolveStatus = (status?: string | null): PlanStatus | null => {
   const normalized = status.toLowerCase().replace(/[\s-]+/g, '_');
 
   switch (normalized) {
+    case 'trial':
+    case 'trialing':
+      return 'trial';
     case 'active':
       return 'active';
     case 'past_due':
@@ -228,6 +238,8 @@ const statusColor = computed(() => {
   switch (normalizedStatus.value) {
     case 'active':
       return 'green';
+    case 'trial':
+      return 'blue';
     case 'past_due':
       return 'orange';
     case 'canceled':
@@ -293,6 +305,10 @@ const billingCycleLabel = computed(() => {
     return t('billing.plan.year');
   }
 
+  if (normalizedStatus.value === 'trial') {
+    return t('billing.plan.trial');
+  }
+
   return props.plan.billingCycle;
 });
 
@@ -323,6 +339,19 @@ const canUpdatePayment = computed(() => {
 });
 
 const canResume = computed(() => normalizedStatus.value === 'canceled');
+
+const paymentMethodDisplay = computed(() => {
+  return props.plan?.paymentMethodMask?.trim()
+    || props.plan?.paymentMethodType?.trim()
+    || t('billing.plan.noPaymentMethod');
+});
+
+const paymentMethodTypeDisplay = computed(() => {
+  const type = props.plan?.paymentMethodType;
+  if (!type) return null;
+  const normalized = type.replace(/[_\\s]+/g, ' ').toLowerCase();
+  return normalized.split(' ').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+});
 
 // Methods
 function formatDate(dateInput: string | null | undefined): string {

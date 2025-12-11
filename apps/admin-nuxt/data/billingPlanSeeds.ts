@@ -23,7 +23,11 @@ const createPlan = (plan: Partial<TenantPlan>): TenantPlan => ({
     'Priority support',
     'Custom branding'
   ],
-  paypalSubscriptionId: plan.paypalSubscriptionId ?? 'I-DEFAULTSEED'
+  paypalSubscriptionId: plan.paypalSubscriptionId ?? 'I-DEFAULTSEED',
+  maxStaff: plan.maxStaff ?? -1,
+  maxDoctors: plan.maxDoctors ?? -1,
+  staffUsed: plan.staffUsed ?? 0,
+  doctorsUsed: plan.doctorsUsed ?? 0
 });
 
 export const billingPlanSeeds: SeedMap = {

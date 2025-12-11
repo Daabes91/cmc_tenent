@@ -1,8 +1,8 @@
 package com.clinic.modules.saas.dto;
 
 /**
- * Response DTO for payment confirmation endpoint.
- * Contains session token and redirect URL after successful payment.
+ * DTO for payment confirmation response.
+ * Contains session token and redirect URL after successful payment verification.
  */
 public class PaymentConfirmationResponse {
 
@@ -14,19 +14,25 @@ public class PaymentConfirmationResponse {
     public PaymentConfirmationResponse() {
     }
 
+    public PaymentConfirmationResponse(boolean success, String sessionToken, String redirectUrl) {
+        this.success = success;
+        this.sessionToken = sessionToken;
+        this.redirectUrl = redirectUrl;
+    }
+
+    public PaymentConfirmationResponse(boolean success, String error) {
+        this.success = success;
+        this.error = error;
+    }
+
+    // Static factory methods for convenience
+
     public static PaymentConfirmationResponse success(String sessionToken, String redirectUrl) {
-        PaymentConfirmationResponse response = new PaymentConfirmationResponse();
-        response.success = true;
-        response.sessionToken = sessionToken;
-        response.redirectUrl = redirectUrl;
-        return response;
+        return new PaymentConfirmationResponse(true, sessionToken, redirectUrl);
     }
 
     public static PaymentConfirmationResponse error(String error) {
-        PaymentConfirmationResponse response = new PaymentConfirmationResponse();
-        response.success = false;
-        response.error = error;
-        return response;
+        return new PaymentConfirmationResponse(false, error);
     }
 
     // Getters and Setters

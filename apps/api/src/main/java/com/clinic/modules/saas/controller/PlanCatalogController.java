@@ -19,7 +19,7 @@ import java.util.*;
  * Public endpoint to expose available subscription plans for the marketing site.
  */
 @RestController
-@RequestMapping("/api/public/plans")
+@RequestMapping({"/api/public/plans", "/public/plans"})
 @CrossOrigin(origins = "*")
 @Tag(name = "Public Plan Catalog", description = "Public endpoints for marketing site to render plan catalog")
 public class PlanCatalogController {

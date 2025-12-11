@@ -204,7 +204,7 @@ Check:
 1. Dr. Sarah Johnson - Family Medicine
 2. Michael Chen - Dental Clinic
 3. Dr. Aisha Al-Rashid - Physical Therapy
-4. Dr. Layla Qadri - Dental Group
+4. Dr. Layla Cliniqax - Dental Group
 5. Sameer Haddad - Health Network
 
 ### Pricing Tiers (3 total)

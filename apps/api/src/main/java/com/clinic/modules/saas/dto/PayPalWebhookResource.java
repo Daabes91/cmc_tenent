@@ -30,6 +30,12 @@ public class PayPalWebhookResource {
     @JsonProperty("update_time")
     private String updateTime;
 
+    @JsonProperty("payment_source")
+    private Map<String, Object> paymentSource;
+
+    @JsonProperty("billing_agreement_id")
+    private String billingAgreementId;
+
     // Constructors
 
     public PayPalWebhookResource() {
@@ -97,5 +103,21 @@ public class PayPalWebhookResource {
 
     public void setUpdateTime(String updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Map<String, Object> getPaymentSource() {
+        return paymentSource;
+    }
+
+    public void setPaymentSource(Map<String, Object> paymentSource) {
+        this.paymentSource = paymentSource;
+    }
+
+    public String getBillingAgreementId() {
+        return billingAgreementId;
+    }
+
+    public void setBillingAgreementId(String billingAgreementId) {
+        this.billingAgreementId = billingAgreementId;
     }
 }

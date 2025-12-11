@@ -1,6 +1,7 @@
 export function useAuthorizedFetch() {
   const auth = useAuth();
   const apiBase = useApiBase();
+  const { tenant } = useTenantContext();
 
   async function request<T>(url: string, options: any = {}, retry = true): Promise<T> {
     try {
@@ -9,6 +10,7 @@ export function useAuthorizedFetch() {
         baseURL: apiBase,
         headers: {
           ...auth.authorizationHeader(),
+          ...(tenant.value?.slug ? { "X-Tenant-Slug": tenant.value.slug } : {}),
           ...(options.headers ?? {})
         },
         ...options

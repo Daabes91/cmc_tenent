@@ -18,6 +18,8 @@ public record AppointmentResponse(
         Integer slotDurationMinutes,
         BigDecimal paymentAmount,
         String paymentMethod,
-        String paymentCurrency
+        String paymentCurrency,
+        boolean patientConfirmed,
+        OffsetDateTime patientConfirmedAt
 ) {
 }

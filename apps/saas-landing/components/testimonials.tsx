@@ -4,11 +4,16 @@ import Image from "next/image"
 import { healthcareCopy } from "@/lib/content/healthcare-copy"
 import { useLanguage } from "@/contexts/LanguageContext"
 import SectionCTA from './SectionCTA'
+import { withBasePath } from "@/lib/base-path"
 
 export default function Testimonials() {
   const { language } = useLanguage();
   // Use healthcare-specific testimonials from configuration
   const { title, subtitle, items: testimonials } = healthcareCopy[language].testimonials
+  const resolvedTestimonials = testimonials.map((testimonial) => ({
+    ...testimonial,
+    avatar: testimonial.avatar?.startsWith('/') ? withBasePath(testimonial.avatar) : testimonial.avatar,
+  }));
 
   return (
     <section id="testimonials" className="relative py-20 md:py-32">
@@ -23,7 +28,7 @@ export default function Testimonials() {
           </p>
         </div>
         <div className="grid gap-8 md:grid-cols-3">
-          {testimonials.map((testimonial, index) => (
+          {resolvedTestimonials.map((testimonial, index) => (
             <div
               key={index}
               className="flex flex-col rounded-xl border border-slate-200 bg-white/90 dark:border-gray-800 dark:bg-gray-900/50 p-6 backdrop-blur-sm transition-all hover:shadow-lg hover:border-primary/30"

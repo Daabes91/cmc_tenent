@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { withBasePath } from "@/lib/base-path"
 
 interface StepCardProps {
   step: {
@@ -16,7 +17,7 @@ export default function StepCard({ step }: StepCardProps) {
       {/* Image at top */}
       <div className="relative h-40 overflow-hidden">
         <Image
-          src={step.image || "/placeholder.svg"}
+          src={step.image || withBasePath("/placeholder.svg")}
           alt={step.title}
           fill
           className="object-cover"

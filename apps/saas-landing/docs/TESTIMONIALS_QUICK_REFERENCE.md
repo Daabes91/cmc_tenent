@@ -30,7 +30,7 @@ Healthcare-specific testimonials showcasing real results from diverse clinic typ
 | Dr. Sarah Johnson | Clinic Director | Family Medicine Practice | 80% reduction in scheduling conflicts |
 | Michael Chen | Practice Manager | Dental Clinic | 15 hours saved per week |
 | Dr. Aisha Al-Rashid | Owner | Physical Therapy Center | 35% increase in patient satisfaction |
-| Dr. Layla Qadri | Medical Director | Qadri Dental Group | 28% reduction in no-shows |
+| Dr. Layla Cliniqax | Medical Director | Cliniqax Dental Group | 28% reduction in no-shows |
 | Sameer Haddad | COO | Shifa Health Network | 11 locations managed seamlessly |
 
 ## Key Features

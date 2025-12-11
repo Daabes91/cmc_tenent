@@ -21,4 +21,5 @@ public interface PayPalConfigRepository extends JpaRepository<PayPalConfigEntity
      * @return Optional containing the PayPal configuration if it exists
      */
     Optional<PayPalConfigEntity> findFirstByOrderByIdAsc();
+
 }

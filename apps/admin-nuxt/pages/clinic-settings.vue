@@ -406,6 +406,69 @@
               </div>
             </div>
 
+            <!-- E-commerce Settings Section -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
+              <div class="bg-gradient-to-r from-purple-500 to-violet-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <UIcon name="i-lucide-shopping-bag" class="h-5 w-5 text-white" />
+                  <div>
+                    <h2 class="text-lg font-semibold text-white">{{ t('clinicSettings.sections.ecommerce.title') }}</h2>
+                    <p class="text-sm text-purple-100">{{ t('clinicSettings.sections.ecommerce.subtitle') }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="p-6">
+                <div v-if="loading" class="space-y-3">
+                  <USkeleton class="h-12 rounded-xl" />
+                </div>
+                <div v-else class="space-y-4">
+                  <div class="flex items-start gap-4 p-4 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 border border-purple-200 dark:border-purple-800 rounded-xl">
+                    <UIcon name="i-lucide-info" class="h-5 w-5 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-purple-900 dark:text-purple-100 mb-2">{{ t('clinicSettings.ecommerce.title') }}</h4>
+                      <p class="text-sm text-purple-700 dark:text-purple-300 mb-3">
+                        {{ t('clinicSettings.ecommerce.description') }}
+                      </p>
+                      <div class="flex items-center gap-3">
+                        <UToggle 
+                          v-model="formData.ecommerceEnabled" 
+                          :disabled="saving"
+                          size="lg"
+                        />
+                        <span class="text-sm font-medium text-purple-900 dark:text-purple-100">
+                          {{ formData.ecommerceEnabled ? t('clinicSettings.ecommerce.enabled') : t('clinicSettings.ecommerce.disabled') }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <UAlert
+                    v-if="formData.ecommerceEnabled"
+                    color="green"
+                    icon="i-lucide-check-circle"
+                    class="rounded-xl border border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-800"
+                  >
+                    <template #title>{{ t('clinicSettings.ecommerce.enabledTitle') }}</template>
+                    <template #description>
+                      {{ t('clinicSettings.ecommerce.enabledDescription') }}
+                    </template>
+                  </UAlert>
+                  
+                  <UAlert
+                    v-else
+                    color="gray"
+                    icon="i-lucide-eye-off"
+                    class="rounded-xl border border-gray-200 bg-gray-50 dark:bg-gray-900/20 dark:border-gray-800"
+                  >
+                    <template #title>{{ t('clinicSettings.ecommerce.disabledTitle') }}</template>
+                    <template #description>
+                      {{ t('clinicSettings.ecommerce.disabledDescription') }}
+                    </template>
+                  </UAlert>
+                </div>
+              </div>
+            </div>
+
             <!-- Payment Settings Section -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
               <div class="bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-4">
@@ -507,81 +570,32 @@
                 </div>
               </div>
               <div class="p-6 space-y-6">
-                <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4">
-                  <div class="flex items-start gap-3">
-                    <UIcon name="i-lucide-info" class="h-5 w-5 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+                <div class="mt-6 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-slate-900/30 p-4 space-y-3">
+                  <div class="flex items-center justify-between gap-2">
                     <div>
-                      <h4 class="font-semibold text-emerald-900 dark:text-emerald-100 mb-2">{{ t('clinicSettings.email.title') }}</h4>
-                      <p class="text-sm text-emerald-700 dark:text-emerald-300 mb-3">
-                        {{ t('clinicSettings.email.description') }}
-                      </p>
-                      <p class="text-xs text-emerald-600 dark:text-emerald-400">
-                        {{ t('clinicSettings.email.hint') }}
+                      <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ t('clinicSettings.email.reminders.title') }}</p>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">
+                        {{ t('clinicSettings.email.reminders.subtitle') }}
                       </p>
                     </div>
+                    <UToggle v-model="formData.reminderEnabled" />
                   </div>
-                </div>
 
-                <div class="grid gap-4 md:grid-cols-2">
-                  <UFormGroup
-                    class="md:col-span-2"
-                    :label="t('clinicSettings.form.sendgrid.apiKey.label')"
-                    :hint="t('clinicSettings.form.sendgrid.apiKey.hint')"
-                  >
-                    <UInput
-                      v-model="formData.sendgridApiKey"
-                      type="password"
-                      size="lg"
-                      :placeholder="t('clinicSettings.form.sendgrid.apiKey.placeholder')"
-                      icon="i-lucide-key-round"
-                    />
-                  </UFormGroup>
-
-                  <UFormGroup
-                    :label="t('clinicSettings.form.sendgrid.fromEmail.label')"
-                    :hint="t('clinicSettings.form.sendgrid.fromEmail.hint')"
-                  >
-                    <UInput
-                      v-model="formData.emailFrom"
-                      size="lg"
-                      type="email"
-                      :placeholder="t('clinicSettings.form.sendgrid.fromEmail.placeholder')"
-                      icon="i-lucide-at-sign"
-                    />
-                  </UFormGroup>
-
-                  <UFormGroup
-                    :label="t('clinicSettings.form.sendgrid.fromName.label')"
-                    :hint="t('clinicSettings.form.sendgrid.fromName.hint')"
-                  >
-                    <UInput
-                      v-model="formData.emailFromName"
-                      size="lg"
-                      :placeholder="t('clinicSettings.form.sendgrid.fromName.placeholder')"
-                      icon="i-lucide-contact"
-                    />
-                  </UFormGroup>
-                </div>
-
-                <div class="flex flex-col gap-3 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-900/20 p-4 md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <p class="font-semibold text-emerald-900 dark:text-emerald-100">
-                      {{ t('clinicSettings.form.sendgrid.enableEmails.label') }}
-                    </p>
-                    <p class="text-sm text-emerald-700 dark:text-emerald-300">
-                      {{ t('clinicSettings.form.sendgrid.enableEmails.hint') }}
-                    </p>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3" :class="{ 'opacity-50 pointer-events-none': !formData.reminderEnabled }">
+                    <UFormGroup
+                      :label="t('clinicSettings.email.reminders.hoursBefore.label')"
+                      :hint="t('clinicSettings.email.reminders.hoursBefore.hint')"
+                    >
+                      <UInput
+                        v-model="formData.reminderHoursBefore"
+                        type="number"
+                        min="1"
+                        max="168"
+                        size="lg"
+                        placeholder="24"
+                      />
+                    </UFormGroup>
                   </div>
-                  <UToggle v-model="formData.emailEnabled" :disabled="!emailConfigComplete" />
-                </div>
-
-                <div v-if="formData.emailEnabled && emailConfigComplete" class="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3">
-                  <UIcon name="i-lucide-check-circle-2" class="h-4 w-4" />
-                  <span>{{ t('clinicSettings.email.configured') }}</span>
-                </div>
-                <div v-else-if="!emailConfigComplete" class="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
-                  <UIcon name="i-lucide-alert-triangle" class="h-4 w-4" />
-                  <span>{{ t('clinicSettings.email.incomplete') }}</span>
                 </div>
               </div>
             </div>
@@ -1090,10 +1104,11 @@ interface ClinicSettingsForm {
   paypalEnvironment: string;
   paypalClientId: string;
   paypalClientSecret: string;
-  sendgridApiKey: string;
   emailFrom: string;
   emailFromName: string;
   emailEnabled: boolean;
+  reminderEnabled: boolean;
+  reminderHoursBefore: string;
   heroMediaType: string;
   heroImageUrl: string;
   heroVideoId: string;
@@ -1102,12 +1117,13 @@ interface ClinicSettingsForm {
   whyChooseSubtitleEn: string;
   whyChooseSubtitleAr: string;
   whyChooseFeatures: WhyChooseFeatureForm[];
+  ecommerceEnabled: boolean;
 }
 
 const DEFAULT_CURRENCY = "AED";
 const DEFAULT_LOCALE = "en-US"; // Always use English (US) locale
 
-const DEFAULT_WHY_CHOOSE_TITLE_EN = "Why Choose Qadri's Clinic?";
+const DEFAULT_WHY_CHOOSE_TITLE_EN = "Why Choose Cliniqax's Clinic?";
 const DEFAULT_WHY_CHOOSE_TITLE_AR = "لماذا تختار عيادة قدري؟";
 const DEFAULT_WHY_CHOOSE_SUBTITLE_EN = "We combine cutting-edge technology with compassionate care to deliver exceptional dental experiences.";
 const DEFAULT_WHY_CHOOSE_SUBTITLE_AR = "نجمع بين أحدث التقنيات والرعاية الإنسانية لنقدم تجربة أسنان استثنائية.";
@@ -1270,10 +1286,11 @@ const formData = ref<ClinicSettingsForm>({
   paypalEnvironment: "sandbox",
   paypalClientId: "",
   paypalClientSecret: "",
-  sendgridApiKey: "",
   emailFrom: "",
   emailFromName: "",
   emailEnabled: false,
+  reminderEnabled: false,
+  reminderHoursBefore: "24",
   heroMediaType: "image",
   heroImageUrl: "",
   heroVideoId: "",
@@ -1281,7 +1298,8 @@ const formData = ref<ClinicSettingsForm>({
   whyChooseTitleAr: DEFAULT_WHY_CHOOSE_TITLE_AR,
   whyChooseSubtitleEn: DEFAULT_WHY_CHOOSE_SUBTITLE_EN,
   whyChooseSubtitleAr: DEFAULT_WHY_CHOOSE_SUBTITLE_AR,
-  whyChooseFeatures: getDefaultWhyChooseFeatures()
+  whyChooseFeatures: getDefaultWhyChooseFeatures(),
+  ecommerceEnabled: false
 });
 
 // Modal state
@@ -1316,23 +1334,21 @@ const billingPlanData = computed(() => {
 const currentPlanTier = computed(() => billingPlan.value?.planTierName || 'Basic');
 
 const formattedRenewalDate = computed(() => {
-  if (!billingPlan.value?.renewalDate) {
+  const rd = billingPlan.value?.renewalDate;
+  if (!rd) {
     return t('billing.plan.notAvailable');
   }
-  
-  try {
-    const date = new Date(billingPlan.value.renewalDate);
-    if (Number.isNaN(date.getTime())) {
-      return t('billing.plan.notAvailable');
-    }
-    return new Intl.DateTimeFormat(formData.value.locale || DEFAULT_LOCALE, {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
-    }).format(date);
-  } catch {
+
+  const date = typeof rd === 'number' ? new Date(rd) : new Date(rd);
+  if (Number.isNaN(date.getTime())) {
     return t('billing.plan.notAvailable');
   }
+
+  return new Intl.DateTimeFormat(formData.value.locale || DEFAULT_LOCALE, {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(date);
 });
 
 // Available plan tiers for upgrade
@@ -1401,10 +1417,8 @@ const selectedCurrencyOption = computed(() => {
 });
 
 const emailConfigComplete = computed(() => {
-  const apiKey = formData.value.sendgridApiKey?.trim();
-  const fromEmail = formData.value.emailFrom?.trim();
-  const fromName = formData.value.emailFromName?.trim();
-  return Boolean(apiKey && fromEmail && fromName);
+  // Allow enabling email even if tenant fields are empty (env credentials will be used)
+  return true;
 });
 
 const formatPlanDate = (input?: string | null) => {
@@ -1423,16 +1437,6 @@ const formatPlanDate = (input?: string | null) => {
     year: 'numeric'
   }).format(date);
 };
-
-watch(
-  emailConfigComplete,
-  complete => {
-    if (!complete && formData.value.emailEnabled) {
-      formData.value.emailEnabled = false;
-    }
-  },
-  { immediate: true }
-);
 
 // Plan management handlers
 async function handleUpgradeConfirm(targetTier: string, billingCycle: string) {
@@ -1513,14 +1517,15 @@ watch(
       virtualConsultationFee: newSettings.virtualConsultationFee?.toString() || "",
       virtualConsultationMeetingLink: newSettings.virtualConsultationMeetingLink || "",
       slotDurationMinutes: (newSettings.slotDurationMinutes ?? 30).toString(),
-      exchangeRates: newSettings.exchangeRates || { ...DEFAULT_EXCHANGE_RATES },
-      paypalEnvironment: newSettings.paypalEnvironment || "sandbox",
-      paypalClientId: newSettings.paypalClientId || "",
-      paypalClientSecret: newSettings.paypalClientSecret || "",
-      sendgridApiKey: newSettings.sendgridApiKey || "",
-      emailFrom: newSettings.emailFrom || "",
-      emailFromName: newSettings.emailFromName || "",
-      emailEnabled: newSettings.emailEnabled ?? true,
+  exchangeRates: newSettings.exchangeRates || { ...DEFAULT_EXCHANGE_RATES },
+  paypalEnvironment: newSettings.paypalEnvironment || "sandbox",
+  paypalClientId: newSettings.paypalClientId || "",
+  paypalClientSecret: newSettings.paypalClientSecret || "",
+  emailFrom: newSettings.emailFrom || "",
+  emailFromName: newSettings.emailFromName || "",
+  emailEnabled: newSettings.emailEnabled ?? true,
+      reminderEnabled: newSettings.reminderEnabled ?? false,
+      reminderHoursBefore: newSettings.reminderHoursBefore?.toString() || "24",
       heroMediaType: newSettings.heroMediaType || "image",
       heroImageUrl: newSettings.heroImageUrl || "",
       heroVideoId: newSettings.heroVideoId || "",
@@ -1528,7 +1533,8 @@ watch(
       whyChooseTitleAr: newSettings.whyChoose?.title?.ar || DEFAULT_WHY_CHOOSE_TITLE_AR,
       whyChooseSubtitleEn: newSettings.whyChoose?.subtitle?.en || DEFAULT_WHY_CHOOSE_SUBTITLE_EN,
       whyChooseSubtitleAr: newSettings.whyChoose?.subtitle?.ar || DEFAULT_WHY_CHOOSE_SUBTITLE_AR,
-      whyChooseFeatures: mapWhyChooseFeaturesFromSettings(newSettings.whyChoose?.features)
+      whyChooseFeatures: mapWhyChooseFeaturesFromSettings(newSettings.whyChoose?.features),
+      ecommerceEnabled: newSettings.ecommerceEnabled ?? false
     };
   },
   { immediate: true }
@@ -1701,10 +1707,11 @@ async function saveSettings() {
       paypalEnvironment: paypalEnvironmentValue,
       paypalClientId: paypalClientIdValue,
       paypalClientSecret: paypalClientSecretValue,
-      sendgridApiKey: sanitize(formData.value.sendgridApiKey),
       emailFrom: sanitize(formData.value.emailFrom),
       emailFromName: sanitize(formData.value.emailFromName),
       emailEnabled: formData.value.emailEnabled,
+      reminderEnabled: formData.value.reminderEnabled,
+      reminderHoursBefore: Number(formData.value.reminderHoursBefore) || 24,
       heroMediaType: formData.value.heroMediaType || "image",
       heroImageUrl: sanitize(formData.value.heroImageUrl),
       heroVideoId: sanitize(formData.value.heroVideoId),
@@ -1871,7 +1878,6 @@ function resetForm() {
     paypalEnvironment: current.paypalEnvironment || "sandbox",
     paypalClientId: current.paypalClientId || "",
     paypalClientSecret: current.paypalClientSecret || "",
-    sendgridApiKey: current.sendgridApiKey || "",
     emailFrom: current.emailFrom || "",
     emailFromName: current.emailFromName || "",
     emailEnabled: current.emailEnabled ?? true,
@@ -1882,7 +1888,8 @@ function resetForm() {
     whyChooseTitleAr: current.whyChoose?.title?.ar || DEFAULT_WHY_CHOOSE_TITLE_AR,
     whyChooseSubtitleEn: current.whyChoose?.subtitle?.en || DEFAULT_WHY_CHOOSE_SUBTITLE_EN,
     whyChooseSubtitleAr: current.whyChoose?.subtitle?.ar || DEFAULT_WHY_CHOOSE_SUBTITLE_AR,
-    whyChooseFeatures: mapWhyChooseFeaturesFromSettings(current.whyChoose?.features)
+    whyChooseFeatures: mapWhyChooseFeaturesFromSettings(current.whyChoose?.features),
+    ecommerceEnabled: current.ecommerceEnabled ?? false
   };
 }
 </script>

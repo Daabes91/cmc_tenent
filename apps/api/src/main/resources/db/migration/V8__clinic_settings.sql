@@ -47,9 +47,9 @@ INSERT INTO clinic_settings (
     saturday_hours,
     sunday_hours
 ) VALUES (
-    'Qadri''s Clinic',
+    'Cliniqax''s Clinic',
     '+1 (555) 123-4567',
-    'info@qadrisclinic.com',
+    'info@Cliniqaxsclinic.com',
     '123 Healthcare Avenue',
     'Medical City',
     'CA',

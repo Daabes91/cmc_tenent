@@ -35,10 +35,6 @@ const ScrollRestoration = () => {
 };
 
 // Lazy load components
-const SocialProof = dynamic(() => import("@/components/social-proof"), {
-  ssr: false,
-});
-
 const Features = dynamic(() => import("@/components/features"), {
   ssr: false,
 });
@@ -52,10 +48,6 @@ const Testimonials = dynamic(() => import("@/components/testimonials"), {
 });
 
 const Pricing = dynamic(() => import("@/components/pricing"), {
-  ssr: false,
-});
-
-const ComparisonTable = dynamic(() => import("@/components/comparison-table"), {
   ssr: false,
 });
 
@@ -132,9 +124,6 @@ export default function LandingPage() {
       <Header />
       <Hero />
       <LazyLoad>
-        <SocialProof />
-      </LazyLoad>
-      <LazyLoad>
         <Features />
       </LazyLoad>
       <LazyLoad>
@@ -145,9 +134,6 @@ export default function LandingPage() {
       </LazyLoad>
       <LazyLoad>
         <Pricing />
-      </LazyLoad>
-      <LazyLoad>
-        <ComparisonTable />
       </LazyLoad>
       <LazyLoad>
         <Integrations />

@@ -10,6 +10,10 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * Manually creates SecurityProperties from environment variables that don't follow
@@ -30,6 +34,26 @@ public class JwtEnvironmentPropertiesConfig {
         log.info("Creating SecurityProperties with environment variable overrides");
 
         SecurityProperties properties = new SecurityProperties();
+
+        // CORS configuration (we do this first so it always reflects the environment)
+        String corsBaseDomain = firstNonBlank(
+                environment.getProperty("SECURITY_CORS_BASE_DOMAIN"),
+                environment.getProperty("CORS_BASE_DOMAIN")
+        );
+        List<String> publicOrigins = collectList(environment, "SECURITY_CORS_PUBLIC_ORIGINS");
+        List<String> adminOrigins = collectList(environment, "SECURITY_CORS_ADMIN_ORIGINS");
+        if (!publicOrigins.isEmpty() || !adminOrigins.isEmpty() || (corsBaseDomain != null && !corsBaseDomain.isBlank())) {
+            SecurityProperties.Cors cors = new SecurityProperties.Cors(
+                    publicOrigins.isEmpty() ? properties.cors().publicOrigins() : publicOrigins,
+                    adminOrigins.isEmpty() ? properties.cors().adminOrigins() : adminOrigins,
+                    corsBaseDomain != null ? corsBaseDomain : properties.cors().baseDomain()
+            );
+            properties.setCors(cors);
+            log.info("Applied CORS configuration from environment: baseDomain='{}', publicOrigins={}, adminOrigins={}",
+                    cors.baseDomain(), cors.publicOrigins(), cors.adminOrigins());
+        } else {
+            log.info("Using default CORS configuration (no environment overrides found)");
+        }
 
         // Staff JWT configuration from environment
         String staffIssuer = environment.getProperty("JWT_STAFF_ISSUER");
@@ -93,5 +117,35 @@ public class JwtEnvironmentPropertiesConfig {
         }
 
         return properties;
+    }
+
+    private String firstNonBlank(String... values) {
+        return Arrays.stream(values)
+                .filter(v -> v != null && !v.isBlank())
+                .findFirst()
+                .orElse(null);
+    }
+
+    private List<String> collectList(Environment env, String baseKey) {
+        List<String> result = new ArrayList<>();
+
+        // Comma-separated form
+        String combined = env.getProperty(baseKey);
+        if (combined != null && !combined.isBlank()) {
+            result.addAll(Arrays.stream(combined.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .toList());
+        }
+
+        // Indexed form: KEY_0, KEY_1, ...
+        IntStream.range(0, 20).forEach(i -> {
+            String value = env.getProperty(baseKey + "_" + i);
+            if (value != null && !value.isBlank()) {
+                result.add(value.trim());
+            }
+        });
+
+        return result;
     }
 }

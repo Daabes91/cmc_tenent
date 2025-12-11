@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+  <title id="title">Michael Chen</title>
+  <desc id="desc">Placeholder avatar for Michael Chen</desc>
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00a33b"/>
+      <stop offset="100%" stop-color="#0f7c30"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="320" fill="url(#grad)" rx="32" ry="32"/>
+  <circle cx="160" cy="130" r="64" fill="#ffffff" fill-opacity="0.9"/>
+  <rect x="76" y="210" width="168" height="70" rx="20" fill="#ffffff" fill-opacity="0.9"/>
+  <text x="160" y="238" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#0f7c30" text-anchor="middle">MC</text>
+</svg>

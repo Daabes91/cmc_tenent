@@ -122,7 +122,7 @@ export default function AppointmentsPage() {
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold text-white">Book Your Appointment</h1>
             <p className="text-blue-50 mt-4 text-lg">
-              Schedule your visit to Qadri's Clinic - Choose your service, doctor, and preferred time
+              Schedule your visit to Cliniqax's Clinic - Choose your service, doctor, and preferred time
             </p>
           </div>
         </div>

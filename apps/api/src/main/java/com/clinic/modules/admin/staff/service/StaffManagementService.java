@@ -8,6 +8,9 @@ import com.clinic.modules.admin.staff.repository.StaffUserRepository;
 import com.clinic.modules.core.doctor.DoctorEntity;
 import com.clinic.modules.core.doctor.DoctorRepository;
 import com.clinic.modules.core.email.EmailService;
+import com.clinic.modules.saas.config.PlanTierConfig;
+import com.clinic.modules.saas.model.PlanTier;
+import com.clinic.modules.saas.repository.SubscriptionRepository;
 import com.clinic.modules.core.tenant.TenantContextHolder;
 import com.clinic.modules.core.tenant.TenantService;
 import org.slf4j.Logger;
@@ -16,6 +19,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -37,6 +42,8 @@ public class StaffManagementService {
     private final DoctorRepository doctorRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final PlanTierConfig planTierConfig;
+    private final SubscriptionRepository subscriptionRepository;
     private final TenantService tenantService;
     private final TenantContextHolder tenantContextHolder;
 
@@ -50,6 +57,8 @@ public class StaffManagementService {
             DoctorRepository doctorRepository,
             PasswordEncoder passwordEncoder,
             EmailService emailService,
+            PlanTierConfig planTierConfig,
+            SubscriptionRepository subscriptionRepository,
             TenantService tenantService,
             TenantContextHolder tenantContextHolder
     ) {
@@ -59,6 +68,8 @@ public class StaffManagementService {
         this.doctorRepository = doctorRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.planTierConfig = planTierConfig;
+        this.subscriptionRepository = subscriptionRepository;
         this.tenantService = tenantService;
         this.tenantContextHolder = tenantContextHolder;
     }
@@ -70,6 +81,8 @@ public class StaffManagementService {
     public StaffResponse createStaff(CreateStaffRequest request) {
         String normalizedEmail = request.email().trim().toLowerCase();
         log.info("Creating new staff member with email: {}", normalizedEmail);
+
+        enforceStaffLimit(currentTenantId());
 
         // Check if email already exists
         if (staffUserRepository.findByEmailIgnoreCaseAndTenantId(normalizedEmail, currentTenantId()).isPresent()) {
@@ -452,5 +465,39 @@ public class StaffManagementService {
 
     private Long currentTenantId() {
         return tenantContextHolder.requireTenantId();
+    }
+
+    /**
+     * Enforce staff limit based on the tenant's active plan.
+     */
+    private void enforceStaffLimit(Long tenantId) {
+        int maxStaff = resolveMaxStaff(tenantId);
+        if (maxStaff < 0) {
+            return; // Unlimited
+        }
+        long currentCount = staffUserRepository.countByTenantId(tenantId);
+        if (currentCount >= maxStaff) {
+            PlanTier tier = resolvePlanTier(tenantId);
+            String planName = tier != null ? tier.name() : "UNKNOWN";
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Staff limit reached for plan " + planName + " (" + maxStaff + " staff allowed)"
+            );
+        }
+    }
+
+    private int resolveMaxStaff(Long tenantId) {
+        PlanTier tier = resolvePlanTier(tenantId);
+        PlanTierConfig.PlanTierDetails details = tier != null ? planTierConfig.getPlanDetails(tier) : null;
+        if (details == null) {
+            return -1;
+        }
+        return details.getMaxStaff();
+    }
+
+    private PlanTier resolvePlanTier(Long tenantId) {
+        return subscriptionRepository.findByTenantId(tenantId)
+                .map(subscription -> subscription.getPlanTier() != null ? subscription.getPlanTier() : PlanTier.BASIC)
+                .orElse(PlanTier.BASIC);
     }
 }

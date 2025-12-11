@@ -25,7 +25,10 @@
     />
 
     <div class="flex min-h-screen">
-      <aside class="hidden w-72 flex-col border-r border-slate-200/60 bg-white/80 backdrop-blur-xl transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/80 lg:flex lg:sticky lg:top-0 lg:h-screen">
+      <aside class="hidden w-72 flex-col border-r border-slate-200/60
+bg-white/80 backdrop-blur-xl transition-colors duration-300
+dark:border-white/10 dark:bg-slate-950/80 
+lg:flex lg:sticky lg:top-0 lg:h-screen overflow-y-auto">
         <div class="flex h-20 items-center gap-3.5 border-b border-slate-200/60 px-6 dark:border-white/10">
           <div class="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-primary-gradient text-2xl shadow-lg shadow-teal-500/30">
             <img
@@ -209,8 +212,6 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-              <TenantSwitcher />
-
               <!-- View Website Button -->
               <UButton
                 icon="i-lucide-globe"
@@ -349,7 +350,6 @@ import { nextTick } from "vue";
 import type { ModuleName } from '@/types/staff';
 import { dashboardSummaryMock, upcomingAppointmentsMock } from "@/data/mock";
 import { useAdminApi } from "@/composables/useAdminApi";
-import TenantSwitcher from "@/components/global/TenantSwitcher.vue";
 
 // Mobile navigation composables
 const { viewport } = useViewport();
@@ -427,23 +427,40 @@ const toggleTheme = () => {
 // Open patient-facing website with tenant slug
 const config = useRuntimeConfig();
 const { tenantSlug } = useTenantSlug();
+const { tenant, fetchTenantContext } = useTenantContext();
+
+const buildTenantHostname = (slug: string, hostname: string) => {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return hostname;
+  }
+
+  const parts = hostname.split('.');
+  if (parts.length >= 3) {
+    // Replace existing subdomain with tenant slug (keep base domain)
+    const baseDomain = parts.slice(-2).join('.');
+    return `${slug}.${baseDomain}`;
+  }
+
+  return `${slug}.${hostname}`;
+};
+
 const openWebsite = () => {
   const baseUrl = config.public.webUrl;
 
-  // Build URL with tenant slug subdomain
-  // For local: http://daabes.localhost:3001
-  // For production: https://daabes.yourdomain.com
   try {
     const url = new URL(baseUrl);
     const slug = tenantSlug.value;
 
-    // Check if hostname already includes the tenant slug
-    if (!url.hostname.startsWith(`${slug}.`)) {
-      // Insert tenant slug as subdomain
-      url.hostname = `${slug}.${url.hostname}`;
+    // For localhost, just open the base URL (subdomain routing doesn't work well in localhost)
+    // For production, use subdomain routing
+    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+      // Just open the base URL for localhost
+      window.open(url.toString(), '_blank');
+    } else {
+      // Production: Build URL with tenant slug subdomain
+      url.hostname = buildTenantHostname(slug, url.hostname);
+      window.open(url.toString(), '_blank');
     }
-
-    window.open(url.toString(), '_blank');
   } catch (error) {
     // Fallback to base URL if URL construction fails
     console.error('Failed to construct tenant URL:', error);
@@ -766,6 +783,20 @@ const allNavigationItems = computed(() => [
     icon: "i-lucide-bar-chart-3",
     to: "/reports"
   },
+  ...(tenant.value?.ecommerceEnabled
+    ? [
+        {
+          label: t("navigation.products") || "Products",
+          icon: "i-lucide-package",
+          to: "/ecommerce/products"
+        },
+        {
+          label: t("navigation.carousels") || "Carousels",
+          icon: "i-lucide-panels-top-left",
+          to: "/ecommerce/carousels"
+        }
+      ]
+    : []),
   {
     label: t("navigation.financeExpenses"),
     icon: "i-lucide-wallet",
@@ -1394,6 +1425,8 @@ onMounted(() => {
 
   // Fetch initial count
   fetchPendingCount();
+  // Prefetch tenant context for ecommerce gating
+  fetchTenantContext().catch(() => {});
 
   // Refresh count every 60 seconds
   const intervalId = setInterval(fetchPendingCount, 60000);

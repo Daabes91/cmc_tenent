@@ -508,12 +508,14 @@
         "refresh": "تم تحديث المواعيد"
       }
     },
-    "status": {
-      "scheduled": "مجدول",
-      "confirmed": "مؤكد",
-      "completed": "مكتمل",
-      "cancelled": "ملغى"
-    },
+      "status": {
+        "scheduled": "مجدول",
+        "confirmed": "مؤكد",
+        "completed": "مكتمل",
+        "cancelled": "ملغى",
+        "patientConfirmed": "تم التأكيد من المريض",
+        "patientPending": "بانتظار تأكيد المريض"
+      },
     "modes": {
       "virtual": "استشارة افتراضية",
       "clinic": "زيارة العيادة"
@@ -824,6 +826,10 @@
     "insuranceCompanies": "شركات التأمين",
     "blogs": "المدونة",
     "reports": "التقارير",
+    "insurancePlans": "خطط التأمين",
+    "insuranceCarousels": "ترويج الخطط",
+    "ecommerceProducts": "التجارة الإلكترونية",
+    "ecommerceCarousels": "العروض المتحركة",
     "finance": "المالية",
     "financeExpenses": "المصروفات",
     "staff": "الموظفين",
@@ -1775,6 +1781,27 @@
         "createPlan": "خطة علاج جديدة",
         "sendReminder": "إرسال تذكير",
         "viewHistory": "عرض السجل"
+      },
+      "reminder": {
+        "title": "إرسال تذكير",
+        "subtitle": "أرسل بريداً تذكيرياً مخصصاً لهذا المريض",
+        "subject": "الموضوع",
+        "subjectPlaceholder": "تذكير بالموعد",
+        "body": "الرسالة",
+        "bodyPlaceholder": "مرحباً، هذا تذكير بموعدك القادم.",
+        "send": "إرسال التذكير",
+        "defaultSubject": "تذكير بالموعد",
+        "defaultBody": "مرحباً {name}، هذا تذكير بموعدك القادم. يرجى إبلاغنا إذا كنت بحاجة لإعادة الجدولة.",
+        "subjectRequired": "الموضوع مطلوب",
+        "bodyRequired": "الرسالة مطلوبة",
+        "toastSuccess": {
+          "title": "تم إرسال التذكير",
+          "description": "تم إرسال بريد تذكيري إلى المريض."
+        },
+        "toastError": {
+          "title": "فشل إرسال التذكير",
+          "description": "تعذر إرسال بريد التذكير."
+        }
       },
       "validation": {
     "firstNameRequired": "الاسم الأول مطلوب",
@@ -3746,7 +3773,15 @@
       "description": "استخدم SendGrid لإرسال تأكيدات المواعيد والتذكيرات.",
       "hint": "يمكن تخزين بيانات الاعتماد لكل عيادة للحفاظ على هوية فريدة.",
       "configured": "تم إعداد SendGrid لهذه العيادة.",
-      "incomplete": "أضف مفتاح SendGrid وبريد واسم المرسل لتفعيل الإشعارات."
+      "incomplete": "أضف مفتاح SendGrid وبريد واسم المرسل لتفعيل الإشعارات.",
+      "reminders": {
+        "title": "تذكيرات المواعيد",
+        "subtitle": "أرسل تذكيراً بالبريد الإلكتروني قبل الزيارة",
+        "hoursBefore": {
+          "label": "الساعات قبل الموعد",
+          "hint": "سنرسل تذكيراً بهذا العدد من الساعات قبل الوقت المحدد"
+        }
+      }
     },
     "metrics": {
       "identity": {
@@ -4268,10 +4303,12 @@
       "notAvailable": "غير متاح",
       "status": {
         "active": "نشط",
+        "trial": "تجريبي",
         "past_due": "متأخر",
         "canceled": "ملغى",
         "pending": "قيد الانتظار"
       },
+      "trial": "تجريبي",
       "pendingChange": "تغيير معلق",
       "pendingCancellation": "سيتم إلغاء اشتراكك في {date}",
       "pendingDowngrade": "ستتغير خطتك إلى {tier} في {date}",
@@ -4308,6 +4345,11 @@
         "confirmCancel": "تأكيد الإلغاء"
       }
     },
+    "usage": "الاستخدام",
+    "usageUpdate": "تحديث الاستخدام",
+    "limitReached": "تم الوصول للحد",
+    "staffSeats": "مقاعد الموظفين",
+    "doctors": "الأطباء",
     "pendingPaymentTitle": "الدفع مطلوب",
     "pastDueTitle": "الدفع متأخر",
     "canceledTitle": "تم إلغاء الاشتراك",

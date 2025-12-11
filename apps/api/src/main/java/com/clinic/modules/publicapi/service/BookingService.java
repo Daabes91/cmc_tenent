@@ -49,6 +49,7 @@ public class BookingService {
     private final ClinicTimezoneConfig clinicTimezoneConfig;
     private final TenantContextHolder tenantContextHolder;
     private final TenantService tenantService;
+    private final com.clinic.modules.admin.service.AppointmentConfirmationService appointmentConfirmationService;
     private static final int DEFAULT_SLOT_DURATION_MINUTES = 30;
 
     public BookingService(ClinicServiceRepository serviceRepository,
@@ -61,7 +62,8 @@ public class BookingService {
                           ClinicSettingsRepository clinicSettingsRepository,
                           ClinicTimezoneConfig clinicTimezoneConfig,
                           TenantContextHolder tenantContextHolder,
-                          TenantService tenantService) {
+                          TenantService tenantService,
+                          com.clinic.modules.admin.service.AppointmentConfirmationService appointmentConfirmationService) {
         this.serviceRepository = serviceRepository;
         this.doctorRepository = doctorRepository;
         this.patientRepository = patientRepository;
@@ -73,6 +75,7 @@ public class BookingService {
         this.clinicTimezoneConfig = clinicTimezoneConfig;
         this.tenantContextHolder = tenantContextHolder;
         this.tenantService = tenantService;
+        this.appointmentConfirmationService = appointmentConfirmationService;
     }
 
     @Transactional
@@ -502,7 +505,7 @@ public class BookingService {
                     : getDefaultSlotDurationMinutes();
             ZonedDateTime appointmentEndTime = appointmentStartTime.plusMinutes(slotDurationMinutes);
 
-            // Check if this is a virtual consultation
+        // Check if this is a virtual consultation
         if (appointment.getBookingMode() == AppointmentMode.VIRTUAL_CONSULTATION) {
             // Send special virtual consultation email with Google Meet link and calendar
             emailService.sendVirtualConsultationConfirmation(
@@ -514,22 +517,24 @@ public class BookingService {
                     appointmentEndTime,
                     getVirtualConsultationMeetingLink()
             );
-            } else {
-                // Send regular clinic visit confirmation
-                String appointmentDate = appointmentStartTime.toLocalDate().toString();
-                String appointmentTimeStr = appointmentStartTime.toLocalTime().toString();
-                String consultationType = appointment.getBookingMode().displayName();
+        } else {
+            // Send regular clinic visit confirmation
+            String appointmentDate = appointmentStartTime.toLocalDate().toString();
+            String appointmentTimeStr = appointmentStartTime.toLocalTime().toString();
+            String consultationType = appointment.getBookingMode().displayName();
+            String confirmationLink = appointmentConfirmationService.generateConfirmationLink(appointment);
 
-                emailService.sendAppointmentConfirmation(
-                        patientEmail,
-                        patientName,
-                        doctorName,
-                        serviceName,
-                        appointmentDate,
-                        appointmentTimeStr,
-                        consultationType
-                );
-            }
+            emailService.sendAppointmentConfirmation(
+                    patientEmail,
+                    patientName,
+                    doctorName,
+                    serviceName,
+                    appointmentDate,
+                    appointmentTimeStr,
+                    consultationType,
+                    confirmationLink
+            );
+        }
         } catch (Exception e) {
             // Log but don't fail the booking if email fails
             System.err.println("Failed to send confirmation email: " + e.getMessage());
@@ -556,7 +561,11 @@ public class BookingService {
                 entity.getSlotDurationMinutes(),
                 entity.getPaymentAmount(),
                 entity.getPaymentMethod() != null ? entity.getPaymentMethod().name() : null,
-                entity.getPaymentCurrency()
+                entity.getPaymentCurrency(),
+                entity.isPatientConfirmed(),
+                entity.getPatientConfirmedAt() != null
+                        ? entity.getPatientConfirmedAt().atZone(zoneId).toOffsetDateTime()
+                        : null
         );
     }
 }

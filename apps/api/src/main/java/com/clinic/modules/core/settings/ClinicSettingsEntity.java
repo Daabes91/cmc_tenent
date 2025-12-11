@@ -135,6 +135,12 @@ public class ClinicSettingsEntity {
     @Column(name = "email_enabled")
     private Boolean emailEnabled = Boolean.TRUE;
 
+    @Column(name = "reminder_enabled")
+    private Boolean reminderEnabled = Boolean.FALSE;
+
+    @Column(name = "reminder_hours_before")
+    private Integer reminderHoursBefore = 24;
+
     // PayPal Credentials Configuration
     @Column(name = "paypal_client_id", length = 200)
     private String paypalClientId;
@@ -492,6 +498,22 @@ public class ClinicSettingsEntity {
 
     public void setEmailEnabled(Boolean emailEnabled) {
         this.emailEnabled = emailEnabled;
+    }
+
+    public Boolean getReminderEnabled() {
+        return reminderEnabled;
+    }
+
+    public void setReminderEnabled(Boolean reminderEnabled) {
+        this.reminderEnabled = reminderEnabled;
+    }
+
+    public Integer getReminderHoursBefore() {
+        return reminderHoursBefore;
+    }
+
+    public void setReminderHoursBefore(Integer reminderHoursBefore) {
+        this.reminderHoursBefore = reminderHoursBefore;
     }
 
     public String getPaypalClientId() {

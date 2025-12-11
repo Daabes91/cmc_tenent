@@ -168,15 +168,17 @@ services:
       context: ./apps/saas-landing
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
-        NEXT_PUBLIC_APP_URL: http://localhost:3003
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8080}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3003}
+        NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-}
         NEXT_PUBLIC_PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
         NEXT_PUBLIC_HERO_VIDEO_URL: https://www.youtube.com/embed/T8lXiW5x8_s?autoplay=1&mute=1&loop=1
     container_name: clinic-saas-landing
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
-      NEXT_PUBLIC_APP_URL: http://localhost:3003
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8080}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3003}
+      NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-}
       NEXT_PUBLIC_PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
       NODE_ENV: production
       PORT: 3003
@@ -188,7 +190,7 @@ services:
     networks:
       - clinic-net
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3003 || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3003${NEXT_PUBLIC_BASE_PATH:-/} || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

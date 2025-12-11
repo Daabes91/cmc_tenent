@@ -2,13 +2,14 @@
 
 import {Link, usePathname} from '@/navigation';
 import {useState, useMemo, useRef, useEffect} from 'react';
-import {Menu, X, ChevronDown} from 'lucide-react';
+import {Menu, X, ChevronDown, ShoppingCart} from 'lucide-react';
 import {useAuth} from '@/hooks/useAuth';
 import {useTranslations, useLocale} from 'next-intl';
 import {api} from '@/lib/api';
 import type {ClinicSettings} from '@/lib/types';
 import {ThemeToggle} from '@/components/ui/ThemeToggle';
 import {getBookingSectionUrl} from '@/utils/basePath';
+import { useEcommerceFeature } from '@/hooks/useEcommerce';
 
 export function Header() {
   const pathname = usePathname();
@@ -21,6 +22,7 @@ export function Header() {
   const t = useTranslations('nav');
   const common = useTranslations('common');
   const locale = useLocale();
+  const { enabled: ecommerceEnabled, isLoading: ecommerceLoading } = useEcommerceFeature();
 
   // Prevent hydration mismatch by only showing auth-dependent UI after mount
   useEffect(() => {
@@ -158,6 +160,17 @@ export function Header() {
             </Link>
           </div>
 
+          {/* Cart (e-commerce) */}
+          {/* Cart always visible; backend enforces e-commerce gating */}
+          <Link
+            href="/cart"
+            className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 shadow-sm transition hover:bg-blue-100 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-100"
+            aria-label="View cart"
+          >
+            <ShoppingCart className="h-5 w-5" />
+            <span>Cart</span>
+          </Link>
+
           {/* Theme Toggle */}
           <ThemeToggle />
 
@@ -294,6 +307,18 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
+
+            {/* Cart - Mobile */}
+            <Link
+              href="/cart"
+              className="mt-1 block rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-400 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-blue-400 dark:hover:text-blue-200"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <div className="flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5" />
+                <span>Cart</span>
+              </div>
+            </Link>
 
             {/* Language Switcher - Mobile */}
             <div className="flex items-center justify-center rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800 p-1">

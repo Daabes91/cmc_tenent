@@ -19,7 +19,7 @@ type ApiResponseEnvelope<T> = {
 export function useAdminApi() {
   const baseURL = useApiBase();
   const auth = useAuth();
-  const { tenantSlug } = useTenantSlug();
+  const { tenantSlug, resetTenantSlug, defaultTenant } = useTenantSlug();
 
   const normalizePath = (path: string) => {
     const normalizedBase = (baseURL || '').replace(/\/+$/, '');
@@ -65,6 +65,12 @@ export function useAdminApi() {
 
       return response as unknown as T;
     } catch (error: any) {
+      if (error?.status === 404 && path.includes("/auth/")) {
+        // Tenant likely missing – reset to default and stop looping bad calls
+        resetTenantSlug();
+        await auth.logout();
+        throw new Error(`Tenant not found. Switched back to "${defaultTenant}".`);
+      }
       if (retry && error?.status === 401) {
         try {
           // Refresh tokens - this will update the auth state

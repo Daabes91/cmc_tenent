@@ -1,6 +1,6 @@
 {
   "common": {
-    "clinicName": "Qadri's Clinic",
+    "clinicName": "Cliniqax's Clinic",
     "tagline": "Dental Excellence",
     "loading": "Loading...",
     "loadingHours": "Loading hours...",
@@ -37,7 +37,7 @@
       "happyPatients": "Happy Patients",
       "satisfactionRate": "Satisfaction Rate"
     },
-    "imageAlt": "Qadri's Clinic - Modern Dental Care",
+    "imageAlt": "Cliniqax's Clinic - Modern Dental Care",
     "features": {
       "support": {
         "title": "24/7 Support",
@@ -67,7 +67,7 @@
     },
     "header": {
       "title": "Our Dental Services",
-      "subtitle": "Comprehensive dental care services for you and your family at Qadri's Clinic"
+      "subtitle": "Comprehensive dental care services for you and your family at Cliniqax's Clinic"
     },
     "empty": {
       "title": "No services available at the moment.",
@@ -159,7 +159,7 @@
     },
     "signup": {
       "title": "Create Account",
-      "subtitle": "Join Qadri's Clinic to book appointments and manage your dental care",
+      "subtitle": "Join Cliniqax's Clinic to book appointments and manage your dental care",
       "errors": {
         "generic": "Signup failed. Please try again.",
         "invalidPhone": "Please enter a valid phone number.",
@@ -284,7 +284,7 @@
     "contact": {
       "title": "Need Help?",
       "phone": "+962 7 0000 0000",
-      "email": "info@qadriclinic.com",
+      "email": "info@cliniqax.com",
       "hours": "9 AM - 8 PM"
     },
     "status": {
@@ -428,7 +428,7 @@
     }
   },
   "whyChoose": {
-    "title": "Why Choose Qadri's Clinic?",
+    "title": "Why Choose Cliniqax's Clinic?",
     "subtitle": "We combine cutting-edge technology with compassionate care to deliver exceptional dental experiences.",
     "features": {
       "experts": {
@@ -459,7 +459,7 @@
   },
   "cta": {
     "title": "Ready for Your Perfect Smile?",
-    "subtitle": "Book your appointment today and experience the difference of quality dental care at Qadri's Clinic.",
+    "subtitle": "Book your appointment today and experience the difference of quality dental care at Cliniqax's Clinic.",
     "scheduleAppointment": "Schedule Appointment",
     "meetDentists": "Meet Our Dentists"
   },
@@ -563,7 +563,7 @@
       },
       "hero": {
         "title": "Meet Our Expert Dentists",
-        "subtitle": "Experienced dental professionals dedicated to your oral health at Qadri's Clinic"
+        "subtitle": "Experienced dental professionals dedicated to your oral health at Cliniqax's Clinic"
       },
       "featuresSection": {
         "title": "Why Choose Our Team?",

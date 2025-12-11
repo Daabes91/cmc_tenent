@@ -9,7 +9,7 @@ const MAX_TIMEOUT_DELAY = 2_147_483_647; // Max safe setTimeout delay in millise
 
 export function useAuth() {
   const apiBase = useApiBase();
-  const { tenantSlug } = useTenantSlug();
+  const { tenantSlug, resetTenantSlug, defaultTenant } = useTenantSlug();
 
   const isDev = import.meta.dev;
 
@@ -73,6 +73,12 @@ export function useAuth() {
       });
     } catch (error: any) {
       console.error('[useAuth] Login error:', error);
+      if (error?.status === 404) {
+        // Likely tenant not found – reset slug to default to prevent retry loops
+        resetTenantSlug();
+        clearAuth();
+        throw new Error("Tenant not found. Please check the tenant slug and try again.");
+      }
       clearAuth();
       throw normalizeError(error);
     }
@@ -174,8 +180,13 @@ export function useAuth() {
       userEmail.value = profile.email;
       userName.value = profile.fullName;
       userRole.value = profile.role;
-    } catch {
-      // fallback to email claim from token in future enhancement
+    } catch (error: any) {
+      // If the tenant slug is invalid, avoid getting stuck in a retry loop
+      if (error?.status === 404) {
+        resetTenantSlug();
+        clearAuth();
+        throw new Error(`Tenant "${tenantSlug.value || defaultTenant}" not found.`);
+      }
     }
   }
 

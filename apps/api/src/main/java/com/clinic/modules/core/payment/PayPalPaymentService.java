@@ -381,7 +381,11 @@ public class PayPalPaymentService {
                 entity.getSlotDurationMinutes(),
                 entity.getPaymentAmount(),
                 Optional.ofNullable(entity.getPaymentMethod()).map(Enum::name).orElse(null),
-                entity.getPaymentCurrency()
+                entity.getPaymentCurrency(),
+                entity.isPatientConfirmed(),
+                entity.getPatientConfirmedAt() != null
+                        ? entity.getPatientConfirmedAt().atZone(clinicZone).toOffsetDateTime()
+                        : null
         );
     }
 

@@ -8,10 +8,14 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import readingTime from 'reading-time';
-import { BlogPost, BlogFrontmatter, BlogListItem, BlogMetadata, BlogCategory } from './types';
+import { BlogPost, BlogFrontmatter, BlogListItem, BlogMetadata, BlogCategory, BlogAuthor } from './types';
 import { BlogError, BlogErrorType, validateBlogFrontmatter, handleBlogPostError } from './error-handler';
+import { withBasePath } from '@/lib/base-path';
 
 const BLOG_CONTENT_DIR = path.join(process.cwd(), 'content', 'blog');
+const PUBLIC_DIR = path.join(process.cwd(), 'public');
+const AUTHOR_PLACEHOLDER = '/images/authors/placeholder.svg';
+const BLOG_PLACEHOLDER = '/images/blog/placeholder.svg';
 
 /**
  * Get all blog post slugs from the content directory
@@ -77,6 +81,26 @@ function parseBlogPost(filePath: string, slug: string): BlogPost {
     validateBlogFrontmatter(data, slug);
     
     const frontmatter = data as BlogFrontmatter;
+
+    // Normalize asset paths to include the base path in production
+    const resolveImage = (value: string | undefined | null, fallback: string) => {
+      if (!value || !value.startsWith('/')) {
+        return withBasePath(fallback);
+      }
+      const normalizedPath = value.startsWith('/') ? value.substring(1) : value;
+      const absPath = path.join(PUBLIC_DIR, normalizedPath);
+      if (fs.existsSync(absPath)) {
+        return withBasePath(value);
+      }
+      return withBasePath(fallback);
+    };
+
+    const normalizedAuthor: BlogAuthor = {
+      ...frontmatter.author,
+      avatar: resolveImage(frontmatter.author?.avatar, AUTHOR_PLACEHOLDER),
+    };
+
+    const normalizedFeaturedImage = resolveImage(frontmatter.featuredImage, BLOG_PLACEHOLDER);
     
     // Calculate reading time
     const stats = readingTime(content);
@@ -84,6 +108,8 @@ function parseBlogPost(filePath: string, slug: string): BlogPost {
     return {
       slug,
       ...frontmatter,
+      author: normalizedAuthor,
+      featuredImage: normalizedFeaturedImage,
       content,
       readingTime: Math.ceil(stats.minutes),
     };

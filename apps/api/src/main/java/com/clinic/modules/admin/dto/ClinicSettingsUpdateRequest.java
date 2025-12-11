@@ -33,13 +33,16 @@ public record ClinicSettingsUpdateRequest(
         String paypalClientId,
         String paypalClientSecret,
         String sendgridApiKey,
-        @Email String emailFrom,
+        String emailFrom,
         String emailFromName,
         Boolean emailEnabled,
+        Boolean reminderEnabled,
+        Integer reminderHoursBefore,
         String heroMediaType,
         String heroImageUrl,
         String heroVideoId,
-        WhyChooseUpdate whyChoose
+        WhyChooseUpdate whyChoose,
+        Boolean ecommerceEnabled
 ) {
     public record WorkingHoursUpdate(
             String monday,

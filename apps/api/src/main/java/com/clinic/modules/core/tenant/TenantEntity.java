@@ -38,6 +38,9 @@ public class TenantEntity {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    @Column(name = "ecommerce_enabled", nullable = false)
+    private Boolean ecommerceEnabled = false;
+
     protected TenantEntity() {
     }
 
@@ -121,5 +124,17 @@ public class TenantEntity {
     public void softDelete() {
         this.deletedAt = Instant.now();
         this.status = TenantStatus.INACTIVE;
+    }
+
+    public Boolean getEcommerceEnabled() {
+        return ecommerceEnabled;
+    }
+
+    public void setEcommerceEnabled(Boolean ecommerceEnabled) {
+        this.ecommerceEnabled = ecommerceEnabled;
+    }
+
+    public boolean isEcommerceEnabled() {
+        return Boolean.TRUE.equals(ecommerceEnabled);
     }
 }

@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { motion } from "framer-motion"
 import {useLanguage} from '@/contexts/LanguageContext';
+import { withBasePath } from '@/lib/base-path';
 
 const COPY = {
   en: {
@@ -31,12 +32,12 @@ export default function SocialProof() {
   const {language} = useLanguage();
   const statCopy = COPY[language];
   const companies = [
-    { name: "Qadri Dental Group", logo: "/placeholder-logo.svg" },
-    { name: "Shifa Health Network", logo: "/placeholder-logo.svg" },
-    { name: "Zen Orthopedics", logo: "/placeholder-logo.svg" },
-    { name: "Nova Smiles Collective", logo: "/placeholder-logo.svg" },
-    { name: "MediPlus Primary Care", logo: "/placeholder-logo.svg" },
-    { name: "Bloom Pediatrics", logo: "/placeholder-logo.svg" },
+    { name: "Cliniqax Dental Group", logo: withBasePath("/placeholder-logo.svg") },
+    { name: "Shifa Health Network", logo: withBasePath("/placeholder-logo.svg") },
+    { name: "Zen Orthopedics", logo: withBasePath("/placeholder-logo.svg") },
+    { name: "Nova Smiles Collective", logo: withBasePath("/placeholder-logo.svg") },
+    { name: "MediPlus Primary Care", logo: withBasePath("/placeholder-logo.svg") },
+    { name: "Bloom Pediatrics", logo: withBasePath("/placeholder-logo.svg") },
   ]
 
   const containerVariants = {
@@ -93,7 +94,7 @@ export default function SocialProof() {
             >
               <div className="bg-white dark:bg-gray-800 rounded-lg p-4 w-[80px] h-[40px] flex items-center justify-center shadow-sm dark:shadow-none">
                 <Image
-                  src={company.logo || "/placeholder.svg"}
+                  src={company.logo || withBasePath("/placeholder.svg")}
                   alt={company.name}
                   width={50}
                   height={40}

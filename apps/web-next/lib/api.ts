@@ -9,10 +9,18 @@ import type {
   TreatmentPlan,
   Blog,
   InsuranceCompany,
+  PublicCarousel,
+  Product,
+  CartResponse,
 } from './types';
-import {locales} from '@/i18n/request';
-import {withBasePath, stripBasePath} from '@/utils/basePath';
-import { getTenantSlugClient, TENANT_HEADER } from './tenant';
+import { locales } from '@/i18n/request';
+import { withBasePath, stripBasePath } from '@/utils/basePath';
+import {
+  getDefaultTenantSlug,
+  getTenantSlugClient,
+  TENANT_COOKIE,
+  TENANT_HEADER,
+} from './tenant';
 
 const SUPPORTED_LOCALES = new Set(locales as readonly string[]);
 const DEFAULT_LOCALE = locales[0] as (typeof locales)[number];
@@ -25,6 +33,47 @@ class APIError extends Error {
     super(message);
     this.name = 'APIError';
   }
+}
+
+export class TenantNotFoundError extends APIError {
+  constructor(public tenant: string) {
+    super(`Tenant not found: ${tenant}`, 404);
+    this.name = 'TenantNotFoundError';
+  }
+}
+
+const CART_SESSION_KEY = 'cartSessionId';
+
+function getCartSessionId(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(CART_SESSION_KEY);
+}
+
+function setCartSessionId(id?: string | null) {
+  if (typeof window === 'undefined') return;
+  if (id) {
+    localStorage.setItem(CART_SESSION_KEY, id);
+  } else {
+    localStorage.removeItem(CART_SESSION_KEY);
+  }
+}
+
+function clearTenantCookie() {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${TENANT_COOKIE}=; path=/; max-age=0; sameSite=lax`;
+}
+
+function applyTenantFallback(tenantSlug: string) {
+  if (typeof window === 'undefined') return;
+
+  // Clear the bad slug and fall back to the default tenant so we stop looping bad requests
+  clearTenantCookie();
+  const fallback = getDefaultTenantSlug();
+  document.cookie = `${TENANT_COOKIE}=${encodeURIComponent(fallback)}; path=/; sameSite=lax`;
+
+  // Send the user to the no-tenant page for a clear message
+  window.location.href = withBasePath('/_errors/no-tenant');
+  throw new TenantNotFoundError(tenantSlug);
 }
 
 async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -49,10 +98,19 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    credentials: options.credentials,
+    ...options,
+    headers,
+  });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
+
+    // If settings request comes back 404, assume the tenant slug is invalid and fall back cleanly
+    if (response.status === 404 && endpoint === '/settings' && tenantSlug) {
+      applyTenantFallback(tenantSlug);
+    }
 
     // Auto-logout on 401 Unauthorized (token expired or invalid)
     if (response.status === 401 && typeof window !== 'undefined') {
@@ -115,6 +173,22 @@ export const api = {
 
   // Clinic Settings (public endpoint)
   getClinicSettings: async () => fetchAPI<ClinicSettings>('/settings'),
+  // Carousels (public)
+  getCarousels: async () => fetchAPI<PublicCarousel[]>('/carousels/all'),
+
+  // Public products (basic listing)
+  getProducts: async (params?: { page?: number; size?: number; search?: string; status?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page !== undefined) searchParams.set('page', String(params.page));
+    if (params?.size !== undefined) searchParams.set('size', String(params.size));
+    if (params?.search) searchParams.set('search', params.search);
+    if (params?.status) searchParams.set('status', params.status);
+    const qs = searchParams.toString();
+    return fetchAPI<{ items: Product[]; page: number; size: number; total: number }>(
+      `/products${qs ? `?${qs}` : ''}`
+    );
+  },
+  getProductBySlug: async (slug: string) => fetchAPI<Product>(`/products/by-slug/${slug}`),
 
   // Doctors
   getDoctors: async (locale?: string) => {
@@ -339,6 +413,38 @@ export const api = {
       body: JSON.stringify({ orderID }),
     });
     return response.data;
+  },
+
+  // Cart
+  addToCart: async (data: { product_id: number; quantity: number; variant_id?: number | null }) => {
+    const slug = getTenantSlugClient();
+    const sessionId = getCartSessionId();
+    const search = new URLSearchParams();
+    if (slug) search.set('slug', slug);
+    if (sessionId) search.set('session_id', sessionId);
+    const suffix = search.toString() ? `?${search.toString()}` : '';
+    const res = await fetchAPI<CartResponse>(`/cart/items${suffix}`, {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+    if ((res as any)?.session_id) {
+      setCartSessionId((res as any).session_id);
+    }
+    return res;
+  },
+  getCart: async () => {
+    const slug = getTenantSlugClient();
+    const sessionId = getCartSessionId();
+    const search = new URLSearchParams();
+    if (slug) search.set('slug', slug);
+    if (sessionId) search.set('session_id', sessionId);
+    const suffix = search.toString() ? `?${search.toString()}` : '';
+    const res = await fetchAPI<CartResponse>(`/cart${suffix}`, { credentials: 'include' });
+    if ((res as any)?.session_id) {
+      setCartSessionId((res as any).session_id);
+    }
+    return res;
   },
 };
 

@@ -9,7 +9,7 @@ The following avatar images are referenced in the healthcare content configurati
 1. **dr-sarah-johnson.jpg** - Dr. Sarah Johnson, Clinic Director, Family Medicine Practice
 2. **michael-chen.jpg** - Michael Chen, Practice Manager, Dental Clinic  
 3. **dr-aisha-alrashid.jpg** - Dr. Aisha Al-Rashid, Owner, Physical Therapy Center
-4. **dr-layla-qadri.jpg** - Dr. Layla Qadri, Medical Director, Qadri Dental Group
+4. **dr-layla-Cliniqax.jpg** - Dr. Layla Cliniqax, Medical Director, Cliniqax Dental Group
 5. **sameer-haddad.jpg** - Sameer Haddad, COO, Shifa Health Network
 
 ## Image Specifications

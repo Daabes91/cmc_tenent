@@ -1,0 +1,3 @@
+ALTER TABLE clinic_settings
+    ADD COLUMN IF NOT EXISTS reminder_enabled BOOLEAN DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS reminder_hours_before INTEGER DEFAULT 24;

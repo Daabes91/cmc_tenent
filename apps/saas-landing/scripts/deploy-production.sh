@@ -84,6 +84,7 @@ print_info "Validating environment variables..."
 REQUIRED_VARS=(
     "NEXT_PUBLIC_API_BASE_URL"
     "NEXT_PUBLIC_APP_URL"
+    "NEXT_PUBLIC_BASE_PATH"
     "NEXT_PUBLIC_PAYPAL_CLIENT_ID"
     "NEXT_PUBLIC_GA_MEASUREMENT_ID"
     "NEXT_PUBLIC_GSC_VERIFICATION"
@@ -153,6 +154,7 @@ echo "Deployment Details:"
 echo "  Site URL: $NEXT_PUBLIC_SITE_URL"
 echo "  API URL: $NEXT_PUBLIC_API_BASE_URL"
 echo "  GA Measurement ID: $NEXT_PUBLIC_GA_MEASUREMENT_ID"
+echo "  Base Path: $NEXT_PUBLIC_BASE_PATH"
 echo ""
 read -p "Do you want to proceed with deployment? (y/n) " -n 1 -r
 echo
@@ -203,6 +205,7 @@ case $DEPLOY_METHOD in
         docker build \
             --build-arg NEXT_PUBLIC_API_BASE_URL="$NEXT_PUBLIC_API_BASE_URL" \
             --build-arg NEXT_PUBLIC_APP_URL="$NEXT_PUBLIC_APP_URL" \
+            --build-arg NEXT_PUBLIC_BASE_PATH="$NEXT_PUBLIC_BASE_PATH" \
             --build-arg NEXT_PUBLIC_PAYPAL_CLIENT_ID="$NEXT_PUBLIC_PAYPAL_CLIENT_ID" \
             -t "$IMAGE_NAME:$IMAGE_TAG" \
             -t "$IMAGE_NAME:latest" \

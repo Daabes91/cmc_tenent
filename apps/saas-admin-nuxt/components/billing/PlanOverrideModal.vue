@@ -39,6 +39,30 @@
           />
         </div>
 
+        <div>
+          <label class="block text-sm font-medium mb-2">
+            {{ $t('billing.billingCycle') }} <span class="text-red-500">*</span>
+          </label>
+          <USelect
+            v-model="form.billingCycle"
+            :options="billingCycleOptions"
+            size="lg"
+            :placeholder="$t('billing.selectBillingCycle')"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">
+            {{ $t('billing.billingCycle') }}
+          </label>
+          <USelect
+            v-model="form.billingCycle"
+            :options="billingCycleOptions"
+            size="lg"
+            :placeholder="$t('billing.selectBillingCycle')"
+          />
+        </div>
+
         <!-- Reason Input -->
         <div>
           <label class="block text-sm font-medium mb-2">
@@ -119,6 +143,7 @@ const isOpen = computed({
 
 const form = reactive({
   targetTier: '',
+  billingCycle: 'MONTHLY',
   reason: ''
 })
 
@@ -130,6 +155,11 @@ const planTierOptions = [
   { label: t('billing.professional'), value: 'PROFESSIONAL' },
   { label: t('billing.enterprise'), value: 'ENTERPRISE' },
   { label: t('billing.custom'), value: 'CUSTOM' }
+]
+
+const billingCycleOptions = [
+  { label: t('billing.monthly'), value: 'MONTHLY' },
+  { label: t('billing.annual'), value: 'ANNUAL' }
 ]
 
 const isFormValid = computed(() => {
@@ -166,6 +196,11 @@ const validateForm = () => {
     return false
   }
 
+  if (!form.billingCycle) {
+    validationError.value = t('billing.billingCycleError')
+    return false
+  }
+
   if (form.reason.trim().length < 10) {
     validationError.value = t('billing.reasonTooShortError')
     return false
@@ -189,6 +224,7 @@ const handleSubmit = async () => {
   try {
     await api.overrideTenantPlan(props.tenantId, {
       targetTier: form.targetTier,
+      billingCycle: form.billingCycle,
       reason: form.reason.trim()
     })
 
@@ -213,6 +249,7 @@ const handleSubmit = async () => {
 
 const handleCancel = () => {
   form.targetTier = ''
+  form.billingCycle = 'MONTHLY'
   form.reason = ''
   validationError.value = null
   isOpen.value = false

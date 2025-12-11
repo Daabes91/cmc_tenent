@@ -54,10 +54,11 @@ type ClinicSettingsPayload = {
   paypalClientId?: string | null;
   paypalClientSecret?: string | null;
   exchangeRates?: ExchangeRatesMap | null;
-  sendgridApiKey?: string | null;
   emailFrom?: string | null;
   emailFromName?: string | null;
   emailEnabled?: boolean | null;
+  reminderEnabled?: boolean | null;
+  reminderHoursBefore?: number | null;
   heroMediaType?: string | null;
   heroImageUrl?: string | null;
   heroVideoId?: string | null;
@@ -179,7 +180,6 @@ export function useClinicSettings(options: UseClinicSettingsOptions = {}) {
     const paypalEnvironment = payload.paypalEnvironment?.trim() || null;
     const paypalClientId = payload.paypalClientId?.trim() || null;
     const paypalClientSecret = payload.paypalClientSecret?.trim() || null;
-    const sendgridApiKey = payload.sendgridApiKey?.trim() || null;
     const emailFrom = payload.emailFrom?.trim() || null;
     const emailFromName = payload.emailFromName?.trim() || null;
     const emailEnabled = payload.emailEnabled ?? true;
@@ -209,7 +209,6 @@ export function useClinicSettings(options: UseClinicSettingsOptions = {}) {
       paypalEnvironment,
       paypalClientId,
       paypalClientSecret,
-      sendgridApiKey,
       emailFrom,
       emailFromName,
       emailEnabled,

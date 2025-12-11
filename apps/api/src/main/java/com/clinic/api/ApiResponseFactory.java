@@ -1,84 +1,176 @@
 package com.clinic.api;
 
-import java.time.Instant;
-import java.util.Collections;
-import java.util.LinkedHashMap;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
-public final class ApiResponseFactory {
+/**
+ * Factory for creating standardized API responses.
+ * Provides convenience methods for common response patterns.
+ */
+public class ApiResponseFactory {
 
-    private ApiResponseFactory() {
+    /**
+     * Create a successful response with data.
+     */
+    public static <T> ApiResponse<T> success(T data) {
+        return ApiResponse.success(data);
     }
 
+    /**
+     * Create a successful response with data and message.
+     */
+    public static <T> ApiResponse<T> success(T data, String message) {
+        return ApiResponse.success(data, message);
+    }
+
+
+
+    /**
+     * Create a successful response with code, message, and data.
+     */
     public static <T> ApiResponse<T> success(String code, String message, T data) {
-        return success(code, message, data, Collections.emptyMap(), Collections.emptyMap());
+        return ApiResponse.success(data, message);
     }
 
-    public static <T> ApiResponse<T> success(String code,
-                                             String message,
-                                             T data,
-                                             Map<String, Object> additionalMeta,
-                                             Map<String, String> links) {
-        return new ApiResponse<>(
-                true,
-                code,
-                message,
-                data,
-                buildMeta(additionalMeta),
-                links == null || links.isEmpty() ? null : Map.copyOf(links),
-                null
-        );
-    }
-
+    /**
+     * Create a successful response with code and message (no data).
+     */
     public static ApiResponse<Void> success(String code, String message) {
-        return success(code, message, null);
+        return ApiResponse.success(null, message);
     }
 
-    public static ApiResponse<Void> success(String code,
-                                            String message,
-                                            Map<String, Object> additionalMeta,
-                                            Map<String, String> links) {
-        return success(code, message, null, additionalMeta, links);
+    /**
+     * Create a successful response with code, message, data, and additional parameters.
+     * This method provides compatibility with existing codebase patterns.
+     */
+    public static <T> ApiResponse<T> success(String code, String message, T data, Map<String, Object> metadata, Map<String, Object> links) {
+        return ApiResponse.success(data, message);
     }
 
-    public static ApiResponse<Void> error(String code,
-                                          String message,
-                                          List<ApiError> errors) {
-        return error(code, message, errors, Collections.emptyMap());
+    /**
+     * Create an error response with code and message.
+     */
+    public static <T> ApiResponse<T> error(String errorCode, String message) {
+        return ApiResponse.error(errorCode, message, null, getCurrentRequestPath());
     }
 
-    public static ApiResponse<Void> error(String code,
-                                          String message,
-                                          List<ApiError> errors,
-                                          Map<String, Object> additionalMeta) {
-        List<ApiError> errorList = (errors == null || errors.isEmpty()) ? List.of() : List.copyOf(errors);
-        return new ApiResponse<>(
-                false,
-                code,
-                message,
-                null,
-                buildMeta(additionalMeta),
-                null,
-                errorList
-        );
+    /**
+     * Create an error response with code, message, and detailed errors.
+     */
+    public static <T> ApiResponse<T> error(String errorCode, String message, List<ApiError> errors) {
+        return ApiResponse.error(errorCode, message, errors, getCurrentRequestPath());
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> ApiResponse<T> errorWithType(String code,
-                                                   String message,
-                                                   List<ApiError> errors) {
-        return (ApiResponse<T>) error(code, message, errors);
+    /**
+     * Create an error response with code, message, errors, and metadata.
+     * This method provides compatibility with existing codebase patterns.
+     */
+    public static <T> ApiResponse<T> error(String errorCode, String message, List<ApiError> errors, Map<String, Object> metadata) {
+        return ApiResponse.error(errorCode, message, errors, getCurrentRequestPath());
     }
 
-    private static Map<String, Object> buildMeta(Map<String, Object> additionalMeta) {
-        Map<String, Object> meta = new LinkedHashMap<>();
-        meta.put("timestamp", Instant.now().toString());
-        meta.put("requestId", UUID.randomUUID().toString());
-        if (additionalMeta != null && !additionalMeta.isEmpty()) {
-            meta.putAll(additionalMeta);
+    /**
+     * Create an error response with type, code, message, and errors.
+     * This method provides compatibility with existing codebase patterns.
+     */
+    public static <T> ApiResponse<T> errorWithType(String errorCode, String message, List<ApiError> errors) {
+        return ApiResponse.error(errorCode, message, errors, getCurrentRequestPath());
+    }
+
+    /**
+     * Create a validation error response.
+     */
+    public static <T> ApiResponse<T> validationError(String message, List<ApiError> errors) {
+        return ApiResponse.error("VALIDATION_ERROR", message, errors, getCurrentRequestPath());
+    }
+
+    /**
+     * Create a not found error response.
+     */
+    public static <T> ApiResponse<T> notFound(String message) {
+        return ApiResponse.error("NOT_FOUND", message, null, getCurrentRequestPath());
+    }
+
+    /**
+     * Create an unauthorized error response.
+     */
+    public static <T> ApiResponse<T> unauthorized(String message) {
+        return ApiResponse.error("UNAUTHORIZED", message, null, getCurrentRequestPath());
+    }
+
+    /**
+     * Create a forbidden error response.
+     */
+    public static <T> ApiResponse<T> forbidden(String message) {
+        return ApiResponse.error("FORBIDDEN", message, null, getCurrentRequestPath());
+    }
+
+    /**
+     * Create a conflict error response.
+     */
+    public static <T> ApiResponse<T> conflict(String message) {
+        return ApiResponse.error("CONFLICT", message, null, getCurrentRequestPath());
+    }
+
+    /**
+     * Create an internal server error response.
+     */
+    public static <T> ApiResponse<T> internalError(String message) {
+        return ApiResponse.error("INTERNAL_SERVER_ERROR", message, null, getCurrentRequestPath());
+    }
+
+    /**
+     * Create a service unavailable error response.
+     */
+    public static <T> ApiResponse<T> serviceUnavailable(String message) {
+        return ApiResponse.error("SERVICE_UNAVAILABLE", message, null, getCurrentRequestPath());
+    }
+
+    /**
+     * Create a bad gateway error response.
+     */
+    public static <T> ApiResponse<T> badGateway(String message) {
+        return ApiResponse.error("BAD_GATEWAY", message, null, getCurrentRequestPath());
+    }
+
+    /**
+     * Create a rate limit exceeded error response.
+     */
+    public static <T> ApiResponse<T> rateLimitExceeded(String message) {
+        return ApiResponse.error("RATE_LIMIT_EXCEEDED", message, null, getCurrentRequestPath());
+    }
+
+    /**
+     * Create a payment required error response.
+     */
+    public static <T> ApiResponse<T> paymentRequired(String message) {
+        return ApiResponse.error("PAYMENT_REQUIRED", message, null, getCurrentRequestPath());
+    }
+
+    /**
+     * Create a payment required error response with details.
+     */
+    public static <T> ApiResponse<T> paymentRequired(String message, List<ApiError> errors) {
+        return ApiResponse.error("PAYMENT_REQUIRED", message, errors, getCurrentRequestPath());
+    }
+
+    /**
+     * Get the current request path for error context.
+     */
+    private static String getCurrentRequestPath() {
+        try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                return request.getRequestURI();
+            }
+        } catch (Exception e) {
+            // Ignore - we'll return null if we can't get the path
         }
-        return meta;
+        return null;
     }
 }

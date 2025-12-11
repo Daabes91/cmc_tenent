@@ -8,8 +8,10 @@ import com.clinic.modules.core.tenant.BillingStatus;
 import com.clinic.modules.core.tenant.TenantEntity;
 import com.clinic.modules.core.tenant.TenantRepository;
 import com.clinic.modules.core.tenant.TenantStatus;
+import com.clinic.modules.saas.dto.InlineSignupResponse;
 import com.clinic.modules.saas.dto.SignupRequest;
 import com.clinic.modules.saas.dto.SignupResponse;
+import com.clinic.modules.saas.dto.SubscriptionCreationResponse;
 import com.clinic.modules.saas.exception.PayPalApiException;
 import com.clinic.modules.saas.exception.PayPalConfigurationException;
 import com.clinic.modules.saas.exception.SubdomainExistsException;
@@ -49,7 +51,8 @@ public class SignupService {
     }
 
     /**
-     * Complete signup flow: create tenant, owner user, and PayPal subscription.
+     * Complete signup flow: create tenant, owner user, and PayPal subscription with redirect.
+     * This uses the redirect-based flow where users are sent to PayPal to approve subscriptions.
      *
      * @param request SignupRequest with clinic and owner information
      * @return SignupResponse with approval URL or error
@@ -83,20 +86,23 @@ public class SignupService {
             auditLogger.logSuccess("OWNER_USER_CREATED", tenant.getId(), ownerUser.getId(), 
                 "Email: " + ownerUser.getEmail() + ", Role: ADMIN");
 
-            // Create PayPal subscription
+            // Create PayPal subscription with redirect flow
             PlanTier selectedTier = request.getPlanTier() != null ? request.getPlanTier() : PlanTier.BASIC;
             String billingCycle = request.getBillingCycle() != null ? request.getBillingCycle().toUpperCase() : "MONTHLY";
 
-            String approvalUrl = subscriptionService.createSubscription(
+            // Create subscription and get approval URL
+            SubscriptionCreationResponse subscriptionResponse = subscriptionService.createSubscriptionWithRedirect(
                     tenant.getId(),
                     selectedTier,
                     billingCycle,
                     request.getClientBaseUrl());
-            logger.info("Created PayPal subscription for tenant: {}, approval URL generated", tenant.getId());
+            
+            logger.info("Created PayPal subscription for tenant: {}, subscription ID: {}", 
+                tenant.getId(), subscriptionResponse.getSubscriptionId());
             auditLogger.logSuccess("SIGNUP_COMPLETED", tenant.getId(), ownerUser.getId(), 
-                "Approval URL generated, awaiting payment");
+                "Subscription created with redirect flow, approval URL: " + subscriptionResponse.getApprovalUrl());
 
-            return SignupResponse.success(approvalUrl, tenant.getId());
+            return SignupResponse.success(tenant.getId(), subscriptionResponse.getApprovalUrl());
 
         } catch (SubdomainExistsException e) {
             auditLogger.logFailure("SIGNUP", null, null, 
@@ -169,5 +175,73 @@ public class SignupService {
         ownerUser.setTenant(tenant);
 
         return staffUserRepository.save(ownerUser);
+    }
+
+    /**
+     * Inline signup flow for PayPal JS SDK (no redirect).
+     * Creates tenant + owner user, then creates a PayPal subscription ID (without return/cancel URLs).
+     */
+    @Transactional
+    public InlineSignupResponse signupInline(SignupRequest request) {
+        logger.info("Starting inline signup process for subdomain: {}", request.getSubdomain());
+        auditLogger.logSuccess("SIGNUP_INLINE_STARTED", null, null,
+                "Subdomain: " + request.getSubdomain() + ", Email: " + request.getEmail());
+
+        try {
+            // Validate subdomain availability
+            if (!isSubdomainAvailable(request.getSubdomain())) {
+                logger.warn("Subdomain already exists (inline): {}", request.getSubdomain());
+                auditLogger.logFailure("SIGNUP_INLINE", null, null,
+                        "Subdomain already exists: " + request.getSubdomain(), null);
+                throw new SubdomainExistsException(request.getSubdomain());
+            }
+
+            // Create tenant with pending_payment status
+            TenantEntity tenant = createPendingTenant(request);
+            logger.info("Created tenant (inline) ID: {} slug: {}", tenant.getId(), tenant.getSlug());
+            auditLogger.logSuccess("TENANT_CREATED_INLINE", tenant.getId(), null,
+                    "Subdomain: " + tenant.getSlug() + ", Status: PENDING_PAYMENT");
+
+            // Create owner user
+            StaffUser ownerUser = createOwnerUser(tenant, request);
+            logger.info("Created owner user (inline) ID: {} for tenant: {}", ownerUser.getId(), tenant.getId());
+            auditLogger.logSuccess("OWNER_USER_CREATED_INLINE", tenant.getId(), ownerUser.getId(),
+                    "Email: " + ownerUser.getEmail() + ", Role: ADMIN");
+
+            // Create PayPal subscription (no redirect URLs; JS SDK handles approval)
+            PlanTier selectedTier = request.getPlanTier() != null ? request.getPlanTier() : PlanTier.BASIC;
+            String billingCycle = request.getBillingCycle() != null ? request.getBillingCycle().toUpperCase() : "MONTHLY";
+
+            String subscriptionId = subscriptionService.createSubscription(
+                    tenant.getId(),
+                    selectedTier,
+                    billingCycle,
+                    request.getClientBaseUrl()
+            );
+
+            logger.info("Inline signup created subscription ID: {} for tenant: {}", subscriptionId, tenant.getId());
+            auditLogger.logSuccess("SIGNUP_INLINE_COMPLETED", tenant.getId(), ownerUser.getId(),
+                    "Subscription created inline without redirect");
+
+            return InlineSignupResponse.success(subscriptionId, tenant.getId());
+
+        } catch (SubdomainExistsException e) {
+            auditLogger.logFailure("SIGNUP_INLINE", null, null,
+                    "Subdomain conflict: " + request.getSubdomain(), e);
+            throw e;
+        } catch (PayPalConfigurationException e) {
+            auditLogger.logFailure("SIGNUP_INLINE", null, null,
+                    "PayPal configuration error (inline) for subdomain: " + request.getSubdomain(), e);
+            throw e;
+        } catch (PayPalApiException e) {
+            auditLogger.logFailure("SIGNUP_INLINE", null, null,
+                    "PayPal API error during inline signup for subdomain: " + request.getSubdomain(), e);
+            throw e;
+        } catch (Exception e) {
+            logger.error("Unexpected error during inline signup for subdomain: {}", request.getSubdomain(), e);
+            auditLogger.logFailure("SIGNUP_INLINE", null, null,
+                    "Unexpected error for subdomain: " + request.getSubdomain(), e);
+            throw new RuntimeException("Inline signup failed due to unexpected error", e);
+        }
     }
 }

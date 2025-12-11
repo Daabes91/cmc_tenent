@@ -245,7 +245,7 @@ export function isTenantStatus(value: unknown): value is TenantStatus {
  * Type for theme keys that exist in the file system
  * This should be updated when new themes are added
  */
-export type AvailableThemeKey = 'default' | 'clinic' | 'barber'
+export type AvailableThemeKey = 'default' | 'clinic' | 'barber' | 'insurance'
 
 /**
  * Type guard to check if a theme key is available
@@ -254,5 +254,5 @@ export type AvailableThemeKey = 'default' | 'clinic' | 'barber'
  * @returns True if theme key is available
  */
 export function isAvailableThemeKey(key: string): key is AvailableThemeKey {
-  return key === 'default' || key === 'clinic' || key === 'barber'
+  return key === 'default' || key === 'clinic' || key === 'barber' || key === 'insurance'
 }

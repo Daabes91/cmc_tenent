@@ -47,7 +47,7 @@ Successfully implemented healthcare-specific testimonials for the SaaS landing p
    - Metric: "35% increase in patient satisfaction"
    - Focus: Patient communication
 
-4. **Dr. Layla Qadri** - Medical Director, Qadri Dental Group
+4. **Dr. Layla Cliniqax** - Medical Director, Cliniqax Dental Group
    - Metric: "28% reduction in no-shows"
    - Focus: Automated reminders and bilingual support
 
@@ -84,7 +84,7 @@ Successfully implemented healthcare-specific testimonials for the SaaS landing p
 - dr-sarah-johnson.jpg
 - michael-chen.jpg
 - dr-aisha-alrashid.jpg
-- dr-layla-qadri.jpg
+- dr-layla-Cliniqax.jpg
 - sameer-haddad.jpg
 
 **Current State**: Using Unsplash placeholder images as fallbacks until custom images are provided

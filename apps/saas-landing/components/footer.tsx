@@ -75,10 +75,8 @@ export default function Footer() {
             <ul className="flex flex-col gap-2">
               <li>
                 <Link
-                  href="https://github.com/MohamedDjoudir/landing-page-template-2/blob/main/QUICKSTART.md"
+                  href="/signup"
                   className="text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white"
-                  target="_blank"
-                  rel="noreferrer"
                 >
                   Quickstart
                 </Link>
@@ -89,7 +87,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#blog" className="text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white">
+                <Link href="/blog" className="text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white">
                   Blog
                 </Link>
               </li>

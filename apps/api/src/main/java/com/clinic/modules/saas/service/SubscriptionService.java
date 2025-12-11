@@ -3,6 +3,8 @@ package com.clinic.modules.saas.service;
 import com.clinic.modules.core.tenant.BillingStatus;
 import com.clinic.modules.core.tenant.TenantEntity;
 import com.clinic.modules.core.tenant.TenantRepository;
+import com.clinic.modules.admin.staff.repository.StaffUserRepository;
+import com.clinic.modules.core.doctor.DoctorRepository;
 import com.clinic.modules.saas.config.PlanTierConfig;
 import com.clinic.modules.saas.dto.*;
 import com.clinic.modules.saas.exception.*;
@@ -23,6 +25,8 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -57,12 +61,18 @@ public class SubscriptionService {
     private final BillingAlertService alertService;
     private final PlanTierConfig planTierConfig;
     private final PayPalCircuitBreaker circuitBreaker;
+    private final StaffUserRepository staffUserRepository;
+    private final DoctorRepository doctorRepository;
 
     @Value("${app.marketing-url:${app.base-url:http://localhost:3000}}")
     private String marketingAppUrl;
 
     @Value("${app.admin-url:http://localhost:3001}")
     private String adminAppUrl;
+
+    // Optional base path for marketing app (e.g., "/landing") to build correct return/cancel URLs
+    @Value("${app.marketing-base-path:/landing}")
+    private String marketingBasePath;
 
     public SubscriptionService(
             PayPalConfigService payPalConfigService,
@@ -73,7 +83,9 @@ public class SubscriptionService {
             BillingMetricsService metricsService,
             BillingAlertService alertService,
             PlanTierConfig planTierConfig,
-            PayPalCircuitBreaker circuitBreaker) {
+            PayPalCircuitBreaker circuitBreaker,
+            StaffUserRepository staffUserRepository,
+            DoctorRepository doctorRepository) {
         this.payPalConfigService = payPalConfigService;
         this.restTemplate = restTemplate;
         this.subscriptionRepository = subscriptionRepository;
@@ -83,6 +95,8 @@ public class SubscriptionService {
         this.alertService = alertService;
         this.planTierConfig = planTierConfig;
         this.circuitBreaker = circuitBreaker;
+        this.staffUserRepository = staffUserRepository;
+        this.doctorRepository = doctorRepository;
     }
 
     private static final Set<String> ACTIVATION_STATUSES = Set.of(
@@ -92,34 +106,259 @@ public class SubscriptionService {
     );
 
     /**
-     * Create a PayPal subscription for a tenant.
+     * Create a PayPal subscription with redirect URLs for the redirect-based flow.
+     * This is the restored redirect flow where users are sent to PayPal to approve subscriptions.
      *
      * @param tenantId the tenant ID
-     * @return PayPal approval URL for the user to approve the subscription
+     * @param planTier requested plan tier
+     * @param billingCycle requested billing cycle (MONTHLY/ANNUAL)
+     * @param landingBaseUrlOverride optional base URL provided by the caller
+     * @return SubscriptionCreationResponse with subscription ID and approval URL
+     * @throws PayPalApiException if subscription creation fails
+     */
+    public SubscriptionCreationResponse createSubscriptionWithRedirect(
+            Long tenantId,
+            PlanTier planTier,
+            String billingCycle,
+            String landingBaseUrlOverride) {
+        logger.info("Creating PayPal subscription with redirect for tenant: {}", tenantId);
+
+        // Resolve tenant slug for return/cancel URLs
+        String tenantSlug = tenantRepository.findById(tenantId)
+                .map(TenantEntity::getSlug)
+                .orElseThrow(() -> new IllegalArgumentException("Tenant not found for subscription: " + tenantId));
+        
+        // Check circuit breaker state
+        circuitBreaker.checkState();
+        
+        // Start timer for API call
+        Timer.Sample sample = metricsService.startPayPalApiTimer();
+        metricsService.recordPayPalApiCall("CREATE_SUBSCRIPTION");
+
+        try {
+            String accessToken = payPalConfigService.getAccessToken();
+            String baseUrl = payPalConfigService.getBaseUrl();
+            PlanTier targetTier = planTier != null ? planTier : PlanTier.BASIC;
+            String cycle = (billingCycle == null || billingCycle.isBlank()) ? "MONTHLY" : billingCycle.toUpperCase();
+            
+            if (!planTierConfig.tierExists(targetTier)) {
+                throw new InvalidPlanTierException(targetTier.name(), PlanTier.values());
+            }
+            
+            String planId = payPalConfigService.getPlanIdForTier(targetTier, cycle);
+            if (planId == null || planId.isBlank()) {
+                planId = planTierConfig.getPayPalPlanId(targetTier, cycle);
+            }
+            
+            // Validate configuration
+            if (accessToken == null || accessToken.isBlank()) {
+                throw new PayPalConfigurationException("PayPal access token is not available");
+            }
+            if (baseUrl == null || baseUrl.isBlank()) {
+                throw new PayPalConfigurationException("PayPal base URL is not configured");
+            }
+            if (planId == null || planId.isBlank()) {
+                throw new PayPalConfigurationException("PayPal plan ID is not configured for tier " + targetTier.name());
+            }
+
+            String url = baseUrl + "/v1/billing/subscriptions";
+
+            // Determine base URL for return/cancel URLs
+            String effectiveBaseUrl = landingBaseUrlOverride != null && !landingBaseUrlOverride.isBlank()
+                    ? normalizeBaseUrl(landingBaseUrlOverride)
+                    : normalizeBaseUrl(marketingAppUrl);
+            effectiveBaseUrl = enforceHttpsForExternalDomains(effectiveBaseUrl);
+            effectiveBaseUrl = appendBasePath(effectiveBaseUrl, marketingBasePath);
+
+            // Build return and cancel URLs (must be valid HTTPS for PayPal)
+            String returnUrl = effectiveBaseUrl + "/payment-confirmation";
+            String cancelUrl = effectiveBaseUrl + "/signup?cancelled=true&slug=" + URLEncoder.encode(tenantSlug, StandardCharsets.UTF_8);
+
+            // Build request body
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("plan_id", planId);
+
+            // Add custom_id to track tenant
+            requestBody.put("custom_id", "tenant_" + tenantId);
+
+            // Add application context with return/cancel URLs
+            Map<String, Object> applicationContext = new HashMap<>();
+            applicationContext.put("brand_name", "Cliniqax");
+            applicationContext.put("locale", "ar-EG");
+            applicationContext.put("shipping_preference", "NO_SHIPPING");
+            applicationContext.put("user_action", "SUBSCRIBE_NOW");
+            applicationContext.put("landing_page", "BILLING");
+            applicationContext.put("logo_url", "https://cliniqax.com/favicon-96x96.png");
+            applicationContext.put("return_url", returnUrl);
+            applicationContext.put("cancel_url", cancelUrl);
+            requestBody.put("application_context", applicationContext);
+
+            // Set headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Bearer " + accessToken);
+            headers.set("Prefer", "return=representation");
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+            // Make API call
+            @SuppressWarnings("rawtypes")
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    Map.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.CREATED && response.getBody() != null) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
+                String subscriptionId = (String) responseBody.get("id");
+                String status = (String) responseBody.get("status");
+
+                // Extract approval URL from links
+                String approvalUrl = extractApprovalUrl(responseBody);
+                if (approvalUrl == null || approvalUrl.isBlank()) {
+                    logger.error("No approval URL found in PayPal response for tenant: {}", tenantId);
+                    throw new PayPalApiException("subscription creation", "No approval URL in response");
+                }
+
+                logger.info("PayPal subscription created successfully for tenant: {} with approval URL", tenantId);
+                auditLogger.logPayPalApiCall("CREATE_SUBSCRIPTION", tenantId, subscriptionId, 201, true);
+                auditLogger.logSubscriptionEvent("CREATED", subscriptionId, tenantId, 
+                    "Subscription created with redirect flow");
+                
+                // Record metrics
+                metricsService.recordPayPalApiSuccess("CREATE_SUBSCRIPTION", 201);
+                metricsService.stopPayPalApiTimer(sample, "CREATE_SUBSCRIPTION");
+                metricsService.recordSubscriptionCreated();
+                
+                // Record success in circuit breaker
+                circuitBreaker.recordSuccess();
+                
+                return new SubscriptionCreationResponse(subscriptionId, approvalUrl, status);
+            }
+
+            logger.error("Failed to create PayPal subscription for tenant: {}. Status: {}", 
+                tenantId, response.getStatusCode());
+            auditLogger.logPayPalApiCall("CREATE_SUBSCRIPTION", tenantId, null, 
+                response.getStatusCode().value(), false);
+            metricsService.recordPayPalApiError("CREATE_SUBSCRIPTION", response.getStatusCode().value());
+            metricsService.recordSubscriptionCreationFailure("unexpected_status");
+            alertService.alertSubscriptionCreationFailure(tenantId, "Unexpected response status: " + response.getStatusCode());
+            circuitBreaker.recordFailure();
+            throw new PayPalApiException("subscription creation", 
+                response.getStatusCode().value(), "Unexpected response status");
+
+        } catch (HttpClientErrorException e) {
+            logger.error("PayPal API client error during subscription creation for tenant: {}. Status: {}, Body: {}", 
+                tenantId, e.getStatusCode(), e.getResponseBodyAsString(), e);
+            auditLogger.logPayPalApiError("CREATE_SUBSCRIPTION", tenantId, null, 
+                e.getStatusCode().value(), e.getMessage(), e.getResponseBodyAsString());
+            metricsService.recordPayPalApiError("CREATE_SUBSCRIPTION", e.getStatusCode().value());
+            metricsService.recordSubscriptionCreationFailure("api_client_error");
+            alertService.alertSubscriptionCreationFailure(tenantId, "PayPal API client error: " + e.getMessage());
+            circuitBreaker.recordFailure();
+            throw new PayPalApiException("subscription creation", e.getStatusCode().value(), 
+                "PayPal API client error: " + e.getMessage());
+        } catch (HttpServerErrorException e) {
+            logger.error("PayPal API server error during subscription creation for tenant: {}. Status: {}, Body: {}", 
+                tenantId, e.getStatusCode(), e.getResponseBodyAsString(), e);
+            auditLogger.logPayPalApiError("CREATE_SUBSCRIPTION", tenantId, null, 
+                e.getStatusCode().value(), e.getMessage(), e.getResponseBodyAsString());
+            metricsService.recordPayPalApiError("CREATE_SUBSCRIPTION", e.getStatusCode().value());
+            metricsService.recordSubscriptionCreationFailure("api_server_error");
+            alertService.alertSubscriptionCreationFailure(tenantId, "PayPal API server error: " + e.getMessage());
+            circuitBreaker.recordFailure();
+            throw new PayPalApiException("subscription creation", e.getStatusCode().value(), 
+                "PayPal API server error: " + e.getMessage());
+        } catch (PayPalApiException | PayPalConfigurationException e) {
+            // Re-throw PayPalApiException and PayPalConfigurationException
+            circuitBreaker.recordFailure();
+            throw e;
+        } catch (Exception e) {
+            logger.error("Unexpected error during PayPal subscription creation for tenant: {}", tenantId, e);
+            auditLogger.logFailure("CREATE_SUBSCRIPTION", tenantId, null, 
+                "Unexpected error during subscription creation", e);
+            metricsService.recordSubscriptionCreationFailure("unexpected_error");
+            alertService.alertSubscriptionCreationFailure(tenantId, "Unexpected error: " + e.getMessage());
+            circuitBreaker.recordFailure();
+            throw new PayPalApiException("subscription creation", "Unexpected error: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Extract approval URL from PayPal subscription response.
+     * Looks for the "approve" link in the links array.
+     *
+     * @param responseBody PayPal API response body
+     * @return approval URL or null if not found
+     */
+    @SuppressWarnings("unchecked")
+    private String extractApprovalUrl(Map<String, Object> responseBody) {
+        Object linksObj = responseBody.get("links");
+        if (!(linksObj instanceof List<?>)) {
+            return null;
+        }
+
+        List<Map<String, Object>> links = (List<Map<String, Object>>) linksObj;
+        for (Map<String, Object> link : links) {
+            String rel = (String) link.get("rel");
+            if ("approve".equals(rel)) {
+                return (String) link.get("href");
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Create a PayPal subscription for a tenant.
+     * This is a convenience method that uses default plan tier and billing cycle.
+     *
+     * @param tenantId the tenant ID
+     * @return PayPal subscription ID
      * @throws PayPalApiException if subscription creation fails
      */
     public String createSubscription(Long tenantId) {
         return createSubscription(tenantId, PlanTier.BASIC, "MONTHLY", null);
     }
 
+    /**
+     * Create a PayPal subscription for a tenant with optional landing base URL override.
+     * This is a convenience method that uses default plan tier and billing cycle.
+     *
+     * @param tenantId the tenant ID
+     * @param landingBaseUrlOverride optional base URL provided by the caller
+     * @return PayPal subscription ID
+     * @throws PayPalApiException if subscription creation fails
+     */
     public String createSubscription(Long tenantId, String landingBaseUrlOverride) {
         return createSubscription(tenantId, PlanTier.BASIC, "MONTHLY", landingBaseUrlOverride);
     }
 
     /**
      * Create a PayPal subscription for a tenant with optional landing base URL override.
+     * This method creates a subscription without redirect URLs, suitable for backend-only flows.
+     * For redirect-based flows where users need to approve on PayPal, use createSubscriptionWithRedirect instead.
      *
      * @param tenantId the tenant ID
      * @param planTier requested plan tier
      * @param billingCycle requested billing cycle (MONTHLY/ANNUAL)
      * @param landingBaseUrlOverride optional base URL provided by the caller
-     * @return PayPal approval URL
+     * @return PayPal subscription ID
+     * @throws PayPalApiException if subscription creation fails
      */
     public String createSubscription(Long tenantId,
                                      PlanTier planTier,
                                      String billingCycle,
                                      String landingBaseUrlOverride) {
         logger.info("Creating PayPal subscription for tenant: {}", tenantId);
+
+        // Resolve tenant slug for return/cancel URLs
+        String tenantSlug = tenantRepository.findById(tenantId)
+                .map(TenantEntity::getSlug)
+                .orElseThrow(() -> new IllegalArgumentException("Tenant not found for subscription: " + tenantId));
         
         // Check circuit breaker state
         circuitBreaker.checkState();
@@ -161,16 +400,12 @@ public class SubscriptionService {
             // Add custom_id to track tenant
             requestBody.put("custom_id", "tenant_" + tenantId);
 
-            // Add application context with return and cancel URLs
-            String landingBaseUrlSource = resolveBaseUrlOverride(landingBaseUrlOverride, marketingAppUrl);
-            String landingBaseUrl = normalizeBaseUrl(landingBaseUrlSource);
+            // Add application context (without return/cancel URLs for card-fields flow)
             Map<String, Object> applicationContext = new HashMap<>();
             applicationContext.put("brand_name", "Clinic SaaS Platform");
             applicationContext.put("locale", "en-US");
             applicationContext.put("shipping_preference", "NO_SHIPPING");
             applicationContext.put("user_action", "SUBSCRIBE_NOW");
-            applicationContext.put("return_url", landingBaseUrl + "/payment-confirmation");
-            applicationContext.put("cancel_url", landingBaseUrl + "/signup?canceled=true");
             requestBody.put("application_context", applicationContext);
 
             // Set headers
@@ -195,41 +430,21 @@ public class SubscriptionService {
                 Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
                 String subscriptionId = (String) responseBody.get("id");
 
-                // Extract approval URL from links
-                @SuppressWarnings("unchecked")
-                java.util.List<Map<String, String>> links = 
-                    (java.util.List<Map<String, String>>) responseBody.get("links");
-
-                if (links != null) {
-                    for (Map<String, String> link : links) {
-                        if ("approve".equals(link.get("rel"))) {
-                            String approvalUrl = link.get("href");
-                            logger.info("PayPal subscription created successfully for tenant: {}", tenantId);
-                            auditLogger.logPayPalApiCall("CREATE_SUBSCRIPTION", tenantId, subscriptionId, 201, true);
-                            auditLogger.logSubscriptionEvent("CREATED", subscriptionId, tenantId, 
-                                "Subscription created, awaiting approval");
-                            
-                            // Record metrics
-                            metricsService.recordPayPalApiSuccess("CREATE_SUBSCRIPTION", 201);
-                            metricsService.stopPayPalApiTimer(sample, "CREATE_SUBSCRIPTION");
-                            metricsService.recordSubscriptionCreated();
-                            
-                            // Record success in circuit breaker
-                            circuitBreaker.recordSuccess();
-                            
-                            return approvalUrl;
-                        }
-                    }
-                }
-
-                logger.error("Approval URL not found in PayPal response for tenant: {}", tenantId);
-                auditLogger.logPayPalApiError("CREATE_SUBSCRIPTION", tenantId, subscriptionId, 201, 
-                    "Approval URL not found in response", responseBody.toString());
-                metricsService.recordPayPalApiError("CREATE_SUBSCRIPTION", 201);
-                metricsService.recordSubscriptionCreationFailure("approval_url_not_found");
-                alertService.alertSubscriptionCreationFailure(tenantId, "Approval URL not found in response");
-                circuitBreaker.recordFailure();
-                throw new PayPalApiException("subscription creation", "Approval URL not found in response");
+                logger.info("PayPal subscription created successfully for tenant: {}", tenantId);
+                auditLogger.logPayPalApiCall("CREATE_SUBSCRIPTION", tenantId, subscriptionId, 201, true);
+                auditLogger.logSubscriptionEvent("CREATED", subscriptionId, tenantId, 
+                    "Subscription created without redirect URLs");
+                
+                // Record metrics
+                metricsService.recordPayPalApiSuccess("CREATE_SUBSCRIPTION", 201);
+                metricsService.stopPayPalApiTimer(sample, "CREATE_SUBSCRIPTION");
+                metricsService.recordSubscriptionCreated();
+                
+                // Record success in circuit breaker
+                circuitBreaker.recordSuccess();
+                
+                // Return subscription ID instead of approval URL
+                return subscriptionId;
             }
 
             logger.error("Failed to create PayPal subscription for tenant: {}. Status: {}", 
@@ -514,7 +729,7 @@ public class SubscriptionService {
     /**
      * Retrieve the current plan information for a tenant by consulting PayPal.
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public TenantPlanResponse getTenantPlan(Long tenantId) {
         TenantEntity tenant = tenantRepository.findById(tenantId)
                 .orElseThrow(() -> new NotFoundException("Tenant with ID " + tenantId + " not found"));
@@ -522,7 +737,29 @@ public class SubscriptionService {
         SubscriptionEntity subscription = subscriptionRepository.findByTenantId(tenantId)
                 .orElseThrow(() -> new NotFoundException("Subscription not found for tenant ID " + tenantId));
 
-        Map<String, Object> subscriptionData = verifySubscription(subscription.getPaypalSubscriptionId());
+        Map<String, Object> subscriptionData;
+        try {
+            subscriptionData = verifySubscription(subscription.getPaypalSubscriptionId());
+        } catch (Exception e) {
+            logger.warn("Failed to verify PayPal subscription {}, falling back to local data: {}", subscription.getPaypalSubscriptionId(), e.getMessage());
+            subscriptionData = new HashMap<>();
+            subscriptionData.put("status", subscription.getStatus());
+            subscriptionData.put("plan_id", subscription.getPlanTier() != null ? subscription.getPlanTier().name() : null);
+        }
+
+        // If we can derive a next billing date from PayPal, persist it for display
+        String nextBilling = getNextBillingTime(subscriptionData);
+        if (nextBilling != null && subscription.getCurrentPeriodEnd() == null) {
+            try {
+                LocalDateTime next = parsePayPalDateTime(nextBilling);
+                subscription.setCurrentPeriodEnd(next);
+                subscription.setRenewalDate(next);
+                subscriptionRepository.save(subscription);
+            } catch (Exception ignored) {
+                // best-effort only
+            }
+        }
+
         return buildPlanResponse(tenant, subscription, subscriptionData);
     }
 
@@ -557,6 +794,70 @@ public class SubscriptionService {
     }
 
     /**
+     * Manually override a tenant's plan tier.
+     * This is a privileged operation for SaaS managers to handle special cases.
+     * All overrides are logged with manager identity and reason.
+     * Evicts the tenant plan cache to ensure fresh data is fetched.
+     *
+     * @param tenantId the tenant ID
+     * @param targetTier the target plan tier
+     * @param managerId the SaaS manager ID performing the override
+     * @param reason the reason for the override
+     * @throws NotFoundException if tenant or subscription not found
+     * @throws IllegalArgumentException if target tier is invalid
+     */
+    @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "tenantPlan", key = "#tenantId", cacheManager = "billingSaasCacheManager")
+    public void manualPlanOverride(Long tenantId, PlanTier targetTier, Long managerId, String reason) {
+        logger.warn("Manual plan override requested for tenant: {} to tier: {} by manager: {}", 
+            tenantId, targetTier, managerId);
+        
+        // Validate tenant and subscription exist
+        TenantEntity tenant = tenantRepository.findById(tenantId)
+                .orElseThrow(() -> new NotFoundException("Tenant with ID " + tenantId + " not found"));
+
+        SubscriptionEntity subscription = subscriptionRepository.findByTenantId(tenantId)
+                .orElseGet(() -> {
+                    SubscriptionEntity manual = new SubscriptionEntity();
+                    manual.setTenant(tenant);
+                    manual.setProvider("manual");
+                    manual.setPaypalSubscriptionId("manual-" + tenantId + "-" + System.currentTimeMillis());
+                    manual.setStatus("ACTIVE");
+                    manual.setCurrentPeriodStart(LocalDateTime.now());
+                    manual.setPlanTier(targetTier != null ? targetTier : PlanTier.BASIC);
+                    return manual;
+                });
+
+        // Validate target tier exists
+        if (!planTierConfig.tierExists(targetTier)) {
+            throw new IllegalArgumentException("Invalid plan tier: " + targetTier);
+        }
+
+        // Store old tier for audit logging
+        String oldTier = subscription.getPlanTier() != null ? subscription.getPlanTier().name() : "BASIC";
+        
+        // Check if already at target tier
+        if (subscription.getPlanTier() == targetTier) {
+            logger.info("Plan tier already set to {} for tenant: {}, no change needed", targetTier, tenantId);
+            return;
+        }
+
+        // Apply the plan change immediately
+        subscription.setPlanTier(targetTier);
+        subscription.setPendingPlanTier(null);
+        subscription.setPendingPlanEffectiveDate(null);
+        subscriptionRepository.save(subscription);
+
+        // Log the manual override with detailed audit trail
+        auditLogger.logManualPlanOverride(tenantId, managerId, oldTier, targetTier.name(), reason);
+        auditLogger.logSubscriptionEvent("MANUAL_PLAN_OVERRIDE", subscription.getPaypalSubscriptionId(), tenantId,
+                "Plan manually overridden from " + oldTier + " to " + targetTier + " by manager " + managerId);
+
+        logger.warn("Plan tier manually overridden for tenant: {} from {} to {} by manager: {}. Reason: {}", 
+            tenantId, oldTier, targetTier, managerId, reason);
+    }
+
+    /**
      * Normalize a base URL by removing trailing slashes for consistent concatenation.
      */
     private String normalizeBaseUrl(String url) {
@@ -567,18 +868,45 @@ public class SubscriptionService {
     }
 
     /**
-     * Resolve a landing base URL override, falling back to the configured marketing URL when invalid.
+     * PayPal requires HTTPS return/cancel URLs. If the provided URL is http and
+     * not clearly a local/dev host, upgrade it to https to avoid INVALID_PARAMETER_SYNTAX.
      */
-    private String resolveBaseUrlOverride(String override, String fallback) {
-        if (override == null || override.isBlank()) {
-            return fallback;
+    private String enforceHttpsForExternalDomains(String url) {
+        if (url == null) {
+            return null;
         }
-        String trimmed = override.trim();
-        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-            return trimmed;
+        String lower = url.toLowerCase();
+        boolean isLocal = lower.contains("localhost") || lower.contains("127.0.0.1");
+        if (lower.startsWith("http://") && !isLocal) {
+            return "https://" + url.substring("http://".length());
         }
-        logger.warn("Ignoring invalid client base URL override: {}", override);
-        return fallback;
+        return url;
+    }
+
+    /**
+     * Append a base path (e.g., /landing) to a base URL if it's not already present.
+     */
+    private String appendBasePath(String baseUrl, String basePath) {
+        if (baseUrl == null || baseUrl.isBlank()) {
+            return baseUrl;
+        }
+        if (basePath == null || basePath.isBlank() || "/".equals(basePath)) {
+            return baseUrl;
+        }
+
+        String normalizedBase = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+        String normalizedPath = basePath.startsWith("/") ? basePath : "/" + basePath;
+        // Drop trailing slash on base path (except root) to avoid /landing/landing duplication
+        if (normalizedPath.endsWith("/") && normalizedPath.length() > 1) {
+            normalizedPath = normalizedPath.substring(0, normalizedPath.length() - 1);
+        }
+
+        // Avoid double-appending
+        if (normalizedBase.endsWith(normalizedPath)) {
+            return normalizedBase;
+        }
+
+        return normalizedBase + normalizedPath;
     }
 
     private PlanTier resolvePlanTier(String paypalPlanId) {
@@ -608,12 +936,30 @@ public class SubscriptionService {
         String billingCycle = determineBillingCycle(subscriptionData);
 
         Map<String, String> paymentDetails = extractPaymentDetails(subscriptionData);
+        String paymentMethodType = derivePaymentMethodType(paymentDetails);
         
-        // Build payment method mask
+        // Build payment method mask and persist any new details so we can show them even if PayPal is down later
         String paymentMethodMask = buildPaymentMethodMask(paymentDetails);
+        if (paymentMethodMask != null && !paymentMethodMask.isBlank()) {
+            if (!paymentMethodMask.equals(subscription.getPaymentMethodMask())) {
+                subscription.setPaymentMethodMask(paymentMethodMask);
+                subscriptionRepository.save(subscription);
+            }
+        } else if (subscription.getPaymentMethodMask() != null && !subscription.getPaymentMethodMask().isBlank()) {
+            paymentMethodMask = subscription.getPaymentMethodMask();
+        }
+
+        if (paymentMethodType == null && paymentMethodMask != null && !paymentMethodMask.isBlank()) {
+            paymentMethodType = paymentMethodMask.toLowerCase().contains("paypal") ? "PAYPAL" : "CREDIT_CARD";
+        }
 
         // Get plan tier from subscription or default to BASIC
         PlanTier planTier = subscription.getPlanTier() != null ? subscription.getPlanTier() : PlanTier.BASIC;
+        PlanTierConfig.PlanTierDetails planDetails = planTierConfig.getPlanDetails(planTier);
+        int maxStaff = planDetails != null ? planDetails.getMaxStaff() : -1;
+        int maxDoctors = planDetails != null ? planDetails.getMaxDoctors() : -1;
+        long staffUsed = staffUserRepository.countByTenantId(tenant.getId());
+        long doctorsUsed = doctorRepository.countByTenantId(tenant.getId());
         
         // Get features for the plan tier
         List<String> features = planTierConfig.getFeatures(planTier);
@@ -630,15 +976,44 @@ public class SubscriptionService {
                 billingCycle,
                 renewalDate,
                 paymentMethodMask,
-                paymentDetails.get("brand"),
+                paymentMethodType,
                 status,
                 subscription.getCancellationDate(),
                 subscription.getCancellationEffectiveDate(),
                 subscription.getPendingPlanTier(),
                 subscription.getPendingPlanEffectiveDate(),
                 features,
-                subscription.getPaypalSubscriptionId()
+                subscription.getPaypalSubscriptionId(),
+                maxStaff,
+                maxDoctors,
+                staffUsed,
+                doctorsUsed
         );
+    }
+
+    /**
+     * Validate that current tenant usage (staff/doctors) fits within the target tier limits.
+     */
+    private void validateTargetTierLimits(Long tenantId, PlanTier targetTier) {
+        PlanTierConfig.PlanTierDetails details = planTierConfig.getPlanDetails(targetTier);
+        if (details == null) {
+            return;
+        }
+
+        long staffCount = staffUserRepository.countByTenantId(tenantId);
+        long doctorCount = doctorRepository.countByTenantId(tenantId);
+
+        if (details.getMaxStaff() >= 0 && staffCount > details.getMaxStaff()) {
+            throw new PlanLimitExceededException(
+                    "Cannot change to " + targetTier + " plan: staff count (" + staffCount + ") exceeds limit of " + details.getMaxStaff()
+            );
+        }
+
+        if (details.getMaxDoctors() >= 0 && doctorCount > details.getMaxDoctors()) {
+            throw new PlanLimitExceededException(
+                    "Cannot change to " + targetTier + " plan: doctor count (" + doctorCount + ") exceeds limit of " + details.getMaxDoctors()
+            );
+        }
     }
     
     private String buildPaymentMethodMask(Map<String, String> paymentDetails) {
@@ -646,13 +1021,28 @@ public class SubscriptionService {
         String last4 = paymentDetails.get("last4");
         
         if (brand != null && last4 != null) {
-            if ("PayPal".equals(brand)) {
+            if ("PayPal".equalsIgnoreCase(brand)) {
                 return "PayPal (" + last4 + ")";
             }
             return brand + " ****" + last4;
         }
-        
-        return "Not available";
+
+        if (brand != null) {
+            return brand;
+        }
+
+        return null;
+    }
+
+    private String derivePaymentMethodType(Map<String, String> paymentDetails) {
+        String brand = paymentDetails.get("brand");
+        if (brand == null) {
+            return null;
+        }
+        if ("PayPal".equalsIgnoreCase(brand)) {
+            return "PAYPAL";
+        }
+        return "CREDIT_CARD";
     }
 
     private String extractPlanName(Map<String, Object> subscriptionData) {
@@ -773,16 +1163,39 @@ public class SubscriptionService {
             return result;
         }
 
-    Object paypalObj = paymentSource.get("paypal");
+        Object paypalObj = paymentSource.get("paypal");
         if (paypalObj instanceof Map<?, ?> paypal) {
             Object email = paypal.get("email_address");
             result.put("brand", "PayPal");
             if (email != null) {
-                result.put("last4", email.toString());
+                result.put("last4", maskEmail(email.toString()));
+            }
+        }
+
+        // Fallback to subscriber email if payment_source is missing (common in sandbox)
+        Object subscriberObj = subscriptionData.get("subscriber");
+        if (subscriberObj instanceof Map<?, ?> subscriber) {
+            Object email = subscriber.get("email_address");
+            if (email != null) {
+                result.put("brand", "PayPal");
+                result.put("last4", maskEmail(email.toString()));
             }
         }
 
         return result;
+    }
+
+    private String maskEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return null;
+        }
+        int atIndex = email.indexOf('@');
+        if (atIndex <= 0) {
+            return email;
+        }
+        String localPart = email.substring(0, Math.min(2, atIndex));
+        String domain = email.substring(atIndex);
+        return localPart + "****" + domain;
     }
 
     private void callPayPalCancelSubscription(String subscriptionId, String reason) {
@@ -878,7 +1291,7 @@ public class SubscriptionService {
      * @return TenantPlanResponse with complete plan details
      * @throws NotFoundException if tenant or subscription not found
      */
-    @Transactional(readOnly = true)
+    @Transactional
     @org.springframework.cache.annotation.Cacheable(value = "tenantPlan", key = "#tenantId", cacheManager = "billingSaasCacheManager")
     public TenantPlanResponse getPlanDetails(Long tenantId) {
         logger.info("Fetching plan details for tenant: {}", tenantId);
@@ -887,15 +1300,46 @@ public class SubscriptionService {
                 .orElseThrow(() -> new NotFoundException("Tenant with ID " + tenantId + " not found"));
 
         SubscriptionEntity subscription = subscriptionRepository.findByTenantId(tenantId)
-                .orElseThrow(() -> new NotFoundException("Subscription not found for tenant ID " + tenantId));
+                .orElseGet(() -> createManualSubscriptionIfMissing(tenant));
 
-        // Verify subscription with PayPal to get latest data
-        Map<String, Object> subscriptionData = verifySubscription(subscription.getPaypalSubscriptionId());
+        Map<String, Object> subscriptionData = new HashMap<>();
+        // If provider is PayPal, verify with PayPal; otherwise build minimal data locally
+        if ("paypal".equalsIgnoreCase(subscription.getProvider())) {
+            try {
+                subscriptionData = verifySubscription(subscription.getPaypalSubscriptionId());
+            } catch (Exception e) {
+                logger.warn("Failed to verify PayPal subscription {}, falling back to local data: {}", subscription.getPaypalSubscriptionId(), e.getMessage());
+                subscriptionData.put("status", subscription.getStatus());
+                subscriptionData.put("plan_id", subscription.getPlanTier() != null ? subscription.getPlanTier().name() : null);
+            }
+        } else {
+            subscriptionData.put("status", subscription.getStatus());
+            subscriptionData.put("plan_id", subscription.getPlanTier() != null ? subscription.getPlanTier().name() : null);
+        }
         
         TenantPlanResponse response = buildPlanResponse(tenant, subscription, subscriptionData);
         
         logger.info("Successfully fetched plan details for tenant: {}", tenantId);
         return response;
+    }
+
+    /**
+     * Create a minimal manual subscription record when none exists (e.g., offline payment).
+     */
+    private SubscriptionEntity createManualSubscriptionIfMissing(TenantEntity tenant) {
+        logger.warn("No subscription found for tenant: {}. Creating manual subscription record.", tenant.getId());
+        SubscriptionEntity manual = new SubscriptionEntity();
+        manual.setTenant(tenant);
+        manual.setProvider("manual");
+        manual.setPaypalSubscriptionId("manual-" + tenant.getId() + "-" + System.currentTimeMillis());
+        manual.setStatus(tenant.getBillingStatus() != null ? tenant.getBillingStatus().name() : "ACTIVE");
+        LocalDateTime now = LocalDateTime.now();
+        manual.setCurrentPeriodStart(now);
+        // Default to a 1-month cycle for manual subscriptions
+        manual.setCurrentPeriodEnd(now.plusMonths(1));
+        manual.setRenewalDate(now.plusMonths(1));
+        manual.setPlanTier(PlanTier.BASIC);
+        return subscriptionRepository.save(manual);
     }
 
     /**
@@ -1079,6 +1523,9 @@ public class SubscriptionService {
         if (currentTier == targetTier) {
             throw new IllegalArgumentException("Already subscribed to " + targetTier + " plan");
         }
+
+        // Ensure current usage fits within target tier limits
+        validateTargetTierLimits(tenantId, targetTier);
 
         // Use current billing cycle if not specified
         String cycle = billingCycle != null ? billingCycle : "MONTHLY";
@@ -1432,12 +1879,16 @@ public class SubscriptionService {
         logger.info("Generating billing portal URL for subscription: {}", subscriptionId);
         
         try {
-            String accessToken = payPalConfigService.getAccessToken();
             String baseUrl = payPalConfigService.getBaseUrl();
+
+            // Use the customer-facing PayPal domain rather than the API host so the link works in browsers
+            String portalBaseUrl = baseUrl.contains("sandbox")
+                    ? "https://www.sandbox.paypal.com"
+                    : "https://www.paypal.com";
 
             // PayPal doesn't have a direct billing portal API, so we construct a URL
             // that redirects to PayPal's subscription management page
-            String portalUrl = baseUrl.replace("/v1", "") + "/myaccount/autopay/connect/" + subscriptionId;
+            String portalUrl = portalBaseUrl + "/myaccount/autopay/connect/" + subscriptionId;
             
             auditLogger.logSubscriptionEvent("BILLING_PORTAL_URL_GENERATED", subscriptionId, null,
                     "Billing portal URL generated");
@@ -1450,60 +1901,5 @@ public class SubscriptionService {
                     "Error generating billing portal URL for subscription: " + subscriptionId, e);
             throw new PayPalApiException("billing portal URL generation", "Unexpected error: " + e.getMessage(), e);
         }
-    }
-
-    /**
-     * Manually override a tenant's plan tier.
-     * This is a privileged operation for SaaS managers to handle special cases.
-     * All overrides are logged with manager identity and reason.
-     * Evicts the tenant plan cache to ensure fresh data is fetched.
-     *
-     * @param tenantId the tenant ID
-     * @param targetTier the target plan tier
-     * @param managerId the SaaS manager ID performing the override
-     * @param reason the reason for the override
-     * @throws NotFoundException if tenant or subscription not found
-     * @throws IllegalArgumentException if target tier is invalid
-     */
-    @Transactional
-    @org.springframework.cache.annotation.CacheEvict(value = "tenantPlan", key = "#tenantId", cacheManager = "billingSaasCacheManager")
-    public void manualPlanOverride(Long tenantId, PlanTier targetTier, Long managerId, String reason) {
-        logger.warn("Manual plan override requested for tenant: {} to tier: {} by manager: {}", 
-            tenantId, targetTier, managerId);
-        
-        // Validate tenant and subscription exist
-        TenantEntity tenant = tenantRepository.findById(tenantId)
-                .orElseThrow(() -> new NotFoundException("Tenant with ID " + tenantId + " not found"));
-
-        SubscriptionEntity subscription = subscriptionRepository.findByTenantId(tenantId)
-                .orElseThrow(() -> new NotFoundException("Subscription not found for tenant ID " + tenantId));
-
-        // Validate target tier exists
-        if (!planTierConfig.tierExists(targetTier)) {
-            throw new IllegalArgumentException("Invalid plan tier: " + targetTier);
-        }
-
-        // Store old tier for audit logging
-        String oldTier = subscription.getPlanTier() != null ? subscription.getPlanTier().name() : "BASIC";
-        
-        // Check if already at target tier
-        if (subscription.getPlanTier() == targetTier) {
-            logger.info("Plan tier already set to {} for tenant: {}, no change needed", targetTier, tenantId);
-            return;
-        }
-
-        // Apply the plan change immediately
-        subscription.setPlanTier(targetTier);
-        subscription.setPendingPlanTier(null);
-        subscription.setPendingPlanEffectiveDate(null);
-        subscriptionRepository.save(subscription);
-
-        // Log the manual override with detailed audit trail
-        auditLogger.logManualPlanOverride(tenantId, managerId, oldTier, targetTier.name(), reason);
-        auditLogger.logSubscriptionEvent("MANUAL_PLAN_OVERRIDE", subscription.getPaypalSubscriptionId(), tenantId,
-                "Plan manually overridden from " + oldTier + " to " + targetTier + " by manager " + managerId);
-
-        logger.warn("Plan tier manually overridden for tenant: {} from {} to {} by manager: {}. Reason: {}", 
-            tenantId, oldTier, targetTier, managerId, reason);
     }
 }

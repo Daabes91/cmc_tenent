@@ -12,6 +12,7 @@ import com.clinic.modules.core.tag.TagEntity;
 import com.clinic.modules.core.tag.TagService;
 import com.clinic.modules.core.tenant.TenantContextHolder;
 import com.clinic.modules.core.tenant.TenantService;
+import com.clinic.modules.saas.service.PlanLimitValidationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -30,19 +31,22 @@ public class PatientAdminService {
     private final TagService tagService;
     private final TenantService tenantService;
     private final TenantContextHolder tenantContextHolder;
+    private final PlanLimitValidationService planLimitValidationService;
 
     public PatientAdminService(PatientRepository patientRepository,
             AppointmentRepository appointmentRepository,
             GlobalPatientService globalPatientService,
             TagService tagService,
             TenantService tenantService,
-            TenantContextHolder tenantContextHolder) {
+            TenantContextHolder tenantContextHolder,
+            PlanLimitValidationService planLimitValidationService) {
         this.patientRepository = patientRepository;
         this.appointmentRepository = appointmentRepository;
         this.globalPatientService = globalPatientService;
         this.tagService = tagService;
         this.tenantService = tenantService;
         this.tenantContextHolder = tenantContextHolder;
+        this.planLimitValidationService = planLimitValidationService;
     }
 
     @Transactional(readOnly = true)
@@ -77,6 +81,9 @@ public class PatientAdminService {
         String driveFolderUrl = normalize(request.driveFolderUrl());
 
         Long tenantId = tenantContextHolder.requireTenantId();
+
+        // Validate plan limits before creating patient
+        planLimitValidationService.validatePatientLimit(tenantId);
 
         // Check if patient already exists in this tenant
         ensureEmailAvailable(email, null, tenantId);

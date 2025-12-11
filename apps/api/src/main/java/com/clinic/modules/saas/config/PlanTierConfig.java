@@ -41,7 +41,8 @@ public class PlanTierConfig {
             "Email support"
         ));
         basic.setMaxPatients(100);
-        basic.setMaxStaff(3);
+        basic.setMaxStaff(2);
+        basic.setMaxDoctors(2);
         tiers.put(PlanTier.BASIC.name(), basic);
 
         // Professional Plan
@@ -62,6 +63,7 @@ public class PlanTierConfig {
         ));
         professional.setMaxPatients(500);
         professional.setMaxStaff(10);
+        professional.setMaxDoctors(10);
         tiers.put(PlanTier.PROFESSIONAL.name(), professional);
 
         // Enterprise Plan
@@ -83,6 +85,7 @@ public class PlanTierConfig {
         ));
         enterprise.setMaxPatients(-1); // Unlimited
         enterprise.setMaxStaff(-1); // Unlimited
+        enterprise.setMaxDoctors(-1); // Unlimited
         tiers.put(PlanTier.ENTERPRISE.name(), enterprise);
 
         // Custom Plan
@@ -101,6 +104,7 @@ public class PlanTierConfig {
         ));
         custom.setMaxPatients(-1);
         custom.setMaxStaff(-1);
+        custom.setMaxDoctors(-1);
         tiers.put(PlanTier.CUSTOM.name(), custom);
     }
 
@@ -264,6 +268,7 @@ public class PlanTierConfig {
         private List<String> features;
         private int maxPatients;
         private int maxStaff;
+        private int maxDoctors;
 
         // Getters and Setters
         public String getTierName() {
@@ -336,6 +341,14 @@ public class PlanTierConfig {
 
         public void setMaxStaff(int maxStaff) {
             this.maxStaff = maxStaff;
+        }
+
+        public int getMaxDoctors() {
+            return maxDoctors;
+        }
+
+        public void setMaxDoctors(int maxDoctors) {
+            this.maxDoctors = maxDoctors;
         }
     }
 }

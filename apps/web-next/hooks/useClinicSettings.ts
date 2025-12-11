@@ -7,7 +7,7 @@
 
 
 import useSWR from 'swr';
-import { api } from '@/lib/api';
+import { api, TenantNotFoundError } from '@/lib/api';
 import type { ClinicSettings } from '@/lib/types';
 
 interface UseClinicSettingsReturn {
@@ -39,6 +39,8 @@ export function useClinicSettings(): UseClinicSettingsReturn {
       dedupingInterval: 300000, // 5 minutes
       errorRetryCount: 3,
       errorRetryInterval: 5000, // 5 seconds
+      // Avoid hammering the API if the tenant slug is invalid
+      shouldRetryOnError: (err) => !(err instanceof TenantNotFoundError),
     }
   );
 

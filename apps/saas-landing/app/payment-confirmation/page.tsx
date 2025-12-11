@@ -6,30 +6,61 @@ import { Loader2, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { API_BASE_URL } from '@/lib/constants';
 
-type ConfirmationStatus = 'loading' | 'success' | 'error' | 'invalid';
+interface PaymentConfirmationResponse {
+  success: boolean;
+  sessionToken?: string;
+  redirectUrl?: string;
+  error?: string;
+}
+
+// Persist session for admin panel so onboarding loads without forcing login
+const bootstrapAdminSession = (token: string) => {
+  try {
+    const [, payloadB64] = token.split('.');
+    const payloadJson = atob(payloadB64 || '');
+    const payload = JSON.parse(payloadJson);
+    const expSeconds = payload?.exp;
+    const expiryIso = expSeconds ? new Date(expSeconds * 1000).toISOString() : null;
+
+    localStorage.setItem('saas_auth_token', token);
+    localStorage.setItem('saas_manager_name', payload?.name || 'Owner');
+    if (expiryIso) {
+      localStorage.setItem('saas_token_expiry', expiryIso);
+    }
+  } catch (e) {
+    console.warn('Unable to decode session token; falling back to token-only storage', e);
+    localStorage.setItem('saas_auth_token', token);
+  }
+};
 
 function PaymentConfirmationContent() {
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<ConfirmationStatus>('loading');
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const [redirectUrl, setRedirectUrl] = useState<string>('');
+  
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const subscriptionId = searchParams.get('subscription_id');
+  const token = searchParams.get('token');
 
   useEffect(() => {
-    const confirmPayment = async () => {
-      // Extract subscription_id from URL query parameters
-      const subscriptionId = searchParams.get('subscription_id');
-      const token = searchParams.get('token');
+    // Validate required parameters
+    if (!subscriptionId || !token) {
+      setIsVerifying(false);
+      setError('Missing payment confirmation parameters. Please contact support.');
+      return;
+    }
 
-      if (!subscriptionId) {
-        setStatus('invalid');
-        setErrorMessage('Missing subscription information. Please contact support.');
-        return;
-      }
+    // Call payment confirmation endpoint
+    const confirmPayment = async () => {
+      setIsVerifying(true);
+      setError(null);
 
       try {
-        // Call payment confirmation endpoint
         const response = await fetch(
-          `${API_BASE_URL}/api/public/payment-confirmation?subscription_id=${encodeURIComponent(subscriptionId)}${token ? `&token=${encodeURIComponent(token)}` : ''}`,
+          `${API_BASE_URL}/api/public/payment-confirmation?subscription_id=${encodeURIComponent(subscriptionId)}&token=${encodeURIComponent(token)}`,
           {
             method: 'GET',
             headers: {
@@ -38,185 +69,146 @@ function PaymentConfirmationContent() {
           }
         );
 
-        const data = await response.json();
+        const data: PaymentConfirmationResponse = await response.json();
 
-        if (response.ok && data.success) {
-          setStatus('success');
-          
-          // Store session token
-          if (data.sessionToken) {
-            // Store in localStorage
-            localStorage.setItem('authToken', data.sessionToken);
+          if (response.ok && data.success) {
+            setSuccess(true);
             
-            // Also store in cookie for SSR
-            document.cookie = `authToken=${data.sessionToken}; path=/; max-age=86400; SameSite=Strict`;
-          }
-
-          // Set redirect URL
-          if (data.redirectUrl) {
-            setRedirectUrl(data.redirectUrl);
+            // Store session token in localStorage
+            if (data.sessionToken) {
+              localStorage.setItem('sessionToken', data.sessionToken);
+              bootstrapAdminSession(data.sessionToken);
+            }
             
-            // Redirect after 2 seconds
-            setTimeout(() => {
-              window.location.href = data.redirectUrl;
-            }, 2000);
+            // Store redirect URL
+            if (data.redirectUrl) {
+              setRedirectUrl(data.redirectUrl);
+            }
+          } else {
+            // Handle error response
+            setError(data.error || 'Payment verification failed. Please try again.');
           }
-        } else {
-          setStatus('error');
-          setErrorMessage(
-            data.error || 
-            'Payment verification failed. Please contact support if you were charged.'
-          );
-        }
-      } catch (error) {
-        console.error('Payment confirmation error:', error);
-        setStatus('error');
-        setErrorMessage(
-          'Unable to verify your payment. Please check your internet connection or contact support.'
-        );
+      } catch (err) {
+        console.error('Payment confirmation error:', err);
+        setError('Unable to connect to the server. Please check your internet connection and try again.');
+      } finally {
+        setIsVerifying(false);
       }
     };
 
     confirmPayment();
-  }, [searchParams]);
+  }, [subscriptionId, token, retryCount]);
 
-  const renderContent = () => {
-    switch (status) {
-      case 'loading':
-        return (
-          <div className="text-center space-y-6">
-            <div className="flex justify-center">
-              <div className="relative">
-                <Loader2 className="h-16 w-16 animate-spin text-primary" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-12 w-12 rounded-full bg-primary/10" />
-                </div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-foreground">
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+  };
+
+  const handleContactSupport = () => {
+    // Redirect to support page or open email client
+    window.location.href = 'mailto:support@cliniqax.com?subject=Payment Confirmation Issue&body=Subscription ID: ' + subscriptionId;
+  };
+
+  // Loading state
+  if (isVerifying) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-gray-950">
+        <div className="max-w-md w-full mx-4">
+          <div className="bg-background rounded-lg border border-border shadow-lg p-8">
+            <div className="flex flex-col items-center text-center">
+              <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
+              <h2 className="text-2xl font-bold text-foreground mb-2">
                 Verifying Your Payment
-              </h1>
+              </h2>
               <p className="text-muted-foreground">
-                Please wait while we confirm your subscription...
+                Please wait while we confirm your subscription with PayPal...
               </p>
+              <div className="mt-6 w-full bg-muted rounded-full h-2 overflow-hidden">
+                <div className="h-full bg-primary animate-pulse" style={{ width: '60%' }} />
+              </div>
             </div>
           </div>
-        );
+        </div>
+      </div>
+    );
+  }
 
-      case 'success':
-        return (
-          <div className="text-center space-y-6">
-            <div className="flex justify-center">
-              <div className="relative">
-                <CheckCircle className="h-16 w-16 text-green-600" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-20 w-20 rounded-full bg-green-600/10 animate-ping" />
+  // Success state
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-gray-950">
+        <div className="max-w-md w-full mx-4">
+          <div className="bg-background rounded-lg border border-border shadow-lg p-8">
+            <div className="flex flex-col items-center text-center">
+              <div className="rounded-full bg-green-100 dark:bg-green-900/20 p-3 mb-4">
+                <CheckCircle className="h-16 w-16 text-green-600 dark:text-green-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">
+                Payment Confirmed!
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                Your subscription is active. Continue to your admin onboarding to finish setup.
+              </p>
+              {redirectUrl && (
+                <div className="w-full">
+                  <Button
+                    onClick={() => window.location.href = redirectUrl}
+                    className="w-full"
+                    size="lg"
+                  >
+                    Go to Admin Onboarding
+                  </Button>
                 </div>
-              </div>
+              )}
             </div>
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-foreground">
-                Payment Successful!
-              </h1>
-              <p className="text-muted-foreground">
-                Your clinic portal has been activated. Redirecting you to onboarding...
-              </p>
-            </div>
-            {redirectUrl && (
-              <div className="pt-4">
-                <Button
-                  size="lg"
-                  onClick={() => window.location.href = redirectUrl}
-                  className="min-w-[200px]"
-                >
-                  Continue to Dashboard
-                </Button>
-              </div>
-            )}
           </div>
-        );
+        </div>
+      </div>
+    );
+  }
 
-      case 'error':
-        return (
-          <div className="text-center space-y-6">
-            <div className="flex justify-center">
-              <XCircle className="h-16 w-16 text-destructive" />
+  // Error state
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-gray-950">
+      <div className="max-w-md w-full mx-4">
+        <div className="bg-background rounded-lg border border-border shadow-lg p-8">
+          <div className="flex flex-col items-center text-center">
+            <div className="rounded-full bg-red-100 dark:bg-red-900/20 p-3 mb-4">
+              <XCircle className="h-16 w-16 text-red-600 dark:text-red-400" />
             </div>
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-foreground">
-                Payment Verification Failed
-              </h1>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                {errorMessage}
-              </p>
+            <h2 className="text-2xl font-bold text-foreground mb-2">
+              Payment Verification Failed
+            </h2>
+            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-md">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-destructive text-left">
+                  {error}
+                </p>
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+            <div className="w-full space-y-3">
               <Button
-                variant="outline"
+                onClick={handleRetry}
+                className="w-full"
                 size="lg"
-                onClick={() => window.location.href = '/'}
+                variant="default"
               >
-                Return to Home
+                <Loader2 className="mr-2 h-4 w-4" />
+                Retry Verification
               </Button>
               <Button
+                onClick={handleContactSupport}
+                className="w-full"
                 size="lg"
-                onClick={() => window.location.href = 'mailto:support@clinic.com'}
+                variant="outline"
               >
                 Contact Support
               </Button>
             </div>
+            <p className="text-xs text-muted-foreground mt-4">
+              If the problem persists, please contact our support team with your subscription ID: <span className="font-mono">{subscriptionId}</span>
+            </p>
           </div>
-        );
-
-      case 'invalid':
-        return (
-          <div className="text-center space-y-6">
-            <div className="flex justify-center">
-              <AlertCircle className="h-16 w-16 text-yellow-600" />
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-foreground">
-                Invalid Payment Link
-              </h1>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                {errorMessage}
-              </p>
-            </div>
-            <div className="pt-4">
-              <Button
-                size="lg"
-                onClick={() => window.location.href = '/'}
-              >
-                Return to Home
-              </Button>
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-gray-950 p-4">
-      <div className="w-full max-w-2xl">
-        <div className="bg-background rounded-lg border border-border shadow-lg p-8 sm:p-12">
-          {renderContent()}
-        </div>
-
-        {/* Additional info */}
-        <div className="mt-8 text-center">
-          <p className="text-xs text-muted-foreground">
-            Having trouble? Contact us at{' '}
-            <a
-              href="mailto:support@clinic.com"
-              className="text-primary hover:underline"
-            >
-              support@clinic.com
-            </a>
-          </p>
         </div>
       </div>
     </div>
@@ -225,13 +217,11 @@ function PaymentConfirmationContent() {
 
 export default function PaymentConfirmationPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-gray-950">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      }
-    >
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-gray-950">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    }>
       <PaymentConfirmationContent />
     </Suspense>
   );

@@ -7,7 +7,7 @@ ALTER TABLE clinic_settings
 
 UPDATE clinic_settings
 SET
-    why_choose_title_en = COALESCE(why_choose_title_en, 'Why Choose Qadri''s Clinic?'),
+    why_choose_title_en = COALESCE(why_choose_title_en, 'Why Choose Cliniqax''s Clinic?'),
     why_choose_title_ar = COALESCE(why_choose_title_ar, 'لماذا تختار عيادة قدري؟'),
     why_choose_subtitle_en = COALESCE(why_choose_subtitle_en, 'We combine cutting-edge technology with compassionate care to deliver exceptional dental experiences.'),
     why_choose_subtitle_ar = COALESCE(why_choose_subtitle_ar, 'نجمع بين أحدث التقنيات والرعاية الإنسانية لنقدم تجربة أسنان استثنائية.'),

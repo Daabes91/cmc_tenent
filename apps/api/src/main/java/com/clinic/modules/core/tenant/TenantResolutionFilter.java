@@ -56,7 +56,34 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
             return false;
         }
         String normalizedPath = path.toLowerCase();
-        return normalizedPath.startsWith("/saas/") || normalizedPath.startsWith("/api/saas/");
+        if (normalizedPath.startsWith("/saas/") || normalizedPath.startsWith("/api/saas/")) {
+            return true;
+        }
+
+        // Public marketing endpoints are not tenant-specific; skip tenant resolution
+        if (normalizedPath.startsWith("/api/public/plans") || normalizedPath.startsWith("/public/plans")) {
+            return true;
+        }
+
+        // Public signup endpoints (marketing site) should not require tenant resolution
+        if (normalizedPath.startsWith("/api/public/signup") || normalizedPath.startsWith("/api/api/public/signup") ||
+                normalizedPath.startsWith("/public/signup")) {
+            return true;
+        }
+
+        // Public payment endpoints should skip tenant resolution
+        if (normalizedPath.startsWith("/api/public/payment") || normalizedPath.startsWith("/api/api/public/payment") ||
+                normalizedPath.startsWith("/public/payment")) {
+            return true;
+        }
+
+        // Payment confirmation endpoint should skip tenant resolution
+        if (normalizedPath.startsWith("/api/public/payment-confirmation") || normalizedPath.startsWith("/api/api/public/payment-confirmation") ||
+                normalizedPath.startsWith("/public/payment-confirmation")) {
+            return true;
+        }
+
+        return false;
     }
 
     private TenantEntity resolveTenant(HttpServletRequest request) {
@@ -67,8 +94,9 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
 
         String hostHeader = request.getHeader("X-Forwarded-Host");
         String host = StringUtils.hasText(hostHeader) ? hostHeader : request.getServerName();
+        String normalizedHost = normalizeHost(host);
 
-        return tenantService.findActiveByDomain(host)
+        return tenantService.findActiveByDomain(normalizedHost)
                 .orElseGet(() -> tenantService.requireActiveTenantBySlug(tenantProperties.getDefaultTenantSlug()));
     }
 
@@ -83,6 +111,40 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
             return paramValue.trim().toLowerCase();
         }
 
-        return tenantProperties.getDefaultTenantSlug();
+        return null;
+    }
+
+    private String normalizeHost(String host) {
+        if (!StringUtils.hasText(host)) {
+            return host;
+        }
+
+        String cleaned = host.trim().toLowerCase();
+
+        // Remove protocol if present (defensive)
+        if (cleaned.startsWith("https://")) {
+            cleaned = cleaned.substring(8);
+        } else if (cleaned.startsWith("http://")) {
+            cleaned = cleaned.substring(7);
+        }
+
+        // Drop path if somehow included
+        int slashIndex = cleaned.indexOf('/');
+        if (slashIndex > -1) {
+            cleaned = cleaned.substring(0, slashIndex);
+        }
+
+        // Strip port
+        int colonIndex = cleaned.indexOf(':');
+        if (colonIndex > -1) {
+            cleaned = cleaned.substring(0, colonIndex);
+        }
+
+        // Strip leading www.
+        if (cleaned.startsWith("www.")) {
+            cleaned = cleaned.substring(4);
+        }
+
+        return cleaned;
     }
 }

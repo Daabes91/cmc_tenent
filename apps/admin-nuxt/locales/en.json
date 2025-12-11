@@ -629,12 +629,14 @@
         "refresh": "Appointments refreshed"
       }
     },
-    "status": {
-      "scheduled": "Scheduled",
-      "confirmed": "Confirmed",
-      "completed": "Completed",
-      "cancelled": "Cancelled"
-    },
+      "status": {
+        "scheduled": "Scheduled",
+        "confirmed": "Confirmed",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "patientConfirmed": "Patient confirmed",
+        "patientPending": "Patient pending"
+      },
     "modes": {
       "virtual": "Virtual consultation",
       "clinic": "Clinic visit"
@@ -945,6 +947,10 @@
     "insuranceCompanies": "Insurance Companies",
     "blogs": "Blog",
     "reports": "Reports",
+    "products": "Products",
+    "carousels": "Carousels",
+    "ecommerceProducts": "E-commerce",
+    "ecommerceCarousels": "Carousels",
     "finance": "Finance",
     "financeExpenses": "Expenses",
     "staff": "Staff",
@@ -1901,6 +1907,27 @@
         "createPlan": "New treatment plan",
         "sendReminder": "Send reminder",
         "viewHistory": "View history"
+      },
+      "reminder": {
+        "title": "Send reminder",
+        "subtitle": "Send a custom reminder email to this patient",
+        "subject": "Subject",
+        "subjectPlaceholder": "Appointment Reminder",
+        "body": "Message",
+        "bodyPlaceholder": "Hi there, this is a reminder for your upcoming appointment.",
+        "send": "Send reminder",
+        "defaultSubject": "Appointment Reminder",
+        "defaultBody": "Hello {name}, this is a reminder about your upcoming appointment. Please let us know if you need to reschedule.",
+        "subjectRequired": "Subject is required",
+        "bodyRequired": "Message is required",
+        "toastSuccess": {
+          "title": "Reminder sent",
+          "description": "We sent a reminder email to the patient."
+        },
+        "toastError": {
+          "title": "Failed to send reminder",
+          "description": "Unable to send reminder email."
+        }
       },
       "validation": {
     "firstNameRequired": "First name is required",
@@ -3609,6 +3636,10 @@
       "whyChoose": {
         "title": "Why Choose Section",
         "subtitle": "Control the headline and benefit cards displayed on your marketing site"
+      },
+      "ecommerce": {
+        "title": "E-commerce Settings",
+        "subtitle": "Enable and configure online store functionality"
       }
     },
     "form": {
@@ -3786,7 +3817,15 @@
       "description": "Use SendGrid to deliver appointment confirmations, reminders, and staff invitations.",
       "hint": "Store credentials per clinic to keep branding and sender information unique.",
       "configured": "SendGrid is configured for this clinic.",
-      "incomplete": "Add an API key, sender email, and sender name to enable notifications."
+      "incomplete": "Add an API key, sender email, and sender name to enable notifications.",
+      "reminders": {
+        "title": "Appointment reminders",
+        "subtitle": "Send a reminder email before the visit",
+        "hoursBefore": {
+          "label": "Hours before appointment",
+          "hint": "We’ll send a reminder this many hours before the scheduled time"
+        }
+      }
     },
     "weekDays": {
       "monday": "Monday",
@@ -4271,12 +4310,14 @@
       "annual": "Annual",
       "noRenewalDate": "No renewal date",
       "notAvailable": "Not available",
-      "status": {
-        "active": "Active",
-        "past_due": "Past Due",
-        "canceled": "Canceled",
-        "pending": "Pending"
-      },
+    "status": {
+      "active": "Active",
+      "trial": "Trial",
+      "past_due": "Past Due",
+      "canceled": "Canceled",
+      "pending": "Pending"
+    },
+    "trial": "Trial",
       "pendingChange": "Pending Change",
       "pendingCancellation": "Your subscription will be cancelled on {date}",
       "pendingDowngrade": "Your plan will change to {tier} on {date}",
@@ -4311,10 +4352,15 @@
         "point3": "You can reactivate anytime before deletion",
         "keepSubscription": "Keep Subscription",
         "confirmCancel": "Confirm Cancellation"
-      }
-    },
-    "pendingPaymentTitle": "Payment Required",
-    "pastDueTitle": "Payment Past Due",
+    }
+  },
+  "usage": "Usage",
+  "usageUpdate": "Usage update",
+  "limitReached": "Plan limit reached",
+  "staffSeats": "Staff seats",
+  "doctors": "Doctors",
+  "pendingPaymentTitle": "Payment Required",
+  "pastDueTitle": "Payment Past Due",
     "canceledTitle": "Subscription Canceled",
     "statusTitle": "Billing Status",
     "defaultMessage": "Please check your billing status",

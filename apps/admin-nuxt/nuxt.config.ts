@@ -1,12 +1,12 @@
 import { fileURLToPath } from "node:url";
 
-const defaultPublicApiBase = (process.env.NUXT_PUBLIC_API_BASE ?? "http://localhost:8080/admin").replace(/\/+$/, "");
+const defaultPublicApiBase = (process.env.NUXT_PUBLIC_API_BASE ?? "https://lionfish-app-mf2v9.ondigitalocean.app/api/admin").replace(/\/+$/, "");
 const defaultPrivateApiBase = (
   process.env.NUXT_PRIVATE_API_BASE ??
   process.env.NUXT_PUBLIC_API_BASE ??
-  "http://localhost:8080/admin"
+  "https://lionfish-app-mf2v9.ondigitalocean.app/api/admin"
 ).replace(/\/+$/, "");
-const defaultPublicBase = (process.env.NUXT_PUBLIC_PUBLIC_API_BASE ?? "http://localhost:8080/public").replace(/\/+$/, "");
+const defaultPublicBase = (process.env.NUXT_PUBLIC_PUBLIC_API_BASE ?? "https://lionfish-app-mf2v9.ondigitalocean.app/api/public").replace(/\/+$/, "");
 
 const tailwindConfigAlias = fileURLToPath(new URL("./tailwind-config", import.meta.url));
 

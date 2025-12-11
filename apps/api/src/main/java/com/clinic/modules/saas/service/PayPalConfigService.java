@@ -7,6 +7,8 @@ import com.clinic.modules.saas.model.PayPalConfigEntity;
 import com.clinic.modules.saas.model.PlanTier;
 import com.clinic.modules.saas.repository.PayPalConfigRepository;
 import com.clinic.util.EncryptionUtil;
+import com.clinic.modules.core.settings.ClinicSettingsRepository;
+import com.clinic.modules.core.settings.ClinicSettingsEntity;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -44,6 +46,7 @@ public class PayPalConfigService {
     private final EncryptionUtil encryptionUtil;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final ClinicSettingsRepository clinicSettingsRepository;
 
     // In-memory cache for access token
     private String cachedAccessToken;
@@ -53,11 +56,13 @@ public class PayPalConfigService {
             PayPalConfigRepository payPalConfigRepository,
             EncryptionUtil encryptionUtil,
             RestTemplate restTemplate,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            ClinicSettingsRepository clinicSettingsRepository) {
         this.payPalConfigRepository = payPalConfigRepository;
         this.encryptionUtil = encryptionUtil;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.clinicSettingsRepository = clinicSettingsRepository;
     }
 
     /**
@@ -309,6 +314,65 @@ public class PayPalConfigService {
                 .map(this::deserializePlanConfigs)
                 .orElseGet(ArrayList::new);
     }
+
+    public String getAccessTokenForTenant(Long tenantId) {
+        TenantPayPalConfig config = resolveTenantConfig(tenantId);
+        try {
+            String baseUrl = config.sandboxMode ? SANDBOX_BASE_URL : PRODUCTION_BASE_URL;
+            String url = baseUrl + TOKEN_ENDPOINT;
+
+            String auth = config.clientId + ":" + config.clientSecret;
+            String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            headers.set("Authorization", "Basic " + encodedAuth);
+
+            String body = "grant_type=client_credentials";
+
+            HttpEntity<String> request = new HttpEntity<>(body, headers);
+
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    Map.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                return (String) response.getBody().get("access_token");
+            }
+
+            throw new IllegalStateException("Failed to retrieve PayPal access token for tenant " + tenantId);
+
+        } catch (Exception e) {
+            logger.error("Failed to get PayPal access token for tenant {}", tenantId, e);
+            throw new IllegalStateException("Failed to retrieve PayPal access token for tenant " + tenantId, e);
+        }
+    }
+
+    public String getBaseUrlForTenant(Long tenantId) {
+        TenantPayPalConfig config = resolveTenantConfig(tenantId);
+        return config.sandboxMode ? SANDBOX_BASE_URL : PRODUCTION_BASE_URL;
+    }
+
+    private TenantPayPalConfig resolveTenantConfig(Long tenantId) {
+        ClinicSettingsEntity settings = clinicSettingsRepository.findByTenantId(tenantId)
+                .orElseThrow(() -> new IllegalStateException("Clinic settings not found for tenant " + tenantId));
+
+        String clientId = settings.getPaypalClientId();
+        String clientSecret = settings.getPaypalClientSecret();
+        String env = settings.getPaypalEnvironment();
+
+        if (clientId == null || clientSecret == null) {
+            throw new IllegalStateException("PayPal client ID/secret not configured for tenant " + tenantId);
+        }
+
+        boolean sandbox = env == null || env.equalsIgnoreCase("sandbox");
+        return new TenantPayPalConfig(clientId.trim(), clientSecret.trim(), sandbox);
+    }
+
+    private record TenantPayPalConfig(String clientId, String clientSecret, boolean sandboxMode) {}
 
     /**
      * Resolve PayPal plan ID for provided tier/cycle, or null if not configured.

@@ -56,7 +56,7 @@ This document provides a comprehensive checklist for manually testing and review
 1. Dr. Sarah Johnson - Family Medicine Practice ✓
 2. Michael Chen - Dental Clinic ✓
 3. Dr. Aisha Al-Rashid - Physical Therapy Center ✓
-4. Dr. Layla Qadri - Qadri Dental Group ✓
+4. Dr. Layla Cliniqax - Cliniqax Dental Group ✓
 5. Sameer Haddad - Shifa Health Network ✓
 
 ### 1.4 Pricing Section Content

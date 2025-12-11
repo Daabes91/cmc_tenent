@@ -4,6 +4,8 @@ import com.clinic.config.SecurityProperties;
 import com.clinic.modules.core.settings.ClinicSettingsEntity;
 import com.clinic.modules.core.settings.ClinicSettingsRepository;
 import com.clinic.modules.core.tenant.TenantContextHolder;
+import com.clinic.modules.core.tenant.TenantService;
+import com.clinic.modules.core.tenant.TenantEntity;
 import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Attachments;
@@ -28,13 +30,16 @@ public class EmailService {
     private final SecurityProperties securityProperties;
     private final ClinicSettingsRepository clinicSettingsRepository;
     private final TenantContextHolder tenantContextHolder;
+    private final TenantService tenantService;
 
     public EmailService(SecurityProperties securityProperties,
                         ClinicSettingsRepository clinicSettingsRepository,
-                        TenantContextHolder tenantContextHolder) {
+                        TenantContextHolder tenantContextHolder,
+                        TenantService tenantService) {
         this.securityProperties = securityProperties;
         this.clinicSettingsRepository = clinicSettingsRepository;
         this.tenantContextHolder = tenantContextHolder;
+        this.tenantService = tenantService;
     }
 
     public void sendAppointmentConfirmation(
@@ -44,7 +49,8 @@ public class EmailService {
             String serviceName,
             String appointmentDate,
             String appointmentTime,
-            String consultationType
+            String consultationType,
+            String confirmationLink
     ) {
         ClinicSettingsEntity settings = currentClinicSettings();
         if (!isEmailEnabled(settings)) {
@@ -59,9 +65,10 @@ public class EmailService {
         }
 
         String clinicName = resolveFromName(settings);
+        String logoUrl = resolveLogoUrl(settings);
         String subject = "Appointment Confirmation - " + clinicName;
         String htmlContent = buildConfirmationEmailHtml(
-                patientName, doctorName, serviceName, appointmentDate, appointmentTime, consultationType, clinicName
+                patientName, doctorName, serviceName, appointmentDate, appointmentTime, consultationType, clinicName, confirmationLink, logoUrl
         );
 
         sendEmail(settings, client, toEmail, subject, htmlContent);
@@ -88,10 +95,30 @@ public class EmailService {
         }
 
         String clinicName = resolveFromName(settings);
+        String logoUrl = resolveLogoUrl(settings);
         String subject = "Appointment Cancelled - " + clinicName;
         String htmlContent = buildCancellationEmailHtml(
-                patientName, doctorName, serviceName, appointmentDate, appointmentTime, clinicName
+                patientName, doctorName, serviceName, appointmentDate, appointmentTime, clinicName, logoUrl
         );
+
+        sendEmail(settings, client, toEmail, subject, htmlContent);
+    }
+
+    /**
+     * Send a custom HTML email using current clinic settings (SendGrid).
+     */
+    public void sendCustomEmail(String toEmail, String subject, String htmlContent) {
+        ClinicSettingsEntity settings = currentClinicSettings();
+        if (!isEmailEnabled(settings)) {
+            log.info("Email sending is disabled. Would have sent custom email to {}", toEmail);
+            return;
+        }
+
+        SendGrid client = resolveSendGridClient(settings);
+        if (client == null) {
+            log.warn("SendGrid API key missing; skipping custom email to {}", toEmail);
+            return;
+        }
 
         sendEmail(settings, client, toEmail, subject, htmlContent);
     }
@@ -124,6 +151,7 @@ public class EmailService {
                 ? meetingLink
                 : securityProperties.email().googleMeetLink();
         String clinicName = resolveFromName(settings);
+        String logoUrl = resolveLogoUrl(settings);
         String subject = "Virtual Consultation Confirmed - " + clinicName;
 
         // Format dates for display
@@ -153,7 +181,8 @@ public class EmailService {
                 formattedTime,
                 meetLink,
                 googleCalendarUrl,
-                clinicName
+                clinicName,
+                logoUrl
         );
 
         // Generate .ics calendar file
@@ -244,7 +273,8 @@ public class EmailService {
     private boolean isEmailEnabled(ClinicSettingsEntity settings) {
         Boolean enabled = settings != null ? settings.getEmailEnabled() : null;
         boolean allowed = enabled != null ? enabled : securityProperties.email().enabled();
-        return allowed && StringUtils.hasText(resolveSendgridApiKey(settings));
+        // Allow env fallback even if tenant has no SendGrid key; key presence is checked when building the client.
+        return allowed;
     }
 
     private SendGrid resolveSendGridClient(ClinicSettingsEntity settings) {
@@ -253,24 +283,66 @@ public class EmailService {
     }
 
     private String resolveSendgridApiKey(ClinicSettingsEntity settings) {
-        if (settings != null && StringUtils.hasText(settings.getSendgridApiKey())) {
-            return settings.getSendgridApiKey().trim();
+        String key = securityProperties.email().sendgridApiKey();
+        if (StringUtils.hasText(key)) {
+            return key.trim();
         }
-        return securityProperties.email().sendgridApiKey();
+        // Fallback to raw env var if config binding failed
+        String envKey = System.getenv("SENDGRID_API_KEY");
+        if (StringUtils.hasText(envKey)) {
+            log.warn("SendGrid API key resolved via environment fallback. Consider setting security.email.sendgrid-api-key.");
+            return envKey.trim();
+        }
+        return null;
     }
 
     private String resolveFromEmail(ClinicSettingsEntity settings) {
-        if (settings != null && StringUtils.hasText(settings.getEmailFrom())) {
-            return settings.getEmailFrom().trim();
+        String envFrom = securityProperties.email().fromEmail();
+        if (StringUtils.hasText(envFrom)) {
+            return envFrom.trim();
         }
-        return securityProperties.email().fromEmail();
+        // Allow raw environment fallback when properties binding misses (as seen in prod)
+        String rawEnvFrom = System.getenv("EMAIL_FROM");
+        if (!StringUtils.hasText(rawEnvFrom)) {
+            rawEnvFrom = System.getenv("SECURITY_EMAIL_FROM_EMAIL");
+        }
+        if (StringUtils.hasText(rawEnvFrom)) {
+            return rawEnvFrom.trim();
+        }
+        return "no-reply@localhost";
     }
 
     private String resolveFromName(ClinicSettingsEntity settings) {
+        try {
+            Long tenantId = tenantContextHolder.requireTenantId();
+            TenantEntity tenant = tenantService.requireTenant(tenantId);
+            if (tenant != null && StringUtils.hasText(tenant.getName())) {
+                return tenant.getName().trim();
+            }
+        } catch (Exception ignored) {
+        }
+        String envFromName = securityProperties.email().fromName();
+        if (StringUtils.hasText(envFromName)) {
+            return envFromName.trim();
+        }
+        String rawEnvFromName = System.getenv("EMAIL_FROM_NAME");
+        if (!StringUtils.hasText(rawEnvFromName)) {
+            rawEnvFromName = System.getenv("SECURITY_EMAIL_FROM_NAME");
+        }
+        if (StringUtils.hasText(rawEnvFromName)) {
+            return rawEnvFromName.trim();
+        }
         if (settings != null && StringUtils.hasText(settings.getEmailFromName())) {
             return settings.getEmailFromName().trim();
         }
-        return securityProperties.email().fromName();
+        return "Clinic";
+    }
+
+    private String resolveLogoUrl(ClinicSettingsEntity settings) {
+        if (settings != null && StringUtils.hasText(settings.getLogoUrl())) {
+            return settings.getLogoUrl().trim();
+        }
+        return null;
     }
 
     private String buildConfirmationEmailHtml(
@@ -280,30 +352,40 @@ public class EmailService {
             String appointmentDate,
             String appointmentTime,
             String consultationType,
-            String clinicName
+            String clinicName,
+            String confirmationLink,
+            String logoUrl
     ) {
+        String brandPrimary = "#00A33B";
+        String brandPrimaryDark = "#0f7c30";
+        String brandSoft = "#e6f6ea";
         return "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +
                 "<meta charset=\"UTF-8\">" +
                 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
                 "<style>" +
-                "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }" +
-                ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
-                ".header { background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
-                ".content { background: #f9fafb; padding: 30px 20px; border-radius: 0 0 8px 8px; }" +
-                ".appointment-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb; }" +
+                "body { font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; background: #f6f9f7; }" +
+                ".container { max-width: 640px; margin: 0 auto; padding: 20px; }" +
+                ".header { background: linear-gradient(135deg, " + brandPrimary + " 0%, " + brandPrimaryDark + " 100%); color: white; padding: 28px 22px; text-align: center; border-radius: 14px 14px 0 0; box-shadow: 0 10px 25px rgba(0,163,59,0.25); }" +
+                ".brand { display:flex; align-items:center; gap:12px; justify-content:center; }" +
+                ".brand img { max-height:48px; width:auto; border-radius:10px; background:white; padding:6px; }" +
+                ".content { background: white; padding: 30px 22px; border-radius: 0 0 14px 14px; border:1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(15,124,48,0.08); }" +
+                ".appointment-details { background: " + brandSoft + "; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid " + brandPrimary + "1a; }" +
                 ".detail-row { margin: 12px 0; }" +
-                ".detail-label { font-weight: bold; color: #1f2937; }" +
-                ".detail-value { color: #4b5563; }" +
-                ".footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }" +
+                ".detail-label { font-weight: 700; color: #111827; }" +
+                ".detail-value { color: #374151; }" +
+                ".cta { text-align:center; margin: 24px 0; }" +
+                ".cta a { display:inline-block; padding:14px 22px; background:" + brandPrimary + "; color:white; text-decoration:none; border-radius: 999px; font-weight:700; box-shadow: 0 12px 25px rgba(0,163,59,0.35); }" +
+                ".footer { text-align: center; margin-top: 30px; padding-top: 18px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 13px; }" +
                 "</style>" +
                 "</head>" +
                 "<body>" +
                 "<div class=\"container\">" +
                 "<div class=\"header\">" +
-                "<h1 style=\"margin: 0;\">✓ Appointment Confirmed</h1>" +
-                "<p style=\"margin: 10px 0 0 0;\">Your appointment has been successfully scheduled</p>" +
+                (logoUrl != null && !logoUrl.isBlank() ? "<div class=\"brand\"><img src=\"" + logoUrl + "\" alt=\"" + clinicName + " logo\" /></div>" : "") +
+                "<h1 style=\"margin: 10px 0 0 0;\">✓ " + clinicName + "</h1>" +
+                "<p style=\"margin: 8px 0 0 0;\">Your appointment has been successfully scheduled</p>" +
                 "</div>" +
                 "<div class=\"content\">" +
                 "<p>Dear " + patientName + ",</p>" +
@@ -315,6 +397,12 @@ public class EmailService {
                 "<div class=\"detail-row\"><span class=\"detail-label\">Time:</span> <span class=\"detail-value\">" + appointmentTime + "</span></div>" +
                 "<div class=\"detail-row\"><span class=\"detail-label\">Type:</span> <span class=\"detail-value\">" + consultationType + "</span></div>" +
                 "</div>" +
+                (confirmationLink != null && !confirmationLink.isBlank()
+                        ? "<p style=\"margin: 20px 0 10px 0;\">Please confirm you are coming:</p>" +
+                        "<div class=\"cta\">" +
+                        "<a href=\"" + confirmationLink + "\">Confirm Appointment</a>" +
+                        "</div>"
+                        : "") +
                 "<p><strong>Important Reminders:</strong></p>" +
                 "<ul>" +
                 "<li>Please arrive 10 minutes early for check-in</li>" +
@@ -338,30 +426,37 @@ public class EmailService {
             String serviceName,
             String appointmentDate,
             String appointmentTime,
-            String clinicName
+            String clinicName,
+            String logoUrl
     ) {
+        String brandPrimary = "#00A33B";
+        String brandPrimaryDark = "#0f7c30";
+        String brandSoft = "#fef2f2";
         return "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +
                 "<meta charset=\"UTF-8\">" +
                 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
                 "<style>" +
-                "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }" +
-                ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
-                ".header { background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
-                ".content { background: #f9fafb; padding: 30px 20px; border-radius: 0 0 8px 8px; }" +
-                ".appointment-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626; }" +
+                "body { font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; background:#f7f8f9; }" +
+                ".container { max-width: 640px; margin: 0 auto; padding: 20px; }" +
+                ".header { background: linear-gradient(135deg, " + brandPrimaryDark + " 0%, #b91c1c 100%); color: white; padding: 28px 22px; text-align: center; border-radius: 14px 14px 0 0; box-shadow: 0 10px 25px rgba(0,0,0,0.12); }" +
+                ".brand { display:flex; align-items:center; gap:12px; justify-content:center; }" +
+                ".brand img { max-height:48px; width:auto; border-radius:10px; background:white; padding:6px; }" +
+                ".content { background: white; padding: 30px 22px; border-radius: 0 0 14px 14px; border:1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(185,28,28,0.1); }" +
+                ".appointment-details { background: " + brandSoft + "; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #fecaca; }" +
                 ".detail-row { margin: 12px 0; }" +
-                ".detail-label { font-weight: bold; color: #1f2937; }" +
-                ".detail-value { color: #4b5563; }" +
-                ".footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }" +
+                ".detail-label { font-weight: 700; color: #111827; }" +
+                ".detail-value { color: #374151; }" +
+                ".footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 13px; }" +
                 "</style>" +
                 "</head>" +
                 "<body>" +
                 "<div class=\"container\">" +
                 "<div class=\"header\">" +
-                "<h1 style=\"margin: 0;\">⚠ Appointment Cancelled</h1>" +
-                "<p style=\"margin: 10px 0 0 0;\">Your appointment has been cancelled</p>" +
+                (logoUrl != null && !logoUrl.isBlank() ? "<div class=\"brand\"><img src=\"" + logoUrl + "\" alt=\"" + clinicName + " logo\" /></div>" : "") +
+                "<h1 style=\"margin: 10px 0 0 0;\">⚠ " + clinicName + "</h1>" +
+                "<p style=\"margin: 8px 0 0 0;\">Your appointment has been cancelled</p>" +
                 "</div>" +
                 "<div class=\"content\">" +
                 "<p>Dear " + patientName + ",</p>" +
@@ -392,34 +487,41 @@ public class EmailService {
             String appointmentTime,
             String meetLink,
             String googleCalendarUrl,
-            String clinicName
+            String clinicName,
+            String logoUrl
     ) {
+        String brandPrimary = "#00A33B";
+        String brandPrimaryDark = "#0f7c30";
+        String brandSoft = "#e6f6ea";
         return "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +
                 "<meta charset=\"UTF-8\">" +
                 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
                 "<style>" +
-                "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }" +
-                ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
-                ".header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
-                ".content { background: #f9fafb; padding: 30px 20px; border-radius: 0 0 8px 8px; }" +
-                ".appointment-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981; }" +
+                "body { font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; background:#f6f9f7; }" +
+                ".container { max-width: 640px; margin: 0 auto; padding: 20px; }" +
+                ".header { background: linear-gradient(135deg, " + brandPrimary + " 0%, " + brandPrimaryDark + " 100%); color: white; padding: 28px 22px; text-align: center; border-radius: 14px 14px 0 0; box-shadow: 0 10px 25px rgba(0,163,59,0.25); }" +
+                ".brand { display:flex; align-items:center; gap:12px; justify-content:center; }" +
+                ".brand img { max-height:48px; width:auto; border-radius:10px; background:white; padding:6px; }" +
+                ".content { background: white; padding: 30px 22px; border-radius: 0 0 14px 14px; border:1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,163,59,0.08); }" +
+                ".appointment-details { background: " + brandSoft + "; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid " + brandPrimary + "1a; }" +
                 ".detail-row { margin: 12px 0; }" +
                 ".detail-label { font-weight: bold; color: #1f2937; }" +
                 ".detail-value { color: #4b5563; }" +
                 ".button-container { text-align: center; margin: 30px 0; }" +
-                ".meet-button { display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px; }" +
-                ".calendar-button { display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px; }" +
-                ".info-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; border-radius: 4px; }" +
+                ".meet-button { display: inline-block; background: linear-gradient(135deg, " + brandPrimary + " 0%, " + brandPrimaryDark + " 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 12px; font-weight: 700; margin: 10px; box-shadow: 0 12px 25px rgba(0,163,59,0.35); }" +
+                ".calendar-button { display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 12px; font-weight: 700; margin: 10px; box-shadow: 0 12px 25px rgba(37,99,235,0.35); }" +
+                ".info-box { background: #eff6ff; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0; border-radius: 10px; }" +
                 ".footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }" +
                 "</style>" +
                 "</head>" +
                 "<body>" +
                 "<div class=\"container\">" +
                 "<div class=\"header\">" +
-                "<h1 style=\"margin: 0;\">&#x1F4F9; Virtual Consultation Confirmed</h1>" +
-                "<p style=\"margin: 10px 0 0 0;\">Your online appointment has been successfully scheduled</p>" +
+                (logoUrl != null && !logoUrl.isBlank() ? "<div class=\"brand\"><img src=\"" + logoUrl + "\" alt=\"" + clinicName + " logo\" /></div>" : "") +
+                "<h1 style=\"margin: 10px 0 0 0;\">&#x1F4F9; " + clinicName + "</h1>" +
+                "<p style=\"margin: 8px 0 0 0;\">Your online appointment has been successfully scheduled</p>" +
                 "</div>" +
                 "<div class=\"content\">" +
                 "<p>Dear " + patientName + ",</p>" +

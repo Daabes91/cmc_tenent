@@ -50,6 +50,8 @@ const FALLBACK_PLANS: CatalogPlan[] = [
 
 export function usePlanCatalog() {
   const apiBase = useApiBase();
+  const auth = useAuth();
+  const { tenantSlug } = useTenantSlug();
   const plans = useState<CatalogPlan[]>('planCatalog:plans', () => []);
   const loading = useState<boolean>('planCatalog:loading', () => false);
   const error = useState<Error | null>('planCatalog:error', () => null);
@@ -80,6 +82,10 @@ export function usePlanCatalog() {
   }));
 
   async function fetchPlans(force = false) {
+    // Only fetch client-side where cookies/tokens are available
+    if (import.meta.server) return;
+    if (!auth.isAuthenticated.value) return;
+    if (!auth.accessToken.value) return;
     if (plans.value.length && !force) return;
 
     loading.value = true;
@@ -87,11 +93,14 @@ export function usePlanCatalog() {
 
     try {
       const response = await $fetch<CatalogPlan[] | { data: CatalogPlan[] }>(
-        '/api/public/plans?currency=USD',
+        '/plans?currency=USD',
         {
+          // Use admin API base; endpoint is now admin-protected
           baseURL: apiBase,
           headers: {
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            ...auth.authorizationHeader(),
+            ...(tenantSlug.value ? { 'X-Tenant-Slug': tenantSlug.value } : {})
           }
         }
       );
