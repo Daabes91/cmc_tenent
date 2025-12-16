@@ -11,8 +11,14 @@ public class UpdateCarouselItemRequest {
     @Size(max = 255, message = "Title must not exceed 255 characters")
     private String title;
 
+    @Size(max = 255, message = "Arabic title must not exceed 255 characters")
+    private String titleAr;
+
     @Size(max = 255, message = "Subtitle must not exceed 255 characters")
     private String subtitle;
+
+    @Size(max = 255, message = "Arabic subtitle must not exceed 255 characters")
+    private String subtitleAr;
 
     @Size(max = 500, message = "Image URL must not exceed 500 characters")
     private String imageUrl;
@@ -24,6 +30,9 @@ public class UpdateCarouselItemRequest {
 
     @Size(max = 100, message = "CTA text must not exceed 100 characters")
     private String ctaText;
+
+    @Size(max = 100, message = "Arabic CTA text must not exceed 100 characters")
+    private String ctaTextAr;
 
     private Boolean isActive;
 
@@ -41,12 +50,28 @@ public class UpdateCarouselItemRequest {
         this.title = title;
     }
 
+    public String getTitleAr() {
+        return titleAr;
+    }
+
+    public void setTitleAr(String titleAr) {
+        this.titleAr = titleAr;
+    }
+
     public String getSubtitle() {
         return subtitle;
     }
 
     public void setSubtitle(String subtitle) {
         this.subtitle = subtitle;
+    }
+
+    public String getSubtitleAr() {
+        return subtitleAr;
+    }
+
+    public void setSubtitleAr(String subtitleAr) {
+        this.subtitleAr = subtitleAr;
     }
 
     public String getImageUrl() {
@@ -79,6 +104,14 @@ public class UpdateCarouselItemRequest {
 
     public void setCtaText(String ctaText) {
         this.ctaText = ctaText;
+    }
+
+    public String getCtaTextAr() {
+        return ctaTextAr;
+    }
+
+    public void setCtaTextAr(String ctaTextAr) {
+        this.ctaTextAr = ctaTextAr;
     }
 
     public Boolean getIsActive() {

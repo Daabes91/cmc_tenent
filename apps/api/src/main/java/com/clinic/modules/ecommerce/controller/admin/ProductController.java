@@ -185,10 +185,13 @@ public class ProductController {
             ProductEntity product = productService.createProduct(
                     tenantId,
                     request.name(),
+                    request.nameAr(),
                     request.slug(),
                     request.sku(),
                     request.description(),
+                    request.descriptionAr(),
                     request.shortDescription(),
+                    request.shortDescriptionAr(),
                     request.price(),
                     request.compareAtPrice(),
                     request.currency(),
@@ -222,6 +225,7 @@ public class ProductController {
             summary = "Update product",
             description = "Update an existing product. Only provided fields will be updated."
     )
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<ProductResponse> updateProduct(
             @Parameter(description = "Tenant ID")
             @PathVariable Long tenantId,
@@ -237,16 +241,22 @@ public class ProductController {
 
         try {
             ProductEntity product = productService.updateProduct(
-                productId, tenantId, request.name(), request.description(), 
-                request.shortDescription(), request.price(), request.compareAtPrice());
-            
-            if (request.isTaxable() != null) {
-                product = productService.updateProductTaxable(productId, tenantId, request.isTaxable());
-            }
-            
-            if (request.isVisible() != null) {
-                product = productService.updateProductVisibility(productId, tenantId, request.isVisible());
-            }
+                productId,
+                tenantId,
+                request.name(),
+                request.nameAr(),
+                request.slug(),
+                request.description(),
+                request.descriptionAr(),
+                request.shortDescription(),
+                request.shortDescriptionAr(),
+                request.price(),
+                request.compareAtPrice(),
+                request.isTaxable(),
+                request.isVisible(),
+                request.currency(),
+                request.status(),
+                request.categoryIds());
             
             ProductResponse response = toResponse(product);
 
@@ -274,6 +284,7 @@ public class ProductController {
             summary = "Update product status",
             description = "Update the status of a product (DRAFT, ACTIVE, ARCHIVED)."
     )
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<ProductResponse> updateProductStatus(
             @Parameter(description = "Tenant ID")
             @PathVariable Long tenantId,
@@ -317,6 +328,7 @@ public class ProductController {
             summary = "Update product SKU",
             description = "Update the SKU of a product. SKU must be unique within the tenant."
     )
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<ProductResponse> updateProductSku(
             @Parameter(description = "Tenant ID")
             @PathVariable Long tenantId,
@@ -400,10 +412,13 @@ public class ProductController {
         return new ProductResponse(
                 entity.getId(),
                 entity.getName(),
+                entity.getNameAr(),
                 entity.getSlug(),
                 entity.getSku(),
                 entity.getDescription(),
+                entity.getDescriptionAr(),
                 entity.getShortDescription(),
+                entity.getShortDescriptionAr(),
                 entity.getStatus(),
                 entity.getProductType(),
                 entity.getPrice(),

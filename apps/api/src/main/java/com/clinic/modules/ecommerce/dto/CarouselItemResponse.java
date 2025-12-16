@@ -14,11 +14,14 @@ public class CarouselItemResponse {
     private Long id;
     private CarouselContentType contentType;
     private String title;
+    private String titleAr;
     private String subtitle;
+    private String subtitleAr;
     private String imageUrl;
     private String linkUrl;
     private CallToActionType ctaType;
     private String ctaText;
+    private String ctaTextAr;
     private Integer sortOrder;
     private Boolean isActive;
 
@@ -64,12 +67,28 @@ public class CarouselItemResponse {
         this.title = title;
     }
 
+    public String getTitleAr() {
+        return titleAr;
+    }
+
+    public void setTitleAr(String titleAr) {
+        this.titleAr = titleAr;
+    }
+
     public String getSubtitle() {
         return subtitle;
     }
 
     public void setSubtitle(String subtitle) {
         this.subtitle = subtitle;
+    }
+
+    public String getSubtitleAr() {
+        return subtitleAr;
+    }
+
+    public void setSubtitleAr(String subtitleAr) {
+        this.subtitleAr = subtitleAr;
     }
 
     public String getImageUrl() {
@@ -102,6 +121,14 @@ public class CarouselItemResponse {
 
     public void setCtaText(String ctaText) {
         this.ctaText = ctaText;
+    }
+
+    public String getCtaTextAr() {
+        return ctaTextAr;
+    }
+
+    public void setCtaTextAr(String ctaTextAr) {
+        this.ctaTextAr = ctaTextAr;
     }
 
     public Integer getSortOrder() {

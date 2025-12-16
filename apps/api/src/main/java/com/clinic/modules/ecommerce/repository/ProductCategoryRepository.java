@@ -4,8 +4,10 @@ import com.clinic.modules.ecommerce.model.ProductCategoryEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -90,18 +92,28 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
     boolean existsByTenantAndCategory(@Param("tenantId") Long tenantId, @Param("categoryId") Long categoryId);
 
     // Bulk operations
+    @Modifying
+    @Transactional
     @Query("DELETE FROM ProductCategoryEntity pc WHERE pc.tenantId = :tenantId AND pc.product.id = :productId")
     int deleteByTenantAndProduct(@Param("tenantId") Long tenantId, @Param("productId") Long productId);
 
+    @Modifying
+    @Transactional
     @Query("DELETE FROM ProductCategoryEntity pc WHERE pc.tenantId = :tenantId AND pc.category.id = :categoryId")
     int deleteByTenantAndCategory(@Param("tenantId") Long tenantId, @Param("categoryId") Long categoryId);
 
+    @Modifying
+    @Transactional
     @Query("DELETE FROM ProductCategoryEntity pc WHERE pc.tenantId = :tenantId AND pc.product.id = :productId AND pc.category.id = :categoryId")
     int deleteByTenantAndProductAndCategory(@Param("tenantId") Long tenantId, @Param("productId") Long productId, @Param("categoryId") Long categoryId);
 
+    @Modifying
+    @Transactional
     @Query("DELETE FROM ProductCategoryEntity pc WHERE pc.tenantId = :tenantId AND pc.product.id IN :productIds")
     int deleteByTenantAndProductIn(@Param("tenantId") Long tenantId, @Param("productIds") List<Long> productIds);
 
+    @Modifying
+    @Transactional
     @Query("DELETE FROM ProductCategoryEntity pc WHERE pc.tenantId = :tenantId AND pc.category.id IN :categoryIds")
     int deleteByTenantAndCategoryIn(@Param("tenantId") Long tenantId, @Param("categoryIds") List<Long> categoryIds);
 

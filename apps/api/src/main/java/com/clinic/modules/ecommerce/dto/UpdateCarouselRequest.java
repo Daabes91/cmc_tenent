@@ -2,6 +2,7 @@ package com.clinic.modules.ecommerce.dto;
 
 import com.clinic.modules.ecommerce.model.CarouselType;
 import com.clinic.modules.ecommerce.model.Platform;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -9,6 +10,7 @@ import jakarta.validation.constraints.Size;
 /**
  * Request DTO for updating an existing carousel.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateCarouselRequest {
 
     @NotBlank(message = "Name is required")
@@ -18,6 +20,9 @@ public class UpdateCarouselRequest {
     @NotBlank(message = "Slug is required")
     @Size(max = 255, message = "Slug must not exceed 255 characters")
     private String slug;
+
+    @Size(max = 255, message = "Arabic name must not exceed 255 characters")
+    private String nameAr;
 
     @NotNull(message = "Type is required")
     private CarouselType type;
@@ -51,6 +56,14 @@ public class UpdateCarouselRequest {
 
     public void setSlug(String slug) {
         this.slug = slug;
+    }
+
+    public String getNameAr() {
+        return nameAr;
+    }
+
+    public void setNameAr(String nameAr) {
+        this.nameAr = nameAr;
     }
 
     public CarouselType getType() {

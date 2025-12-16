@@ -62,6 +62,8 @@ export function getTenantSlugClient(): string {
     return DEFAULT_TENANT;
   }
 
+  const hostSlug = tenantFromHost(window.location.hostname);
+
   const cookieMatch = document.cookie
     .split(';')
     .map((c) => c.trim())
@@ -70,16 +72,16 @@ export function getTenantSlugClient(): string {
   if (cookieMatch) {
     const [, value] = cookieMatch.split('=');
     const slug = sanitizeTenantSlug(decodeURIComponent(value));
-    if (slug) {
+    // If cookie exists but host-derived slug is available and different, prefer host and refresh cookie.
+    if (slug && (!hostSlug || slug === hostSlug)) {
       return slug;
     }
   }
 
-  // Fallback on the client: derive from hostname and persist to cookie for consistency.
-  const slug = tenantFromHost(window.location.hostname);
-  if (slug) {
-    document.cookie = `${TENANT_COOKIE}=${encodeURIComponent(slug)}; path=/; sameSite=lax`;
-    return slug;
+  // Prefer host-derived slug and persist to cookie for consistency.
+  if (hostSlug) {
+    document.cookie = `${TENANT_COOKIE}=${encodeURIComponent(hostSlug)}; path=/; sameSite=lax`;
+    return hostSlug;
   }
 
   return DEFAULT_TENANT;

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -89,13 +90,13 @@ public class PublicCarouselService {
      * @param platform The target platform
      * @return List of carousel responses
      */
-    public List<PublicCarouselResponse> getCarouselsByPlacementAndPlatform(Long tenantId, String placement, Platform platform) {
+    public List<PublicCarouselResponse> getCarouselsByPlacementAndPlatform(Long tenantId, String placement, Platform platform, String locale) {
         logger.debug("Getting carousels for tenant: {}, placement: {}, platform: {}", tenantId, placement, platform);
         
         List<CarouselEntity> carousels = carouselRepository.findByTenantIdAndPlacementAndPlatform(tenantId, placement, platform);
         
         return carousels.stream()
-                .map(this::convertToPublicResponse)
+                .map(carousel -> convertToPublicResponse(carousel, locale))
                 .collect(Collectors.toList());
     }
 
@@ -106,13 +107,13 @@ public class PublicCarouselService {
      * @param placement The carousel placement
      * @return List of carousel responses
      */
-    public List<PublicCarouselResponse> getCarouselsByPlacement(Long tenantId, String placement) {
+    public List<PublicCarouselResponse> getCarouselsByPlacement(Long tenantId, String placement, String locale) {
         logger.debug("Getting carousels for tenant: {}, placement: {}", tenantId, placement);
         
         List<CarouselEntity> carousels = carouselRepository.findByTenantIdAndPlacement(tenantId, placement);
         
         return carousels.stream()
-                .map(this::convertToPublicResponse)
+                .map(carousel -> convertToPublicResponse(carousel, locale))
                 .collect(Collectors.toList());
     }
 
@@ -122,13 +123,13 @@ public class PublicCarouselService {
      * @param tenantId The tenant ID
      * @return List of carousel responses
      */
-    public List<PublicCarouselResponse> getActiveCarousels(Long tenantId) {
+    public List<PublicCarouselResponse> getActiveCarousels(Long tenantId, String locale) {
         logger.debug("Getting all active carousels for tenant: {}", tenantId);
         
         List<CarouselEntity> carousels = carouselRepository.findActiveByTenantId(tenantId);
         
         return carousels.stream()
-                .map(this::convertToPublicResponse)
+                .map(carousel -> convertToPublicResponse(carousel, locale))
                 .collect(Collectors.toList());
     }
 
@@ -138,21 +139,21 @@ public class PublicCarouselService {
      * @param carousel The carousel entity
      * @return Public carousel response
      */
-    private PublicCarouselResponse convertToPublicResponse(CarouselEntity carousel) {
+    private PublicCarouselResponse convertToPublicResponse(CarouselEntity carousel, String locale) {
         List<PublicCarouselItemResponse> itemResponses;
 
         if (carousel.getType() == CarouselType.VIEW_ALL_PRODUCTS) {
-            itemResponses = buildDynamicProductItems(carousel.getTenant().getId(), carousel.getMaxItems());
+            itemResponses = buildDynamicProductItems(carousel.getTenant().getId(), carousel.getMaxItems(), locale);
         } else {
             itemResponses = carousel.getItems().stream()
                     .filter(item -> item.getIsActive() != null && item.getIsActive())
-                    .map(this::convertToPublicItemResponse)
+                    .map(item -> convertToPublicItemResponse(item, locale))
                     .collect(Collectors.toList());
         }
 
-        return new PublicCarouselResponse(
+        PublicCarouselResponse response = new PublicCarouselResponse(
                 carousel.getId(),
-                carousel.getName(),
+                localize(carousel.getName(), carousel.getNameAr(), locale),
                 carousel.getSlug(),
                 carousel.getType(),
                 carousel.getPlacement(),
@@ -162,6 +163,8 @@ public class PublicCarouselService {
                 carousel.getCreatedAt(),
                 carousel.getUpdatedAt()
         );
+        response.setNameAr(carousel.getNameAr());
+        return response;
     }
 
     /**
@@ -170,17 +173,20 @@ public class PublicCarouselService {
      * @param item The carousel item entity
      * @return Public carousel item response
      */
-    private PublicCarouselItemResponse convertToPublicItemResponse(CarouselItemEntity item) {
+    private PublicCarouselItemResponse convertToPublicItemResponse(CarouselItemEntity item, String locale) {
         PublicCarouselItemResponse response = new PublicCarouselItemResponse();
         
         response.setId(item.getId());
         response.setContentType(item.getContentType());
-        response.setTitle(item.getTitle());
-        response.setSubtitle(item.getSubtitle());
+        response.setTitle(localize(item.getTitle(), item.getTitleAr(), locale));
+        response.setTitleAr(item.getTitleAr());
+        response.setSubtitle(localize(item.getSubtitle(), item.getSubtitleAr(), locale));
+        response.setSubtitleAr(item.getSubtitleAr());
         response.setImageUrl(item.getImageUrl());
         response.setLinkUrl(item.getLinkUrl());
         response.setCtaType(item.getCtaType());
-        response.setCtaText(item.getCtaText());
+        response.setCtaText(localize(item.getCtaText(), item.getCtaTextAr(), locale));
+        response.setCtaTextAr(item.getCtaTextAr());
         response.setSortOrder(item.getSortOrder());
         response.setCreatedAt(item.getCreatedAt());
         response.setUpdatedAt(item.getUpdatedAt());
@@ -190,7 +196,7 @@ public class PublicCarouselService {
 
         // Include product information if available
         if (item.getProduct() != null) {
-            response.setProduct(convertToProductInfo(item.getProduct()));
+            response.setProduct(convertToProductInfo(item.getProduct(), locale));
         }
 
         // Include category information if available
@@ -201,7 +207,7 @@ public class PublicCarouselService {
         return response;
     }
 
-    private List<PublicCarouselItemResponse> buildDynamicProductItems(Long tenantId, Integer maxItems) {
+    private List<PublicCarouselItemResponse> buildDynamicProductItems(Long tenantId, Integer maxItems, String locale) {
         int limit = (maxItems != null && maxItems > 0) ? maxItems : 10;
 
         var page = productRepository.findVisibleByTenant(
@@ -210,7 +216,7 @@ public class PublicCarouselService {
         );
 
         return page.getContent().stream()
-                .map(this::convertToProductInfo)
+                .map(product -> convertToProductInfo(product, locale))
                 .map(productInfo -> {
                     PublicCarouselItemResponse response = new PublicCarouselItemResponse();
                     response.setContentType(CarouselContentType.PRODUCT);
@@ -226,7 +232,7 @@ public class PublicCarouselService {
      * @param product The product entity
      * @return Product info DTO
      */
-    private PublicCarouselItemResponse.ProductInfo convertToProductInfo(ProductEntity product) {
+    private PublicCarouselItemResponse.ProductInfo convertToProductInfo(ProductEntity product, String locale) {
         // Get main image URL
         String mainImageUrl = product.getImages().stream()
                 .filter(img -> img.getIsMain() != null && img.getIsMain())
@@ -245,18 +251,34 @@ public class PublicCarouselService {
                 product.getVariants().stream().anyMatch(v -> v.getIsInStock() != null && v.getIsInStock()) :
                 true; // Simple products are considered in stock if active
 
+        String localizedName = localize(product.getName(), product.getNameAr(), locale);
+        String localizedShortDescription = localize(product.getShortDescription(), product.getShortDescriptionAr(), locale);
+
         return new PublicCarouselItemResponse.ProductInfo(
                 product.getId(),
-                product.getName(),
+                localizedName,
+                product.getNameAr(),
                 product.getSlug(),
                 product.getPrice(),
                 product.getCompareAtPrice(),
                 product.getCurrency(),
-                product.getShortDescription(),
+                localizedShortDescription,
+                product.getShortDescriptionAr(),
                 mainImageUrl,
                 imageUrls,
                 inStock
         );
+    }
+
+    private String localize(String en, String ar, String locale) {
+        boolean useArabic = locale != null && locale.toLowerCase(Locale.ROOT).startsWith("ar");
+        if (useArabic && StringUtils.hasText(ar)) {
+            return ar;
+        }
+        if (StringUtils.hasText(en)) {
+            return en;
+        }
+        return ar;
     }
 
     /**

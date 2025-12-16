@@ -25,7 +25,7 @@
     />
 
     <div class="flex min-h-screen">
-      <aside class="hidden w-72 flex-col border-r border-slate-200/60
+      <aside class="hidden w-72 flex-shrink-0 flex-col border-r border-slate-200/60
 bg-white/80 backdrop-blur-xl transition-colors duration-300
 dark:border-white/10 dark:bg-slate-950/80 
 lg:flex lg:sticky lg:top-0 lg:h-screen overflow-y-auto">
@@ -85,7 +85,132 @@ lg:flex lg:sticky lg:top-0 lg:h-screen overflow-y-auto">
         </div>
 
         <nav class="flex-1 px-4 py-6">
-          <UVerticalNavigation :links="navigation" :ui="navUi" />
+          <div class="space-y-1.5">
+            <template v-for="item in navigation" :key="item.label">
+              <!-- Regular navigation items without children -->
+              <NuxtLink
+                v-if="!item.children"
+                :to="item.to"
+                :class="[
+                  'group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200',
+                  $route.path === item.to
+                    ? 'bg-gradient-to-r from-mint-500 to-mint-400 text-white shadow-lg shadow-mint-600/40 ring-1 ring-white/20'
+                    : isDark
+                      ? 'text-slate-300 hover:bg-white/5 hover:text-white'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                ]"
+              >
+                <UIcon
+                  :name="item.icon"
+                  :class="[
+                    'h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110',
+                    $route.path === item.to
+                      ? 'text-white'
+                      : isDark
+                        ? 'text-slate-400 group-hover:text-white'
+                        : 'text-slate-400 group-hover:text-slate-700'
+                  ]"
+                />
+                <span>{{ item.label }}</span>
+                <span
+                  v-if="item.badge"
+                  :class="[
+                    'ml-auto rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide',
+                    $route.path === item.to
+                      ? 'border-white/15 bg-white/10 text-white'
+                      : isDark
+                        ? 'border-white/15 bg-white/10 text-white'
+                        : 'border-violet-100 bg-violet-50 text-violet-600'
+                  ]"
+                >
+                  {{ item.badge }}
+                </span>
+              </NuxtLink>
+
+              <!-- Navigation items with children (like ecommerce) -->
+              <div v-else class="space-y-1">
+                <button
+                  @click="toggleSubmenu(item.label)"
+                  :class="[
+                    'group relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200',
+                    isSubmenuOpen(item.label) || isChildActive(item.children)
+                      ? 'bg-gradient-to-r from-mint-500 to-mint-400 text-white shadow-lg shadow-mint-600/40 ring-1 ring-white/20'
+                      : isDark
+                        ? 'text-slate-300 hover:bg-white/5 hover:text-white'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ]"
+                >
+                  <UIcon
+                    :name="item.icon"
+                    :class="[
+                      'h-5 w-5 flex-shrink-0 transition-transform duration-200',
+                      isSubmenuOpen(item.label) || isChildActive(item.children)
+                        ? 'text-white'
+                        : isDark
+                          ? 'text-slate-400 group-hover:text-white'
+                          : 'text-slate-400 group-hover:text-slate-700'
+                    ]"
+                  />
+                  <span class="flex-1 text-left">{{ item.label }}</span>
+                  <UIcon
+                    name="i-lucide-chevron-down"
+                    :class="[
+                      'h-4 w-4 transition-transform duration-200',
+                      isSubmenuOpen(item.label) ? 'rotate-180' : '',
+                      isSubmenuOpen(item.label) || isChildActive(item.children)
+                        ? 'text-white'
+                        : isDark
+                          ? 'text-slate-400'
+                          : 'text-slate-400'
+                    ]"
+                  />
+                </button>
+
+                <!-- Submenu items -->
+                <Transition
+                  name="submenu"
+                  enter-active-class="transition-all duration-200 ease-out"
+                  enter-from-class="opacity-0 max-h-0"
+                  enter-to-class="opacity-100 max-h-96"
+                  leave-active-class="transition-all duration-200 ease-in"
+                  leave-from-class="opacity-100 max-h-96"
+                  leave-to-class="opacity-0 max-h-0"
+                >
+                  <div
+                    v-if="isSubmenuOpen(item.label)"
+                    class="ml-6 mt-1 space-y-1 overflow-hidden"
+                  >
+                    <NuxtLink
+                      v-for="child in item.children"
+                      :key="child.to"
+                      :to="child.to"
+                      :class="[
+                        'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
+                        $route.path === child.to
+                          ? 'bg-gradient-to-r from-mint-500 to-mint-400 text-white shadow-lg shadow-mint-600/40'
+                          : isDark
+                            ? 'text-slate-400 hover:bg-white/5 hover:text-white'
+                            : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                      ]"
+                    >
+                      <UIcon
+                        :name="child.icon"
+                        :class="[
+                          'h-4 w-4 flex-shrink-0 transition-transform duration-200',
+                          $route.path === child.to
+                            ? 'text-white'
+                            : isDark
+                              ? 'text-slate-500 group-hover:text-white'
+                              : 'text-slate-500 group-hover:text-slate-700'
+                        ]"
+                      />
+                      <span>{{ child.label }}</span>
+                    </NuxtLink>
+                  </div>
+                </Transition>
+              </div>
+            </template>
+          </div>
         </nav>
 
         <div class="border-t border-slate-200/60 p-5 dark:border-white/10">
@@ -415,6 +540,27 @@ const { recentNotifications } = appointmentNotifications;
 const hasUnreadNotifications = computed(() => recentNotifications.value.length > 0);
 const { fetcher, request } = useAdminApi();
 
+// Submenu state management
+const openSubmenus = ref<Set<string>>(new Set());
+
+const toggleSubmenu = (label: string) => {
+  if (openSubmenus.value.has(label)) {
+    openSubmenus.value.delete(label);
+  } else {
+    openSubmenus.value.add(label);
+  }
+};
+
+const isSubmenuOpen = (label: string) => {
+  return openSubmenus.value.has(label);
+};
+
+const isChildActive = (children: any[]) => {
+  if (!children) return false;
+  const currentRoute = useRoute();
+  return children.some(child => child.to === currentRoute.path);
+};
+
 const isDark = computed(() => colorMode.value === "dark");
 const themeIcon = computed(() => (isDark.value ? "i-lucide-sun" : "i-lucide-moon-star"));
 const themeLabel = computed(() =>
@@ -472,6 +618,13 @@ const openWebsite = () => {
 const handleMobileNavClick = (item: any) => {
   if (item.to) {
     navigateTo(item.to);
+    return;
+  }
+
+  // Fallback: if a parent item is clicked, navigate to its first child route
+  const firstChildRoute = item?.children?.find((child: any) => child.to)?.to;
+  if (firstChildRoute) {
+    navigateTo(firstChildRoute);
   }
 };
 
@@ -786,14 +939,25 @@ const allNavigationItems = computed(() => [
   ...(tenant.value?.ecommerceEnabled
     ? [
         {
-          label: t("navigation.products") || "Products",
-          icon: "i-lucide-package",
-          to: "/ecommerce/products"
-        },
-        {
-          label: t("navigation.carousels") || "Carousels",
-          icon: "i-lucide-panels-top-left",
-          to: "/ecommerce/carousels"
+          label: t("navigation.ecommerce") || "E-commerce",
+          icon: "i-lucide-store",
+          children: [
+            {
+              label: t("navigation.products") || "Products",
+              icon: "i-lucide-package",
+              to: "/ecommerce/products"
+            },
+            {
+              label: t("navigation.carousels") || "Carousels",
+              icon: "i-lucide-panels-top-left",
+              to: "/ecommerce/carousels"
+            },
+            {
+              label: t("navigation.orders") || "Orders",
+              icon: "i-lucide-shopping-bag",
+              to: "/ecommerce/orders"
+            }
+          ]
         }
       ]
     : []),
@@ -833,12 +997,25 @@ const allNavigationItems = computed(() => [
 const navigation = computed(() => {
   return allNavigationItems.value.filter(item => {
     const module = getModuleForRoute(item.to);
-    // Always show dashboard and settings
     if (!module) return true;
-    // Check if user has access to this module
     return hasModuleAccess(module);
   });
 });
+
+// Auto-open submenus when child is active
+const autoOpenActiveSubmenus = () => {
+  const currentRoute = useRoute();
+  navigation.value.forEach(item => {
+    if (item.children && isChildActive(item.children)) {
+      openSubmenus.value.add(item.label);
+    }
+  });
+};
+
+// Watch for route changes to auto-open submenus
+watch(() => useRoute().path, () => {
+  autoOpenActiveSubmenus();
+}, { immediate: true });
 
 const quickActions = computed(() => [
   [
@@ -1441,3 +1618,22 @@ onMounted(() => {
   });
 });
 </script>
+
+<style scoped>
+.submenu-enter-active,
+.submenu-leave-active {
+  transition: all 0.2s ease;
+}
+
+.submenu-enter-from,
+.submenu-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+
+.submenu-enter-to,
+.submenu-leave-from {
+  opacity: 1;
+  max-height: 200px;
+}
+</style>

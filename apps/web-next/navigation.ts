@@ -11,7 +11,8 @@ export const pathnames = {
   '/appointments': '/appointments',
   '/dashboard': '/dashboard',
   '/login': '/login',
-  '/signup': '/signup'
+  '/signup': '/signup',
+  '/products': '/products'
 } as const;
 
 export const {Link, redirect, usePathname, useRouter} = createNavigation({

@@ -74,6 +74,26 @@ class PayPalServiceTest {
     }
 
     @Test
+    void testGetPaymentByProviderOrderId() {
+        // Given
+        String providerOrderId = "PAYPAL123";
+        Long tenantId = 1L;
+        PaymentEntity mockPayment = new PaymentEntity();
+        mockPayment.setId(2L);
+
+        when(paymentRepository.findByProviderOrderIdAndTenantId(providerOrderId, tenantId))
+            .thenReturn(Optional.of(mockPayment));
+
+        // When
+        Optional<PaymentEntity> result = payPalService.getPaymentByProviderOrderId(providerOrderId, tenantId);
+
+        // Then
+        assertTrue(result.isPresent());
+        assertEquals(2L, result.get().getId());
+        verify(paymentRepository).findByProviderOrderIdAndTenantId(providerOrderId, tenantId);
+    }
+
+    @Test
     void testVerifyWebhookSignature() {
         // Given
         String payload = "test payload";

@@ -1,5 +1,10 @@
 <template>
-  <div class="space-y-6 max-w-6xl">
+  <ProductForm
+    v-if="isEditRoute"
+    :product-id="Number(route.params.id)"
+    mode="edit"
+  />
+  <div v-else class="space-y-6 max-w-6xl">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <div class="flex items-center gap-2 mb-2">
@@ -38,6 +43,15 @@
           :to="`/ecommerce/products/${route.params.id}/edit`"
         >
           Edit product
+        </UButton>
+        <UButton
+          color="green"
+          icon="i-lucide-check-circle"
+          :loading="activating"
+          @click="activateProduct"
+          v-if="product?.status !== 'ACTIVE'"
+        >
+          Activate
         </UButton>
       </div>
     </div>
@@ -194,25 +208,7 @@
       </div>
 
       <div class="space-y-4">
-        <UCard>
-          <template #header>
-            <div class="flex items-center gap-2">
-              <UIcon name="i-lucide-folder-tree" class="h-4 w-4 text-slate-500" />
-              <h3 class="text-lg font-semibold">Categories</h3>
-            </div>
-          </template>
-          <div class="flex flex-wrap gap-2" v-if="product?.categoryIds?.length">
-            <UBadge
-              v-for="cid in product.categoryIds"
-              :key="cid"
-              color="primary"
-              variant="soft"
-            >
-              {{ categories.find((c) => c.id === cid)?.name || `ID ${cid}` }}
-            </UBadge>
-          </div>
-          <p v-else class="text-sm text-slate-500">No categories assigned.</p>
-        </UCard>
+
       </div>
     </div>
   </div>
@@ -220,7 +216,8 @@
 
 <script setup lang="ts">
 import { useEcommerceService } from "@/services/ecommerce.service";
-import type { Category, Product, ProductImage } from "~/types/ecommerce";
+import type { Product, ProductImage } from "~/types/ecommerce";
+import ProductForm from "./new.vue";
 
 definePageMeta({
   requiresAuth: true,
@@ -228,6 +225,7 @@ definePageMeta({
 });
 
 const route = useRoute();
+const isEditRoute = computed(() => route.path.endsWith("/edit"));
 const toast = useToast();
 const { tenant, fetchTenantContext } = useTenantContext();
 const ecommerce = useEcommerceService();
@@ -235,9 +233,10 @@ const ecommerce = useEcommerceService();
 const product = ref<Product | null>(null);
 const loading = ref(true);
 const errorMessage = ref<string | null>(null);
-const categories = ref<Category[]>([]);
+
 const images = ref<ProductImage[]>([]);
 const addingImage = ref(false);
+const activating = ref(false);
 const newImage = reactive({ url: "", alt: "", isMain: false });
 
 const statusColor = computed(() => {
@@ -287,9 +286,6 @@ const loadProduct = async () => {
     const id = Number(route.params.id);
     product.value = await ecommerce.getProduct(tenant.value!.id, id);
     images.value = await ecommerce.listProductImages(tenant.value!.id, id);
-    if (!categories.value.length) {
-      categories.value = (await ecommerce.listCategories(tenant.value!.id))?.content ?? [];
-    }
   } catch (err: any) {
     console.error("[product detail] load error", err);
     errorMessage.value = err?.data?.message || err?.message || "Failed to load product";
@@ -334,6 +330,25 @@ const addImage = async () => {
   }
 };
 
+const activateProduct = async () => {
+  if (!tenant.value?.id || !product.value?.id) return;
+  activating.value = true;
+  try {
+    const updated = await ecommerce.updateProduct(tenant.value.id, product.value.id, {
+      status: "ACTIVE",
+    });
+    product.value = updated;
+    toast.add({ title: "Product activated", color: "green" });
+  } catch (err: any) {
+    toast.add({
+      title: "Failed to activate",
+      description: err?.data?.message || err?.message,
+      color: "red",
+    });
+  } finally {
+    activating.value = false;
+  }
+};
 const markMainImage = async (imageId: number) => {
   if (!tenant.value?.id || !product.value?.id) return;
   await ecommerce.setMainProductImage(tenant.value.id, product.value.id, imageId);

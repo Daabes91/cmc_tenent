@@ -2,12 +2,14 @@ package com.clinic.modules.ecommerce.controller.publicapi;
 
 import com.clinic.modules.core.tenant.TenantEntity;
 import com.clinic.modules.core.tenant.TenantService;
+import com.clinic.modules.ecommerce.dto.BuyNowRequest;
 import com.clinic.modules.ecommerce.dto.CreateOrderRequest;
 import com.clinic.modules.ecommerce.dto.OrderResponse;
 import com.clinic.modules.ecommerce.exception.InvalidCartStateException;
 import com.clinic.modules.ecommerce.exception.ProductNotFoundException;
 import com.clinic.modules.ecommerce.model.OrderEntity;
 import com.clinic.modules.ecommerce.service.EcommerceFeatureService;
+import com.clinic.modules.ecommerce.service.OrderNotificationService;
 import com.clinic.modules.ecommerce.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -44,14 +47,17 @@ public class PublicOrderController {
     private final OrderService orderService;
     private final TenantService tenantService;
     private final EcommerceFeatureService ecommerceFeatureService;
+    private final OrderNotificationService orderNotificationService;
 
     @Autowired
     public PublicOrderController(OrderService orderService,
                                 TenantService tenantService,
-                                EcommerceFeatureService ecommerceFeatureService) {
+                                EcommerceFeatureService ecommerceFeatureService,
+                                OrderNotificationService orderNotificationService) {
         this.orderService = orderService;
         this.tenantService = tenantService;
         this.ecommerceFeatureService = ecommerceFeatureService;
+        this.orderNotificationService = orderNotificationService;
     }
 
     /**
@@ -107,6 +113,9 @@ public class PublicOrderController {
             // Clear cart after successful order creation
             orderService.clearCartAfterOrder(tenantEntity, request.getSessionId());
 
+            // Notify the customer by email (non-blocking on failures)
+            orderNotificationService.sendOrderConfirmationEmail(order);
+
             // Prepare response
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -152,6 +161,81 @@ public class PublicOrderController {
         }
     }
 
+    @Operation(summary = "Buy now - Create order directly from product", 
+               description = "Create a new order directly from a single product without using cart")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Order created successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid request data or insufficient stock"),
+        @ApiResponse(responseCode = "404", description = "Tenant or product not found"),
+        @ApiResponse(responseCode = "503", description = "E-commerce feature not enabled")
+    })
+    @PostMapping("/buy-now")
+    public ResponseEntity<Map<String, Object>> buyNow(
+            @Parameter(description = "Tenant slug or domain", required = true)
+            @RequestParam String tenant,
+            @Parameter(description = "Buy now request", required = true)
+            @Valid @RequestBody BuyNowRequest request) {
+        
+        logger.debug("Processing buy now for product {} and tenant: {}", request.getProductId(), tenant);
+
+        try {
+            // Resolve tenant
+            TenantEntity tenantEntity = resolveTenant(tenant);
+            
+            // Check e-commerce feature
+            ecommerceFeatureService.validateEcommerceEnabled(tenantEntity.getId());
+
+            // Create order directly
+            OrderEntity order = orderService.createDirectOrder(tenantEntity, request);
+
+            // Notify the customer by email (non-blocking on failures)
+            orderNotificationService.sendOrderConfirmationEmail(order);
+
+            // Prepare response
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Order created successfully");
+            response.put("order", OrderResponse.fromEntityWithItems(order));
+
+            logger.info("Successfully created buy now order {} for tenant {}", 
+                       order.getOrderNumber(), tenantEntity.getId());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        } catch (InvalidCartStateException e) {
+            logger.warn("Invalid product state for buy now: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "INVALID_PRODUCT_STATE");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+
+        } catch (ProductNotFoundException e) {
+            logger.warn("Product not found during buy now: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "PRODUCT_NOT_FOUND");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid request while processing buy now: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "INVALID_REQUEST");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+
+        } catch (Exception e) {
+            logger.error("Error processing buy now for tenant {}: {}", tenant, e.getMessage(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "BUY_NOW_FAILED");
+            errorResponse.put("message", "Failed to process buy now. Please try again.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
     @Operation(summary = "Get order by number", 
                description = "Retrieve order details by order number")
     @ApiResponses(value = {
@@ -160,6 +244,7 @@ public class PublicOrderController {
         @ApiResponse(responseCode = "503", description = "E-commerce feature not enabled")
     })
     @GetMapping("/{orderNumber}")
+    @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> getOrder(
             @Parameter(description = "Tenant slug or domain", required = true)
             @RequestParam String tenant,
@@ -218,6 +303,7 @@ public class PublicOrderController {
         @ApiResponse(responseCode = "503", description = "E-commerce feature not enabled")
     })
     @GetMapping
+    @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> getCustomerOrders(
             @Parameter(description = "Tenant slug or domain", required = true)
             @RequestParam String tenant,
@@ -303,6 +389,7 @@ public class PublicOrderController {
         @ApiResponse(responseCode = "503", description = "E-commerce feature not enabled")
     })
     @GetMapping("/search")
+    @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> searchOrders(
             @Parameter(description = "Tenant slug or domain", required = true)
             @RequestParam String tenant,

@@ -6,7 +6,10 @@ import com.clinic.modules.ecommerce.exception.ProductNotFoundException;
 import com.clinic.modules.ecommerce.model.ProductEntity;
 import com.clinic.modules.ecommerce.model.ProductStatus;
 import com.clinic.modules.ecommerce.repository.ProductRepository;
+import com.clinic.modules.ecommerce.repository.ProductImageRepository;
 import com.clinic.modules.ecommerce.repository.ProductVariantRepository;
+import com.clinic.modules.ecommerce.repository.ProductCategoryRepository;
+import com.clinic.modules.ecommerce.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +32,16 @@ class ProductServiceTest {
     private ProductRepository productRepository;
 
     @Mock
+    private ProductImageRepository productImageRepository;
+
+    @Mock
     private ProductVariantRepository productVariantRepository;
+
+    @Mock
+    private ProductCategoryRepository productCategoryRepository;
+
+    @Mock
+    private CategoryRepository categoryRepository;
 
     @Mock
     private TenantRepository tenantRepository;
@@ -46,7 +58,10 @@ class ProductServiceTest {
     void setUp() {
         productService = new ProductService(
                 productRepository,
+                productImageRepository,
                 productVariantRepository,
+                productCategoryRepository,
+                categoryRepository,
                 tenantRepository,
                 ecommerceFeatureService
         );
@@ -69,7 +84,22 @@ class ProductServiceTest {
         when(productRepository.save(any(ProductEntity.class))).thenReturn(testProduct);
 
         // Act
-        ProductEntity result = productService.createProduct(tenantId, name, slug);
+        ProductEntity result = productService.createProduct(
+                tenantId,
+                name,
+                null,
+                slug,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
 
         // Assert
         assertNotNull(result);
@@ -92,7 +122,22 @@ class ProductServiceTest {
         // Act & Assert
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> productService.createProduct(tenantId, name, slug)
+                () -> productService.createProduct(
+                        tenantId,
+                        name,
+                        null,
+                        slug,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null)
         );
         assertEquals("Product slug already exists: " + slug, exception.getMessage());
         verify(productRepository, never()).save(any());
@@ -164,7 +209,22 @@ class ProductServiceTest {
         // Act & Assert
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> productService.createProduct(tenantId, emptyName, slug)
+                () -> productService.createProduct(
+                        tenantId,
+                        emptyName,
+                        null,
+                        slug,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null)
         );
         assertEquals("Product name is required", exception.getMessage());
     }
@@ -182,7 +242,22 @@ class ProductServiceTest {
         // Act & Assert
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> productService.createProduct(tenantId, name, invalidSlug)
+                () -> productService.createProduct(
+                        tenantId,
+                        name,
+                        null,
+                        invalidSlug,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null)
         );
         assertEquals("Product slug must contain only lowercase letters, numbers, and hyphens", exception.getMessage());
     }

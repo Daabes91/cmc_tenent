@@ -79,7 +79,10 @@ public class PublicCarouselController {
             @RequestParam(required = false) String placement,
             
             @Parameter(description = "Target platform", required = false)
-            @RequestParam(required = false) Platform platform) {
+            @RequestParam(required = false) Platform platform,
+
+            @Parameter(description = "Locale hint for localized fields", required = false)
+            @RequestParam(name = "locale", required = false) String locale) {
 
         // Prefer query params, otherwise fall back to headers sent by clients (web-next sets X-Tenant-Slug)
         String effectiveSlug = StringUtils.hasText(slug) ? slug : headerSlug;
@@ -95,11 +98,11 @@ public class PublicCarouselController {
             List<PublicCarouselResponse> carousels;
             
             if (placement != null && platform != null) {
-                carousels = publicCarouselService.getCarouselsByPlacementAndPlatform(tenant.getId(), placement, platform);
+                carousels = publicCarouselService.getCarouselsByPlacementAndPlatform(tenant.getId(), placement, platform, locale);
             } else if (placement != null) {
-                carousels = publicCarouselService.getCarouselsByPlacement(tenant.getId(), placement);
+                carousels = publicCarouselService.getCarouselsByPlacement(tenant.getId(), placement, locale);
             } else {
-                carousels = publicCarouselService.getActiveCarousels(tenant.getId());
+                carousels = publicCarouselService.getActiveCarousels(tenant.getId(), locale);
             }
 
             logger.info("Retrieved {} carousels for tenant: {}", carousels.size(), tenant.getSlug());
@@ -153,7 +156,10 @@ public class PublicCarouselController {
             @PathVariable String placement,
             
             @Parameter(description = "Target platform", required = false)
-            @RequestParam(required = false) Platform platform) {
+            @RequestParam(required = false) Platform platform,
+
+            @Parameter(description = "Locale hint for localized fields", required = false)
+            @RequestParam(name = "locale", required = false) String locale) {
 
         String effectiveSlug = StringUtils.hasText(slug) ? slug : headerSlug;
         String effectiveDomain = StringUtils.hasText(domain) ? domain : headerDomain;
@@ -168,9 +174,9 @@ public class PublicCarouselController {
             List<PublicCarouselResponse> carousels;
             
             if (platform != null) {
-                carousels = publicCarouselService.getCarouselsByPlacementAndPlatform(tenant.getId(), placement, platform);
+                carousels = publicCarouselService.getCarouselsByPlacementAndPlatform(tenant.getId(), placement, platform, locale);
             } else {
-                carousels = publicCarouselService.getCarouselsByPlacement(tenant.getId(), placement);
+                carousels = publicCarouselService.getCarouselsByPlacement(tenant.getId(), placement, locale);
             }
 
             logger.info("Retrieved {} carousels for tenant: {}, placement: {}", 
@@ -217,7 +223,10 @@ public class PublicCarouselController {
             @RequestHeader(name = "X-Tenant-Slug", required = false) String headerSlug,
 
             @Parameter(description = "Tenant domain header fallback", required = false)
-            @RequestHeader(name = "X-Tenant-Domain", required = false) String headerDomain) {
+            @RequestHeader(name = "X-Tenant-Domain", required = false) String headerDomain,
+
+            @Parameter(description = "Locale hint for localized fields", required = false)
+            @RequestParam(name = "locale", required = false) String locale) {
 
         String effectiveSlug = StringUtils.hasText(slug) ? slug : headerSlug;
         String effectiveDomain = StringUtils.hasText(domain) ? domain : headerDomain;
@@ -227,7 +236,7 @@ public class PublicCarouselController {
         try {
             // Resolve tenant from slug or domain
             TenantEntity tenant = publicCarouselService.resolveTenant(effectiveSlug, effectiveDomain);
-            List<PublicCarouselResponse> carousels = publicCarouselService.getActiveCarousels(tenant.getId());
+            List<PublicCarouselResponse> carousels = publicCarouselService.getActiveCarousels(tenant.getId(), locale);
 
             logger.info("Retrieved {} active carousels for tenant: {}", carousels.size(), tenant.getSlug());
             return ResponseEntity.ok(carousels);

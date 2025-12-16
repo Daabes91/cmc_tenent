@@ -314,9 +314,12 @@ export interface ProductImage {
 export interface Product {
   id: number;
   name: string;
+  nameAr?: string | null;
   slug: string;
   description?: string | null;
+  descriptionAr?: string | null;
   shortDescription?: string | null;
+  shortDescriptionAr?: string | null;
   price?: number | null;
   compareAtPrice?: number | null;
   currency?: string | null;
@@ -340,21 +343,26 @@ export interface PublicCarouselItem {
   id: number;
   contentType: 'IMAGE' | 'PRODUCT' | 'CATEGORY' | 'BRAND' | 'OFFER' | 'VIEW_ALL_PRODUCTS';
   title?: string | null;
+  titleAr?: string | null;
   subtitle?: string | null;
+  subtitleAr?: string | null;
   imageUrl?: string | null;
   linkUrl?: string | null;
   ctaText?: string | null;
+  ctaTextAr?: string | null;
   sortOrder?: number | null;
   product?: {
     id: number;
     name: string;
+    nameAr?: string | null;
     slug: string;
     price?: number | null;
     compareAtPrice?: number | null;
     currency?: string | null;
     shortDescription?: string | null;
+    shortDescriptionAr?: string | null;
     mainImageUrl?: string | null;
-    images?: string[];
+    images?: string[] | ProductImage[];
     inStock?: boolean | null;
   };
 }
@@ -362,6 +370,7 @@ export interface PublicCarouselItem {
 export interface PublicCarousel {
   id: number;
   name: string;
+  nameAr?: string | null;
   slug: string;
   type: 'PRODUCT' | 'VIEW_ALL_PRODUCTS' | 'IMAGE' | 'CATEGORY' | 'BRAND' | 'OFFER' | 'TESTIMONIAL' | 'BLOG' | 'MIXED';
   placement: CarouselPlacement;
@@ -372,20 +381,76 @@ export interface PublicCarousel {
   updatedAt?: string;
 }
 
+export interface CurrencyAmount {
+  amount: number;
+  currency: string;
+  formatted: string;
+}
+
+export interface OrderResponse {
+  id: number;
+  orderNumber: string;
+  status: string;
+  statusDisplayName?: string | null;
+  currency?: string | null;
+  totalAmount?: number | null;
+  totalItemCount?: number | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface PaymentInitiationResponse {
+  paymentId?: string | null;
+  providerOrderId?: string | null;
+  approvalUrl?: string | null;
+  status?: string | null;
+  success?: boolean;
+  message?: string | null;
+}
+
+export interface PaymentCaptureResponse {
+  captureId?: string | null;
+  status?: string | null;
+  orderId?: number | null;
+  success?: boolean;
+  message?: string | null;
+}
+
+export interface PaymentInitiationResponse {
+  paymentId?: string | null;
+  providerOrderId?: string | null;
+  approvalUrl?: string | null;
+  status?: string | null;
+  success?: boolean;
+  message?: string | null;
+}
+
 export interface CartResponse {
   id?: number | null;
   session_id?: string | null;
+  customer_email?: string | null;
   items?: Array<{
     id: number;
-    productId: number;
+    product_id: number;
+    product_name?: string;
+    product_slug?: string;
+    variant_id?: number | null;
+    variant_name?: string | null;
+    sku?: string | null;
     quantity: number;
-    product?: Product;
-    price?: number;
-    currency?: string;
+    unit_price?: number | null;
+    total_price?: number | null;
+    currency?: string | null;
+    image_url?: string | null;
+    is_available?: boolean | null;
+    stock_quantity?: number | null;
   }>;
-  subtotal?: any;
-  tax_amount?: any;
-  total_amount?: any;
+  subtotal?: CurrencyAmount | null;
+  tax_amount?: CurrencyAmount | null;
+  total_amount?: CurrencyAmount | null;
   item_count?: number;
   total_quantity?: number;
+  created_at?: string | null;
+  updated_at?: string | null;
+  expires_at?: string | null;
 }

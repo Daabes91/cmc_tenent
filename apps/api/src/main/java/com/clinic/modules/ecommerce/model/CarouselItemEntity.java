@@ -42,9 +42,17 @@ public class CarouselItemEntity {
     @Size(max = 255)
     private String title;
 
+    @Column(name = "title_ar")
+    @Size(max = 255)
+    private String titleAr;
+
     @Column(name = "subtitle")
     @Size(max = 255)
     private String subtitle;
+
+    @Column(name = "subtitle_ar")
+    @Size(max = 255)
+    private String subtitleAr;
 
     @Column(name = "image_url")
     @Size(max = 500)
@@ -61,6 +69,10 @@ public class CarouselItemEntity {
     @Column(name = "cta_text")
     @Size(max = 100)
     private String ctaText;
+
+    @Column(name = "cta_text_ar")
+    @Size(max = 100)
+    private String ctaTextAr;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
@@ -134,12 +146,28 @@ public class CarouselItemEntity {
         this.title = title;
     }
 
+    public String getTitleAr() {
+        return titleAr;
+    }
+
+    public void setTitleAr(String titleAr) {
+        this.titleAr = titleAr;
+    }
+
     public String getSubtitle() {
         return subtitle;
     }
 
     public void setSubtitle(String subtitle) {
         this.subtitle = subtitle;
+    }
+
+    public String getSubtitleAr() {
+        return subtitleAr;
+    }
+
+    public void setSubtitleAr(String subtitleAr) {
+        this.subtitleAr = subtitleAr;
     }
 
     public String getImageUrl() {
@@ -172,6 +200,14 @@ public class CarouselItemEntity {
 
     public void setCtaText(String ctaText) {
         this.ctaText = ctaText;
+    }
+
+    public String getCtaTextAr() {
+        return ctaTextAr;
+    }
+
+    public void setCtaTextAr(String ctaTextAr) {
+        this.ctaTextAr = ctaTextAr;
     }
 
     public ProductEntity getProduct() {

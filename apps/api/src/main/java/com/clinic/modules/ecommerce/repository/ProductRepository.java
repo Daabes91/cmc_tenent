@@ -48,13 +48,17 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     // Search queries
     @Query("SELECT p FROM ProductEntity p WHERE p.tenantId = :tenantId AND " +
            "(LOWER(p.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+           "LOWER(COALESCE(p.nameAr, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
            "LOWER(p.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+           "LOWER(COALESCE(p.descriptionAr, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
            "LOWER(p.sku) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
     Page<ProductEntity> searchByTenant(@Param("tenantId") Long tenantId, @Param("searchTerm") String searchTerm, Pageable pageable);
 
     @Query("SELECT p FROM ProductEntity p WHERE p.tenantId = :tenantId AND p.status = 'ACTIVE' AND p.isVisible = true AND " +
            "(LOWER(p.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+           "LOWER(COALESCE(p.nameAr, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
            "LOWER(p.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+           "LOWER(COALESCE(p.descriptionAr, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
            "LOWER(p.sku) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
     Page<ProductEntity> searchVisibleByTenant(@Param("tenantId") Long tenantId, @Param("searchTerm") String searchTerm, Pageable pageable);
 
@@ -94,7 +98,9 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
            "AND (:categoryId IS NULL OR pc.category.id = :categoryId) " +
            "AND (:searchTerm IS NULL OR " +
            "     LOWER(p.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+           "     LOWER(COALESCE(p.nameAr, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
            "     LOWER(p.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+           "     LOWER(COALESCE(p.descriptionAr, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
            "     LOWER(p.sku) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
            "AND (:minPrice IS NULL OR p.price >= :minPrice) " +
            "AND (:maxPrice IS NULL OR p.price <= :maxPrice)")
@@ -152,4 +158,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM ProductEntity p WHERE p.tenantId = :tenantId AND p.id = :id")
     boolean existsByTenantIdAndId(@Param("tenantId") Long tenantId, @Param("id") Long id);
+
+    // Note: Individual collection loading methods can be added here if needed in the future
+    // Currently using @Transactional approach in controllers to avoid MultipleBagFetchException
 }

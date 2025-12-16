@@ -50,6 +50,12 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilterErrorDispatch() {
+        // Avoid re-resolving tenant during /error dispatches, which can create noisy loops when the DB is unavailable
+        return true;
+    }
+
+    @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         if (path == null) {
@@ -68,6 +74,13 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
         // Public signup endpoints (marketing site) should not require tenant resolution
         if (normalizedPath.startsWith("/api/public/signup") || normalizedPath.startsWith("/api/api/public/signup") ||
                 normalizedPath.startsWith("/public/signup")) {
+            return true;
+        }
+
+        // Patient auth endpoints should not require tenant resolution for signup/login
+        if (normalizedPath.startsWith("/public/patient/signup") || normalizedPath.startsWith("/public/patient/login") ||
+                normalizedPath.startsWith("/api/public/patient/signup") || normalizedPath.startsWith("/api/public/patient/login") ||
+                normalizedPath.startsWith("/api/api/public/patient/signup") || normalizedPath.startsWith("/api/api/public/patient/login")) {
             return true;
         }
 

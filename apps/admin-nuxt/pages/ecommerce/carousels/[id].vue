@@ -91,6 +91,14 @@
                   icon="i-lucide-type"
                 />
               </UFormGroup>
+              <UFormGroup label="Name (Arabic)">
+                <UInput
+                  v-model="form.nameAr"
+                  dir="rtl"
+                  placeholder="اسم المعرض بالعربية"
+                  icon="i-lucide-type"
+                />
+              </UFormGroup>
               <UFormGroup label="Slug" required :error="errors.slug">
                 <UInput
                   v-model="form.slug"
@@ -106,6 +114,8 @@
                 <USelectMenu
                   v-model="form.type"
                   :options="typeOptions"
+                  value-attribute="value"
+                  option-attribute="label"
                   placeholder="Select carousel type"
                   searchable
                 >
@@ -133,6 +143,8 @@
                 <USelectMenu
                   v-model="form.platform"
                   :options="platformOptions"
+                  value-attribute="value"
+                  option-attribute="label"
                   placeholder="Select platform"
                 >
                   <template #label>
@@ -374,6 +386,7 @@ const ecommerce = useEcommerceService();
 // State
 const carouselId = Number(route.params.id);
 const form = reactive<Partial<Carousel>>({
+  nameAr: "",
   platform: "WEB",
   maxItems: 10,
   isActive: true,

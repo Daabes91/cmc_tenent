@@ -4,6 +4,7 @@ import com.clinic.modules.core.tenant.TenantEntity;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.util.Objects;
 
 /**
  * JPA entity representing the many-to-many relationship between products and categories.
@@ -12,7 +13,11 @@ import java.time.Instant;
  * while maintaining tenant isolation.
  */
 @Entity
-@Table(name = "product_categories")
+@Table(name = "product_categories",
+       uniqueConstraints = @UniqueConstraint(
+           name = "uk_product_categories_product_category",
+           columnNames = {"product_id", "category_id"}
+       ))
 public class ProductCategoryEntity {
 
     @Id
@@ -100,12 +105,23 @@ public class ProductCategoryEntity {
         if (this == o) return true;
         if (!(o instanceof ProductCategoryEntity)) return false;
         ProductCategoryEntity that = (ProductCategoryEntity) o;
-        return id != null && id.equals(that.id);
+        
+        // Use business key equality: same product, category, and tenant
+        return product != null && category != null && tenantId != null &&
+               product.getId() != null && category.getId() != null &&
+               product.getId().equals(that.product != null ? that.product.getId() : null) &&
+               category.getId().equals(that.category != null ? that.category.getId() : null) &&
+               tenantId.equals(that.tenantId);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        // Use business key for hash code
+        return Objects.hash(
+            product != null ? product.getId() : null,
+            category != null ? category.getId() : null,
+            tenantId
+        );
     }
 
     @Override

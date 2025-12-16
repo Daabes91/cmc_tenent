@@ -554,7 +554,7 @@ function PayPalCheckoutInner({
               </p>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold bg-gradient-to-r from-violet-600 to-cyan-600 dark:from-violet-400 dark:to-cyan-400 bg-clip-text text-transparent">
+              <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-cyan-600 dark:from-violet-400 dark:to-cyan-400 bg-clip-text text-transparent">
                 ${amount.toFixed(2)}
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">

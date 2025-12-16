@@ -1,4 +1,4 @@
-import type { Carousel, CarouselItem, Page, Product, ProductImage, ProductPage, Category } from "~/types/ecommerce";
+import type { Carousel, CarouselItem, Page, Product, ProductImage, ProductPage, Order } from "~/types/ecommerce";
 
 export function useEcommerceService() {
   const api = useAdminApi();
@@ -21,6 +21,10 @@ export function useEcommerceService() {
 
   const listProducts = (tenantId: number, params: Record<string, any> = {}) => {
     const search = new URLSearchParams();
+    // Set default pagination if not provided
+    if (!params.page) params.page = 0;
+    if (!params.size) params.size = 12; // Default page size for card layout
+    
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") {
         search.set(key, String(value));
@@ -43,6 +47,11 @@ export function useEcommerceService() {
     api.request<Product>(`/admin/tenants/${tenantId}/products/${productId}`, {
       method: "PUT",
       body: payload,
+    });
+
+  const deleteProduct = (tenantId: number, productId: number) =>
+    api.request(`/admin/tenants/${tenantId}/products/${productId}`, {
+      method: "DELETE",
     });
 
   const createCarousel = (tenantId: number, payload: Partial<Carousel>) =>
@@ -92,16 +101,7 @@ export function useEcommerceService() {
       method: "DELETE",
     });
 
-  const listCategories = (tenantId: number, params: Record<string, any> = {}) => {
-    const search = new URLSearchParams({ size: "200" });
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== "") {
-        search.set(key, String(value));
-      }
-    });
-    const qs = search.toString();
-    return api.request<Page<Category>>(`/admin/tenants/${tenantId}/categories${qs ? `?${qs}` : ""}`);
-  };
+
 
   const listProductImages = (tenantId: number, productId: number) =>
     api.request<ProductImage[]>(`/admin/tenants/${tenantId}/products/${productId}/images`);
@@ -137,6 +137,32 @@ export function useEcommerceService() {
       method: "PUT",
     });
 
+  const listOrders = (tenantId: number, params: Record<string, any> = {}) => {
+    const search = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        search.set(key, String(value));
+      }
+    });
+    const qs = search.toString();
+    return api.request<Page<Order>>(
+      `/admin/tenants/${tenantId}/orders${qs ? `?${qs}` : ""}`
+    );
+  };
+
+  const getOrder = (tenantId: number, orderId: number) =>
+    api.request<Order>(`/admin/tenants/${tenantId}/orders/${orderId}`);
+
+  const updateOrder = (
+    tenantId: number,
+    orderId: number,
+    payload: Partial<Order>
+  ) =>
+    api.request<Order>(`/admin/tenants/${tenantId}/orders/${orderId}`, {
+      method: "PUT",
+      body: payload,
+    });
+
   return {
     listCarousels,
     getCarousel,
@@ -144,6 +170,7 @@ export function useEcommerceService() {
     getProduct,
     createProduct,
     updateProduct,
+    deleteProduct,
     createCarousel,
     updateCarousel,
     deleteCarousel,
@@ -151,11 +178,14 @@ export function useEcommerceService() {
     listCarouselItems,
     updateCarouselItem,
     deleteCarouselItem,
-    listCategories,
+
     listProductImages,
     addProductImage,
     updateProductImage,
     deleteProductImage,
     setMainProductImage,
+    listOrders,
+    getOrder,
+    updateOrder,
   };
 }

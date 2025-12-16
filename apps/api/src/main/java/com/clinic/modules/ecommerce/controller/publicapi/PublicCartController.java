@@ -49,6 +49,7 @@ public class PublicCartController {
      * Get current cart for session.
      */
     @GetMapping
+    @Transactional(readOnly = true)
     public ResponseEntity<CartResponse> getCart(
             @RequestParam(required = false) String slug,
             @RequestParam(required = false) String domain,
@@ -78,13 +79,14 @@ public class PublicCartController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            // Gracefully degrade: return an empty cart with the session id so the client can continue.
             logger.error("Failed to get cart", e);
-            CartResponse error = new CartResponse();
-            error.setItems(List.of());
-            error.setItemCount(0);
-            error.setTotalQuantity(0);
-            error.setSessionId(sessionIdParam);
-            return ResponseEntity.internalServerError().body(error);
+            CartResponse emptyCart = new CartResponse();
+            emptyCart.setSessionId(sessionIdParam);
+            emptyCart.setItems(List.of());
+            emptyCart.setItemCount(0);
+            emptyCart.setTotalQuantity(0);
+            return ResponseEntity.ok(emptyCart);
         }
     }
 

@@ -6,6 +6,8 @@ import com.clinic.modules.core.payment.PayPalPaymentService;
 import com.clinic.modules.core.settings.ClinicSettingsEntity;
 import com.clinic.modules.core.settings.ClinicSettingsRepository;
 import com.clinic.modules.core.tenant.TenantContextHolder;
+import com.clinic.modules.core.tenant.TenantEntity;
+import com.clinic.modules.core.tenant.TenantRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +17,14 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/public/payments")
@@ -29,6 +35,7 @@ public class PaymentController {
     private final PayPalPaymentService paymentService;
     private final ClinicSettingsRepository settingsRepository;
     private final TenantContextHolder tenantContextHolder;
+    private final TenantRepository tenantRepository;
 
     @Value("${paypal.client-id:}")
     private String paypalClientIdFallback;
@@ -39,15 +46,19 @@ public class PaymentController {
     @Autowired
     public PaymentController(PayPalPaymentService paymentService,
                              ClinicSettingsRepository settingsRepository,
-                             TenantContextHolder tenantContextHolder) {
+                             TenantContextHolder tenantContextHolder,
+                             TenantRepository tenantRepository) {
         this.paymentService = paymentService;
         this.settingsRepository = settingsRepository;
         this.tenantContextHolder = tenantContextHolder;
+        this.tenantRepository = tenantRepository;
     }
 
     @PostMapping("/paypal/create-order")
     public ResponseEntity<ApiResponse<Map<String, String>>> createPayPalOrder(@RequestBody CreateOrderRequest request) {
         try {
+            // Ensure tenant context is set from header before downstream services fetch credentials
+            ensureTenantContext();
             logger.info("Creating PayPal order for patient {} with doctor {}", request.patientId(), request.doctorId());
             
             String orderId = paymentService.createPayPalOrder(
@@ -70,6 +81,8 @@ public class PaymentController {
     @PostMapping("/paypal/capture")
     public ResponseEntity<ApiResponse<Map<String, Object>>> capturePayPalOrder(@RequestBody CaptureOrderRequest request) {
         try {
+            // Ensure tenant context is set from header before downstream services fetch credentials
+            ensureTenantContext();
             logger.info("Capturing PayPal order: {}", request.orderID());
             
             boolean success = paymentService.capturePayPalOrder(request.orderID());
@@ -97,9 +110,9 @@ public class PaymentController {
     }
 
     @GetMapping("/settings")
-    public ResponseEntity<ApiResponse<PaymentSettingsResponse>> getPaymentSettings() {
+    public ResponseEntity<ApiResponse<PaymentSettingsResponse>> getPaymentSettings(HttpServletRequest request) {
         try {
-            ClinicSettingsEntity settings = resolveTenantSettings();
+            ClinicSettingsEntity settings = resolveTenantSettings(request);
 
             BigDecimal fee = settings.getVirtualConsultationFee();
 
@@ -108,7 +121,7 @@ public class PaymentController {
                     .body(ApiResponseFactory.errorWithType("FEE_NOT_CONFIGURED", "Virtual consultation fee not configured", List.of()));
             }
 
-            PayPalSettings payPalSettings = resolvePayPalSettings();
+            PayPalSettings payPalSettings = resolvePayPalSettings(settings);
             if (payPalSettings == null) {
                 return ResponseEntity.badRequest()
                     .body(ApiResponseFactory.errorWithType("PAYPAL_NOT_CONFIGURED", "PayPal configuration not set up in settings or environment", List.of()));
@@ -147,14 +160,37 @@ public class PaymentController {
         String paypalEnvironment
     ) {}
 
-    private ClinicSettingsEntity resolveTenantSettings() {
-        Long tenantId = tenantContextHolder.requireTenantId();
+    private ClinicSettingsEntity resolveTenantSettings(HttpServletRequest request) {
+        Long tenantId = null;
+
+        // Prefer explicit slug header
+        String slugHeader = request.getHeader("x-tenant-slug");
+        if (StringUtils.hasText(slugHeader)) {
+            Optional<TenantEntity> tenantOpt = tenantRepository.findBySlugIgnoreCaseAndNotDeleted(slugHeader.trim());
+            if (tenantOpt.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tenant not found for slug: " + slugHeader);
+            }
+            tenantId = tenantOpt.get().getId();
+        }
+
+        // Fallback to existing tenant context if not resolved from header
+        if (tenantId == null) {
+            try {
+                tenantId = tenantContextHolder.requireTenantId();
+            } catch (Exception ignored) {
+                // will fallback below
+            }
+        }
+
+        if (tenantId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tenant context not provided");
+        }
+
         return settingsRepository.findByTenantId(tenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Clinic settings not configured"));
     }
 
-    private PayPalSettings resolvePayPalSettings() {
-        ClinicSettingsEntity settings = resolveTenantSettings();
+    private PayPalSettings resolvePayPalSettings(ClinicSettingsEntity settings) {
         String dbClientId = settings.getPaypalClientId();
         if (StringUtils.hasText(dbClientId)) {
             String dbEnvironment = settings.getPaypalEnvironment();
@@ -175,4 +211,19 @@ public class PaymentController {
     }
 
     private record PayPalSettings(String clientId, String environment) {}
+
+    private void ensureTenantContext() {
+        // Try to set from slug header first
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes != null) {
+            HttpServletRequest req = attributes.getRequest();
+            String slugHeader = req.getHeader("x-tenant-slug");
+            if (StringUtils.hasText(slugHeader)) {
+                Optional<TenantEntity> tenantOpt = tenantRepository.findBySlugIgnoreCaseAndNotDeleted(slugHeader.trim());
+                tenantOpt.ifPresent(tenant ->
+                    tenantContextHolder.setTenant(new com.clinic.modules.core.tenant.TenantContext(tenant.getId(), tenant.getSlug()))
+                );
+            }
+        }
+    }
 }

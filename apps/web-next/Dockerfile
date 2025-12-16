@@ -16,7 +16,7 @@ ARG NEXT_PUBLIC_API_URL=https://cliniqax.com/api/public
 ARG NEXT_SERVER_API_URL=https://cliniqax.com/api/public
 ARG NEXT_SERVER_API_BASE_URL=https://cliniqax.com
 ARG DATABASE_URL
-ARG APP_PATH=.
+ARG APP_PATH=apps/web-next
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/* \
     && corepack enable && corepack prepare pnpm@10.22.0 --activate
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
@@ -35,7 +35,7 @@ ARG NEXT_PUBLIC_API_URL=https://cliniqax.com/api/public
 ARG NEXT_SERVER_API_URL=https://cliniqax.com/api/public
 ARG NEXT_SERVER_API_BASE_URL=https://cliniqax.com
 ARG DATABASE_URL
-ARG APP_PATH=.
+ARG APP_PATH=apps/web-next
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_SERVER_API_URL=${NEXT_SERVER_API_URL}
 ENV NEXT_SERVER_API_BASE_URL=${NEXT_SERVER_API_BASE_URL}

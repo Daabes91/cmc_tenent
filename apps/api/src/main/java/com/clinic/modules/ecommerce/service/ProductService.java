@@ -4,9 +4,7 @@ import com.clinic.modules.core.tenant.TenantEntity;
 import com.clinic.modules.core.tenant.TenantRepository;
 import com.clinic.modules.ecommerce.exception.ProductNotFoundException;
 import com.clinic.modules.ecommerce.model.*;
-import com.clinic.modules.ecommerce.repository.ProductRepository;
-import com.clinic.modules.ecommerce.repository.ProductImageRepository;
-import com.clinic.modules.ecommerce.repository.ProductVariantRepository;
+import com.clinic.modules.ecommerce.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -16,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing products in the e-commerce system.
@@ -31,6 +31,8 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final ProductCategoryRepository productCategoryRepository;
+    private final CategoryRepository categoryRepository;
     private final TenantRepository tenantRepository;
     private final EcommerceFeatureService ecommerceFeatureService;
 
@@ -38,11 +40,15 @@ public class ProductService {
             ProductRepository productRepository,
             ProductImageRepository productImageRepository,
             ProductVariantRepository productVariantRepository,
+            ProductCategoryRepository productCategoryRepository,
+            CategoryRepository categoryRepository,
             TenantRepository tenantRepository,
             EcommerceFeatureService ecommerceFeatureService) {
         this.productRepository = productRepository;
         this.productImageRepository = productImageRepository;
         this.productVariantRepository = productVariantRepository;
+        this.productCategoryRepository = productCategoryRepository;
+        this.categoryRepository = categoryRepository;
         this.tenantRepository = tenantRepository;
         this.ecommerceFeatureService = ecommerceFeatureService;
     }
@@ -59,10 +65,13 @@ public class ProductService {
     @Transactional
     public ProductEntity createProduct(Long tenantId,
                                        String name,
+                                       String nameAr,
                                        String slug,
                                        String sku,
                                        String description,
+                                       String descriptionAr,
                                        String shortDescription,
+                                       String shortDescriptionAr,
                                        java.math.BigDecimal price,
                                        java.math.BigDecimal compareAtPrice,
                                        String currency,
@@ -100,7 +109,10 @@ public class ProductService {
         ProductEntity product = new ProductEntity(tenant, name, slug);
         product.setSku(sku);
         product.setDescription(description);
+        product.setDescriptionAr(descriptionAr);
         product.setShortDescription(shortDescription);
+        product.setShortDescriptionAr(shortDescriptionAr);
+        product.setNameAr(nameAr);
         if (price != null) product.setPrice(price);
         if (compareAtPrice != null) product.setCompareAtPrice(compareAtPrice);
         if (currency != null && !currency.isBlank()) product.setCurrency(currency);
@@ -150,6 +162,36 @@ public class ProductService {
     }
 
     /**
+     * Get a product by ID with tenant validation and initialize collections.
+     * This method is used when the product collections (variants, images, categories) are needed.
+     * 
+     * @param productId the product ID
+     * @param tenantId the tenant ID
+     * @return the product with collections initialized
+     * @throws ProductNotFoundException if product not found
+     */
+    @Transactional(readOnly = true)
+    public ProductEntity getProductWithCollections(Long productId, Long tenantId) {
+        log.debug("Getting product with collections {} for tenant {}", productId, tenantId);
+        
+        // Validate e-commerce feature is enabled
+        ecommerceFeatureService.validateEcommerceEnabled(tenantId);
+        
+        ProductEntity product = productRepository.findByIdAndTenant(productId, tenantId)
+                .orElseThrow(() -> new ProductNotFoundException(productId, tenantId));
+        
+        // Initialize collections within the transaction to avoid LazyInitializationException
+        product.getVariants().size(); // Force initialization
+        product.getImages().size(); // Force initialization
+        product.getProductCategories().size(); // Force initialization
+        
+        // Initialize nested category entities
+        product.getProductCategories().forEach(pc -> pc.getCategory().getName());
+        
+        return product;
+    }
+
+    /**
      * Get a product by slug with tenant validation.
      * 
      * @param slug the product slug
@@ -181,8 +223,11 @@ public class ProductService {
      * @return the updated product
      */
     @Transactional
-    public ProductEntity updateProduct(Long productId, Long tenantId, String name, String description, 
-                                     String shortDescription, BigDecimal price, BigDecimal compareAtPrice) {
+    public ProductEntity updateProduct(Long productId, Long tenantId, String name, String nameAr, String slug, String description, 
+                                     String descriptionAr, String shortDescription, String shortDescriptionAr,
+                                     BigDecimal price, BigDecimal compareAtPrice,
+                                     Boolean isTaxable, Boolean isVisible, String currency, ProductStatus status,
+                                     List<Long> categoryIds) {
         log.debug("Updating product {} for tenant {}", productId, tenantId);
         
         // Validate e-commerce feature is enabled
@@ -195,15 +240,35 @@ public class ProductService {
             validateProductName(name);
             product.setName(name);
         }
+
+        if (nameAr != null) {
+            product.setNameAr(nameAr);
+        }
+
+        if (StringUtils.hasText(slug)) {
+            validateProductSlug(slug);
+            if (productRepository.existsBySlugAndTenantExcludingId(slug, tenantId, productId)) {
+                throw new IllegalArgumentException("Product slug already exists: " + slug);
+            }
+            product.setSlug(slug);
+        }
         
         if (description != null) {
             product.setDescription(description);
+        }
+
+        if (descriptionAr != null) {
+            product.setDescriptionAr(descriptionAr);
         }
         
         if (shortDescription != null) {
             product.setShortDescription(shortDescription);
         }
-        
+
+        if (shortDescriptionAr != null) {
+            product.setShortDescriptionAr(shortDescriptionAr);
+        }
+
         if (price != null) {
             validatePrice(price);
             product.setPrice(price);
@@ -213,11 +278,70 @@ public class ProductService {
             validatePrice(compareAtPrice);
             product.setCompareAtPrice(compareAtPrice);
         }
+
+        if (isTaxable != null) {
+            product.setIsTaxable(isTaxable);
+        }
+
+        if (isVisible != null) {
+            product.setIsVisible(isVisible);
+        }
+
+        if (currency != null) {
+            validateCurrency(currency);
+            product.setCurrency(currency);
+        }
+
+        if (status != null) {
+            validateStatusTransition(product.getStatus(), status);
+            product.setStatus(status);
+        }
+
+        if (categoryIds != null) {
+            updateProductCategories(product, categoryIds);
+        }
         
         product = productRepository.save(product);
         
         log.info("Updated product {} for tenant {}", productId, tenantId);
         return product;
+    }
+
+    private void updateProductCategories(ProductEntity product, List<Long> categoryIds) {
+        if (categoryIds.isEmpty()) {
+            // Clear existing associations - let Hibernate handle orphan removal
+            product.getProductCategories().clear();
+            return;
+        }
+
+        // Get current category IDs to avoid unnecessary database operations
+        Set<Long> currentCategoryIds = product.getProductCategories().stream()
+                .map(pc -> pc.getCategory().getId())
+                .collect(Collectors.toSet());
+
+        Set<Long> newCategoryIds = new HashSet<>(categoryIds);
+
+        // Remove categories that are no longer needed
+        product.getProductCategories().removeIf(pc -> !newCategoryIds.contains(pc.getCategory().getId()));
+
+        // Add only new categories that don't already exist
+        Set<Long> categoriesToAdd = newCategoryIds.stream()
+                .filter(id -> !currentCategoryIds.contains(id))
+                .collect(Collectors.toSet());
+
+        if (!categoriesToAdd.isEmpty()) {
+            List<CategoryEntity> categories = categoriesToAdd.stream()
+                    .map(id -> categoryRepository.findByIdAndTenant(id, product.getTenantId())
+                            .orElseThrow(() -> new IllegalArgumentException("Category not found: " + id)))
+                    .collect(Collectors.toList());
+
+            List<ProductCategoryEntity> links = categories.stream()
+                    .map(cat -> new ProductCategoryEntity(product, cat, product.getTenant()))
+                    .collect(Collectors.toList());
+
+            // Add new associations to the existing collection
+            product.getProductCategories().addAll(links);
+        }
     }
 
     /**

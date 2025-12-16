@@ -18,7 +18,7 @@ export function LegalPage({ title, intro, updated, sections }: LegalPageProps) {
         <p className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-300 mb-3">
           {updated}
         </p>
-        <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-slate-50 leading-tight">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-50 leading-tight">
           {title}
         </h1>
         <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">{intro}</p>
@@ -29,7 +29,7 @@ export function LegalPage({ title, intro, updated, sections }: LegalPageProps) {
               key={section.title}
               className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 p-6 shadow-sm dark:shadow-blue-900/30 backdrop-blur"
             >
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                 {section.title}
               </h2>
               <p className="mt-3 text-slate-600 dark:text-slate-300">{section.body}</p>

@@ -43,10 +43,26 @@
               icon="i-lucide-type"
             />
           </UFormGroup>
+          <UFormGroup label="Title (Arabic)">
+            <UInput
+              v-model="form.titleAr"
+              dir="rtl"
+              placeholder="العنوان بالعربية"
+              icon="i-lucide-type"
+            />
+          </UFormGroup>
           <UFormGroup label="Subtitle">
             <UInput
               v-model="form.subtitle"
               placeholder="Optional subtitle"
+              icon="i-lucide-align-left"
+            />
+          </UFormGroup>
+          <UFormGroup label="Subtitle (Arabic)">
+            <UInput
+              v-model="form.subtitleAr"
+              dir="rtl"
+              placeholder="وصف مختصر"
               icon="i-lucide-align-left"
             />
           </UFormGroup>
@@ -148,6 +164,14 @@
               icon="i-lucide-mouse-pointer-click"
             />
           </UFormGroup>
+          <UFormGroup label="CTA Text (Arabic)">
+            <UInput
+              v-model="form.ctaTextAr"
+              dir="rtl"
+              placeholder="نص الدعوة للإجراء"
+              icon="i-lucide-mouse-pointer-click"
+            />
+          </UFormGroup>
         </div>
 
         <!-- Sort Order and Status -->
@@ -233,10 +257,13 @@ const isEditing = computed(() => !!props.item);
 const form = reactive<Partial<CarouselItem>>({
   contentType: 'IMAGE',
   title: '',
+  titleAr: '',
   subtitle: '',
+  subtitleAr: '',
   imageUrl: '',
   linkUrl: '',
   ctaText: '',
+  ctaTextAr: '',
   sortOrder: 0,
   isActive: true,
 });
@@ -384,10 +411,13 @@ const resetForm = () => {
   Object.assign(form, {
     contentType: 'IMAGE',
     title: '',
+    titleAr: '',
     subtitle: '',
+    subtitleAr: '',
     imageUrl: '',
     linkUrl: '',
     ctaText: '',
+    ctaTextAr: '',
     sortOrder: 0,
     isActive: true,
   });

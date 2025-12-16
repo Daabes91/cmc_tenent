@@ -19,6 +19,9 @@ public class CreateCarouselRequest {
     @Size(max = 255, message = "Slug must not exceed 255 characters")
     private String slug;
 
+    @Size(max = 255, message = "Arabic name must not exceed 255 characters")
+    private String nameAr;
+
     @NotNull(message = "Type is required")
     private CarouselType type;
 
@@ -59,6 +62,14 @@ public class CreateCarouselRequest {
 
     public void setSlug(String slug) {
         this.slug = slug;
+    }
+
+    public String getNameAr() {
+        return nameAr;
+    }
+
+    public void setNameAr(String nameAr) {
+        this.nameAr = nameAr;
     }
 
     public CarouselType getType() {

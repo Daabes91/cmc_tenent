@@ -128,7 +128,7 @@
         <nav 
           ref="sidebarRef"
           :class="[
-            'fixed left-0 top-0 h-full bg-white dark:bg-slate-950 shadow-xl',
+            'fixed left-0 top-0 h-full bg-white dark:bg-slate-950 shadow-xl flex flex-col overflow-y-auto',
             'transform transition-transform duration-300 ease-out',
             'w-80 max-w-[85vw]',
             isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -216,11 +216,113 @@
               </div>
             </div>
 
-            <UVerticalNavigation
-              :links="navigationLinks"
-              :ui="mobileNavUi"
-              @click="handleNavClick"
-            />
+            <div class="space-y-2">
+              <template v-for="item in navigationLinks" :key="item.label">
+                <!-- Regular navigation items without children -->
+                <NuxtLink
+                  v-if="!item.children"
+                  :to="item.to"
+                  :class="[
+                    'group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 touch-manipulation min-h-[48px]',
+                    $route.path === item.to
+                      ? 'bg-gradient-to-r from-mint-500 to-mint-400 text-white shadow-lg shadow-mint-600/40'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white'
+                  ]"
+                  @click="handleNavClick(item)"
+                >
+                  <UIcon
+                    :name="item.icon"
+                    :class="[
+                      'h-5 w-5 flex-shrink-0 transition-transform duration-200',
+                      $route.path === item.to
+                        ? 'text-white'
+                        : 'text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white'
+                    ]"
+                  />
+                  <span>{{ item.label }}</span>
+                  <span
+                    v-if="item.badge"
+                    class="ml-auto rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white"
+                  >
+                    {{ item.badge }}
+                  </span>
+                </NuxtLink>
+
+                <!-- Navigation items with children (like ecommerce) -->
+                <div v-else class="space-y-1">
+                  <button
+                    @click="toggleMobileSubmenu(item.label)"
+                    :class="[
+                      'group relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 touch-manipulation min-h-[48px]',
+                      isMobileSubmenuOpen(item.label) || isMobileChildActive(item.children)
+                        ? 'bg-gradient-to-r from-mint-500 to-mint-400 text-white shadow-lg shadow-mint-600/40'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white'
+                    ]"
+                  >
+                    <UIcon
+                      :name="item.icon"
+                      :class="[
+                        'h-5 w-5 flex-shrink-0 transition-transform duration-200',
+                        isMobileSubmenuOpen(item.label) || isMobileChildActive(item.children)
+                          ? 'text-white'
+                          : 'text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white'
+                      ]"
+                    />
+                    <span class="flex-1 text-left">{{ item.label }}</span>
+                    <UIcon
+                      name="i-lucide-chevron-down"
+                      :class="[
+                        'h-4 w-4 transition-transform duration-200',
+                        isMobileSubmenuOpen(item.label) ? 'rotate-180' : '',
+                        isMobileSubmenuOpen(item.label) || isMobileChildActive(item.children)
+                          ? 'text-white'
+                          : 'text-slate-400'
+                      ]"
+                    />
+                  </button>
+
+                  <!-- Mobile submenu items -->
+                  <Transition
+                    name="mobile-submenu"
+                    enter-active-class="transition-all duration-200 ease-out"
+                    enter-from-class="opacity-0 max-h-0"
+                    enter-to-class="opacity-100 max-h-96"
+                    leave-active-class="transition-all duration-200 ease-in"
+                    leave-from-class="opacity-100 max-h-96"
+                    leave-to-class="opacity-0 max-h-0"
+                  >
+                    <div
+                      v-if="isMobileSubmenuOpen(item.label)"
+                      class="ml-6 mt-1 space-y-1 overflow-hidden"
+                    >
+                      <NuxtLink
+                        v-for="child in item.children"
+                        :key="child.to"
+                        :to="child.to"
+                        :class="[
+                          'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px]',
+                          $route.path === child.to
+                            ? 'bg-gradient-to-r from-mint-500 to-mint-400 text-white shadow-lg shadow-mint-600/40'
+                            : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white'
+                        ]"
+                        @click="handleNavClick(child)"
+                      >
+                        <UIcon
+                          :name="child.icon"
+                          :class="[
+                            'h-4 w-4 flex-shrink-0 transition-transform duration-200',
+                            $route.path === child.to
+                              ? 'text-white'
+                              : 'text-slate-500 group-hover:text-slate-700 dark:group-hover:text-white'
+                          ]"
+                        />
+                        <span>{{ child.label }}</span>
+                      </NuxtLink>
+                    </div>
+                  </Transition>
+                </div>
+              </template>
+            </div>
           </div>
           
           <!-- Quick Actions (Mobile) -->
@@ -303,6 +405,42 @@ const emit = defineEmits<Emits>();
 // Use viewport composable
 const { viewport, getTouchTargetSize } = useViewport();
 const shouldShowMobileNav = computed(() => viewport.isMobile || viewport.isTablet);
+
+// Mobile submenu state management
+const mobileOpenSubmenus = ref<Set<string>>(new Set());
+
+const toggleMobileSubmenu = (label: string) => {
+  if (mobileOpenSubmenus.value.has(label)) {
+    mobileOpenSubmenus.value.delete(label);
+  } else {
+    mobileOpenSubmenus.value.add(label);
+  }
+};
+
+const isMobileSubmenuOpen = (label: string) => {
+  return mobileOpenSubmenus.value.has(label);
+};
+
+const isMobileChildActive = (children: any[]) => {
+  if (!children) return false;
+  const currentRoute = useRoute();
+  return children.some(child => child.to === currentRoute.path);
+};
+
+// Auto-open mobile submenus when child is active
+const autoOpenActiveMobileSubmenus = () => {
+  const currentRoute = useRoute();
+  (props.navigationLinks || []).forEach(item => {
+    if (item.children && isMobileChildActive(item.children)) {
+      mobileOpenSubmenus.value.add(item.label);
+    }
+  });
+};
+
+// Watch for route changes to auto-open mobile submenus
+watch(() => useRoute().path, () => {
+  autoOpenActiveMobileSubmenus();
+}, { immediate: true });
 
 // Navigation methods
 const toggleSidebar = () => {
@@ -567,5 +705,23 @@ watch(() => route.path, () => {
 /* Smooth scrolling for navigation */
 .overflow-y-auto {
   -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile submenu transitions */
+.mobile-submenu-enter-active,
+.mobile-submenu-leave-active {
+  transition: all 0.2s ease;
+}
+
+.mobile-submenu-enter-from,
+.mobile-submenu-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+
+.mobile-submenu-enter-to,
+.mobile-submenu-leave-from {
+  opacity: 1;
+  max-height: 200px;
 }
 </style>

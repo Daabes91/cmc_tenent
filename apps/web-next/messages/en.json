@@ -387,7 +387,14 @@
     },
     "actions": {
       "back": "Back to dashboard",
-      "book": "Book appointment"
+      "book": "Book appointment",
+      "confirm": "Confirm visit",
+      "bookAnother": "Book another"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page} of {total}"
     }
   },
   "booking": {
@@ -719,6 +726,70 @@
       "info": {
         "title": "Why link accounts?",
         "description": "Linking your Google account allows you to sign in using either your email/password or Google. You can use whichever method is most convenient for you."
+      }
+    }
+  },
+  "productsPage": {
+    "header": {
+      "eyebrow": "Shop",
+      "title": "Products",
+      "subtitle": "Browse our featured products and add them to your cart."
+    },
+    "loading": "Loading products...",
+    "errors": {
+      "load": "Failed to load products. Please try again."
+    },
+    "empty": {
+      "title": "No products available",
+      "description": "We are adding new products soon. Please check back shortly."
+    },
+    "actions": {
+      "viewProduct": "View product",
+      "addToCart": "Add to cart",
+      "added": "Added",
+      "adding": "Adding...",
+      "contactForPrice": "Contact for price"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page} of {total}"
+    },
+    "disabled": "Online store is currently disabled."
+  },
+  "ecommerce": {
+    "featuredProducts": "Featured products",
+    "viewAllProducts": "View all products",
+    "addToCart": "Add to cart",
+    "adding": "Adding…",
+    "addedToCart": "Added to cart",
+    "contactForPrice": "Contact for price",
+    "noImage": "No image",
+    "sale": "SALE",
+    "noProductsFound": "No products found",
+    "adjustSearchCriteria": "Try adjusting your search or filter criteria.",
+    "productDetails": {
+      "quantity": "Quantity",
+      "productDetails": "Product Details",
+      "share": "Share",
+      "buyNow": "Buy Now",
+      "backToProducts": "Back to Products",
+      "products": "Products",
+      "productNotFound": "Product Not Found",
+      "youSave": "You save {amount} {currency}",
+      "trustBadges": {
+        "securePayment": "Secure Payment",
+        "fastShipping": "Fast Shipping",
+        "qualityGuarantee": "Quality Guarantee",
+        "support247": "24/7 Support"
+      },
+      "loading": {
+        "loadingProduct": "Loading product...",
+        "preparingCheckout": "Preparing your checkout..."
+      },
+      "errors": {
+        "productNotFound": "Product Not Found",
+        "failedToLoad": "Failed to load product"
       }
     }
   }

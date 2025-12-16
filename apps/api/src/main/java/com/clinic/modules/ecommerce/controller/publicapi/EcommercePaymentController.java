@@ -1,5 +1,7 @@
 package com.clinic.modules.ecommerce.controller.publicapi;
 
+import com.clinic.modules.core.tenant.TenantContext;
+import com.clinic.modules.core.tenant.TenantContextHolder;
 import com.clinic.modules.core.tenant.TenantEntity;
 import com.clinic.modules.core.tenant.TenantRepository;
 import com.clinic.modules.ecommerce.config.RequiresEcommerceFeature;
@@ -35,13 +37,16 @@ public class EcommercePaymentController {
     private final PayPalService payPalService;
     private final OrderRepository orderRepository;
     private final TenantRepository tenantRepository;
+    private final TenantContextHolder tenantContextHolder;
 
     public EcommercePaymentController(@Qualifier("ecommercePayPalService") PayPalService payPalService,
                            OrderRepository orderRepository,
-                           TenantRepository tenantRepository) {
+                           TenantRepository tenantRepository,
+                           TenantContextHolder tenantContextHolder) {
         this.payPalService = payPalService;
         this.orderRepository = orderRepository;
         this.tenantRepository = tenantRepository;
+        this.tenantContextHolder = tenantContextHolder;
     }
 
     /**
@@ -63,6 +68,8 @@ public class EcommercePaymentController {
             // Resolve tenant
             TenantEntity tenant = tenantRepository.findBySlugIgnoreCaseAndNotDeleted(tenantSlug)
                 .orElseThrow(() -> new PaymentProcessingException("Tenant not found: " + tenantSlug));
+
+            setTenantContext(tenant);
 
             // Find order with tenant isolation
             OrderEntity order = orderRepository.findByIdAndTenant(request.getOrderId(), tenant.getId())
@@ -118,28 +125,38 @@ public class EcommercePaymentController {
             TenantEntity tenant = tenantRepository.findBySlugIgnoreCaseAndNotDeleted(tenantSlug)
                 .orElseThrow(() -> new PaymentProcessingException("Tenant not found: " + tenantSlug));
 
+            setTenantContext(tenant);
+
             // Capture payment
             PayPalService.PayPalCaptureResponse paypalResponse = payPalService.capturePayPalPayment(
                 request.getPaypalOrderId(), tenant.getId());
 
             if (paypalResponse.isSuccess()) {
-                // Find payment to get order ID
-                Optional<PaymentEntity> paymentOpt = payPalService.getPaymentForOrder(null, tenant.getId());
-                if (paymentOpt.isPresent()) {
-                    OrderEntity order = paymentOpt.get().getOrder();
-                    order.setStatus(OrderStatus.PAID);
-                    orderRepository.save(order);
+                // Find payment using the PayPal order id to retrieve the related order
+                Optional<PaymentEntity> paymentOpt = payPalService.getPaymentByProviderOrderId(
+                    request.getPaypalOrderId(), tenant.getId());
 
-                    PaymentCaptureResponse response = PaymentCaptureResponse.success(
-                        request.getPaypalOrderId(),
-                        paypalResponse.getCaptureId(),
-                        paypalResponse.getStatus(),
-                        order.getId()
-                    );
-
-                    logger.info("PayPal payment captured successfully for order: {}", request.getPaypalOrderId());
-                    return ResponseEntity.ok(response);
+                if (paymentOpt.isEmpty()) {
+                    logger.warn("Payment capture succeeded on PayPal but local payment record was not found for order {}", request.getPaypalOrderId());
+                    return ResponseEntity.badRequest()
+                        .body(PaymentCaptureResponse.error("Payment captured on PayPal, but local record was not found"));
                 }
+
+                Long orderId = paymentOpt.get().getOrder().getId();
+                OrderEntity order = orderRepository.findByIdAndTenant(orderId, tenant.getId())
+                    .orElseThrow(() -> new PaymentProcessingException("Order not found: " + orderId));
+                order.setStatus(OrderStatus.PAID);
+                orderRepository.save(order);
+
+                PaymentCaptureResponse response = PaymentCaptureResponse.success(
+                    request.getPaypalOrderId(),
+                    paypalResponse.getCaptureId(),
+                    paypalResponse.getStatus(),
+                    order.getId()
+                );
+
+                logger.info("PayPal payment captured successfully for order: {}", request.getPaypalOrderId());
+                return ResponseEntity.ok(response);
             }
 
             return ResponseEntity.badRequest()
@@ -224,6 +241,8 @@ public class EcommercePaymentController {
             TenantEntity tenant = tenantRepository.findBySlugIgnoreCaseAndNotDeleted(tenantSlug)
                 .orElseThrow(() -> new PaymentProcessingException("Tenant not found: " + tenantSlug));
 
+            setTenantContext(tenant);
+
             // Read webhook payload
             StringBuilder payload = new StringBuilder();
             String line;
@@ -252,6 +271,12 @@ public class EcommercePaymentController {
         } catch (Exception e) {
             logger.error("Error processing PayPal webhook for tenant: {}", tenantSlug, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Webhook processing error");
+        }
+    }
+
+    private void setTenantContext(TenantEntity tenant) {
+        if (tenant != null) {
+            tenantContextHolder.setTenant(new TenantContext(tenant.getId(), tenant.getSlug()));
         }
     }
 }

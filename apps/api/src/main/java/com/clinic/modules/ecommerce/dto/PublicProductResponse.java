@@ -15,9 +15,12 @@ import java.util.List;
 public record PublicProductResponse(
     Long id,
     String name,
+    String nameAr,
     String slug,
     String description,
+    String descriptionAr,
     String shortDescription,
+    String shortDescriptionAr,
     ProductStatus status,
     BigDecimal price,
     BigDecimal compareAtPrice,
@@ -39,12 +42,32 @@ public record PublicProductResponse(
      * @return the response DTO
      */
     public static PublicProductResponse fromEntity(ProductEntity product) {
+        return fromEntity(product, null);
+    }
+
+    public static PublicProductResponse fromEntity(ProductEntity product, String locale) {
+        String resolvedLocale = locale != null ? locale.toLowerCase(java.util.Locale.ROOT) : null;
+        boolean useArabic = resolvedLocale != null && resolvedLocale.startsWith("ar");
+
+        String localizedName = useArabic && product.getNameAr() != null && !product.getNameAr().isBlank()
+                ? product.getNameAr()
+                : product.getName();
+        String localizedDescription = useArabic && product.getDescriptionAr() != null && !product.getDescriptionAr().isBlank()
+                ? product.getDescriptionAr()
+                : product.getDescription();
+        String localizedShortDescription = useArabic && product.getShortDescriptionAr() != null && !product.getShortDescriptionAr().isBlank()
+                ? product.getShortDescriptionAr()
+                : product.getShortDescription();
+
         return new PublicProductResponse(
             product.getId(),
-            product.getName(),
+            localizedName,
+            product.getNameAr(),
             product.getSlug(),
-            product.getDescription(),
-            product.getShortDescription(),
+            localizedDescription,
+            product.getDescriptionAr(),
+            localizedShortDescription,
+            product.getShortDescriptionAr(),
             product.getStatus(),
             product.getPrice(),
             product.getCompareAtPrice(),

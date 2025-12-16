@@ -13,10 +13,13 @@ import java.util.List;
 public record ProductResponse(
         Long id,
         String name,
+        String nameAr,
         String slug,
         String sku,
         String description,
+        String descriptionAr,
         String shortDescription,
+        String shortDescriptionAr,
         ProductStatus status,
         ProductType productType,
         BigDecimal price,

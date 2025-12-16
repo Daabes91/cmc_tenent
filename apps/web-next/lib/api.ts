@@ -12,6 +12,9 @@ import type {
   PublicCarousel,
   Product,
   CartResponse,
+  OrderResponse,
+  PaymentInitiationResponse,
+  PaymentCaptureResponse,
 } from './types';
 import { locales } from '@/i18n/request';
 import { withBasePath, stripBasePath } from '@/utils/basePath';
@@ -174,21 +177,31 @@ export const api = {
   // Clinic Settings (public endpoint)
   getClinicSettings: async () => fetchAPI<ClinicSettings>('/settings'),
   // Carousels (public)
-  getCarousels: async () => fetchAPI<PublicCarousel[]>('/carousels/all'),
+  getCarousels: async (locale?: string) => {
+    const qs = locale ? `?locale=${locale}` : '';
+    return fetchAPI<PublicCarousel[]>(`/carousels/all${qs}`);
+  },
 
   // Public products (basic listing)
-  getProducts: async (params?: { page?: number; size?: number; search?: string; status?: string }) => {
+  getProducts: async (params?: { page?: number; size?: number; search?: string; status?: string; locale?: string }) => {
     const searchParams = new URLSearchParams();
     if (params?.page !== undefined) searchParams.set('page', String(params.page));
     if (params?.size !== undefined) searchParams.set('size', String(params.size));
     if (params?.search) searchParams.set('search', params.search);
     if (params?.status) searchParams.set('status', params.status);
+    if (params?.locale) searchParams.set('locale', params.locale);
     const qs = searchParams.toString();
-    return fetchAPI<{ items: Product[]; page: number; size: number; total: number }>(
-      `/products${qs ? `?${qs}` : ''}`
-    );
+    const res = await fetchAPI<any>(`/products${qs ? `?${qs}` : ''}`);
+    const items: Product[] = res?.items ?? res?.data ?? res?.products ?? [];
+    const page = res?.page ?? res?.pagination?.page ?? params?.page ?? 0;
+    const size = res?.size ?? res?.pagination?.page_size ?? params?.size ?? items.length ?? 0;
+    const total = res?.total ?? res?.pagination?.total ?? items.length ?? 0;
+    return { items, page, size, total };
   },
-  getProductBySlug: async (slug: string) => fetchAPI<Product>(`/products/by-slug/${slug}`),
+  getProductBySlug: async (slug: string, locale?: string) => {
+    const qs = locale ? `?locale=${locale}` : '';
+    return fetchAPI<Product>(`/products/by-slug/${slug}${qs}`);
+  },
 
   // Doctors
   getDoctors: async (locale?: string) => {
@@ -445,6 +458,106 @@ export const api = {
       setCartSessionId((res as any).session_id);
     }
     return res;
+  },
+  updateCartItem: async (itemId: number, quantity: number) => {
+    const slug = getTenantSlugClient();
+    const sessionId = getCartSessionId();
+    const search = new URLSearchParams();
+    if (slug) search.set('slug', slug);
+    if (sessionId) search.set('session_id', sessionId);
+    const suffix = search.toString() ? `?${search.toString()}` : '';
+    const res = await fetchAPI<CartResponse>(`/cart/items/${itemId}${suffix}`, {
+      method: 'PUT',
+      credentials: 'include',
+      body: JSON.stringify({ quantity }),
+    });
+    if ((res as any)?.session_id) {
+      setCartSessionId((res as any).session_id);
+    }
+    return res;
+  },
+  removeCartItem: async (itemId: number) => {
+    const slug = getTenantSlugClient();
+    const sessionId = getCartSessionId();
+    const search = new URLSearchParams();
+    if (slug) search.set('slug', slug);
+    if (sessionId) search.set('session_id', sessionId);
+    const suffix = search.toString() ? `?${search.toString()}` : '';
+    const res = await fetchAPI<CartResponse>(`/cart/items/${itemId}${suffix}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    if ((res as any)?.session_id) {
+      setCartSessionId((res as any).session_id);
+    }
+    return res;
+  },
+  createOrderFromCart: async (data: {
+    sessionId: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone?: string;
+    billingAddressLine1: string;
+    billingAddressLine2?: string;
+    billingAddressCity: string;
+    billingAddressState?: string;
+    billingAddressPostalCode?: string;
+    billingAddressCountry: string;
+    notes?: string;
+  }) => {
+    const tenant = getTenantSlugClient();
+    const search = new URLSearchParams();
+    search.set('tenant', tenant);
+    return fetchAPI<{ success: boolean; order: OrderResponse }>(`/orders?${search.toString()}`, {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+        sessionId: data.sessionId,
+        customerName: data.customerName,
+        customerEmail: data.customerEmail,
+        customerPhone: data.customerPhone,
+        billingAddressLine1: data.billingAddressLine1,
+        billingAddressLine2: data.billingAddressLine2,
+        billingAddressCity: data.billingAddressCity,
+        billingAddressState: data.billingAddressState,
+        billingAddressPostalCode: data.billingAddressPostalCode,
+        billingAddressCountry: data.billingAddressCountry,
+        notes: data.notes,
+      }),
+    });
+  },
+  initiateCartPayPalPayment: async (orderId: number, returnUrl: string, cancelUrl: string) => {
+    const tenant = getTenantSlugClient();
+    return fetchAPI<PaymentInitiationResponse>(`/payments/paypal/${tenant}/initiate`, {
+      method: 'POST',
+      body: JSON.stringify({ orderId, returnUrl, cancelUrl }),
+    });
+  },
+  captureCartPayPalPayment: async (paypalOrderId: string) => {
+    const tenant = getTenantSlugClient();
+    return fetchAPI<PaymentCaptureResponse>(`/payments/paypal/${tenant}/capture`, {
+      method: 'POST',
+      body: JSON.stringify({ paypalOrderId }),
+    });
+  },
+  initiateCartPayPalOrder: async (orderId: number, returnUrl: string, cancelUrl: string) => {
+    const tenant = getTenantSlugClient();
+    return fetchAPI<PaymentInitiationResponse>(`/payments/paypal/${tenant}/initiate`, {
+      method: 'POST',
+      body: JSON.stringify({ orderId, returnUrl, cancelUrl }),
+    });
+  },
+  getPatientOrders: async (email: string, options: { page?: number; size?: number } = {}) => {
+    const tenant = getTenantSlugClient();
+    const search = new URLSearchParams();
+    if (tenant) search.set('tenant', tenant);
+    search.set('email', email);
+    if (options.page !== undefined) search.set('page', String(options.page));
+    if (options.size !== undefined) search.set('size', String(options.size));
+    return fetchAPI<{ success: boolean; orders: OrderResponse[]; pagination?: any }>(
+      `/orders?${search.toString()}`,
+      { credentials: 'include' }
+    );
   },
 };
 

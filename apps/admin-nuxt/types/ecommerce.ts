@@ -3,6 +3,7 @@ export type CarouselContentType = 'IMAGE' | 'PRODUCT' | 'CATEGORY' | 'BRAND' | '
 export interface Carousel {
   id: number;
   name: string;
+  nameAr?: string | null;
   slug: string;
   type: 'PRODUCT' | 'VIEW_ALL_PRODUCTS' | 'IMAGE' | 'CATEGORY' | 'BRAND' | 'OFFER' | 'TESTIMONIAL' | 'BLOG' | 'MIXED';
   placement: string;
@@ -16,10 +17,13 @@ export interface CarouselItem {
   id: number;
   contentType: CarouselContentType;
   title?: string | null;
+  titleAr?: string | null;
   subtitle?: string | null;
+  subtitleAr?: string | null;
   imageUrl?: string | null;
   linkUrl?: string | null;
   ctaText?: string | null;
+  ctaTextAr?: string | null;
   sortOrder?: number | null;
   productId?: number | null;
   categoryId?: number | null;
@@ -37,28 +41,54 @@ export interface ProductImage {
 export interface Product {
   id: number;
   name: string;
+  nameAr?: string | null;
   slug: string;
   sku?: string | null;
   description?: string | null;
+  descriptionAr?: string | null;
   shortDescription?: string | null;
+  shortDescriptionAr?: string | null;
   price?: number | null;
   compareAtPrice?: number | null;
   currency?: string | null;
   status?: string;
+  productType?: string;
   hasVariants?: boolean;
   isTaxable?: boolean;
   isVisible?: boolean;
   images?: ProductImage[];
-  categoryIds?: number[];
-  createdAt?: string;
-  updatedAt?: string;
+  variants?: any[];
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 export interface ProductPage {
   content: Product[];
-  page: number;
-  size: number;
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+    sort: {
+      empty: boolean;
+      sorted: boolean;
+      unsorted: boolean;
+    };
+    offset: number;
+    unpaged: boolean;
+    paged: boolean;
+  };
+  last: boolean;
   totalElements: number;
+  totalPages: number;
+  first: boolean;
+  size: number;
+  number: number;
+  sort: {
+    empty: boolean;
+    sorted: boolean;
+    unsorted: boolean;
+  };
+  numberOfElements: number;
+  empty: boolean;
 }
 
 export interface Category {
@@ -73,4 +103,38 @@ export interface Page<T> {
   page: number;
   size: number;
   totalElements: number;
+}
+
+export interface Order {
+  id: number;
+  orderNumber: string;
+  items?: OrderItem[];
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  status?: string;
+  statusDisplayName?: string;
+  subtotal?: number;
+  taxAmount?: number;
+  shippingAmount?: number;
+  totalAmount?: number;
+  currency?: string;
+  notes?: string;
+  totalItemCount?: number;
+  fullBillingAddress?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface OrderItem {
+  id: number;
+  productId?: number;
+  variantId?: number;
+  productName?: string;
+  variantName?: string;
+  sku?: string;
+  quantity?: number;
+  unitPrice?: number;
+  totalPrice?: number;
+  currency?: string;
 }

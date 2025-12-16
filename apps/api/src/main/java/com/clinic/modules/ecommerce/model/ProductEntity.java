@@ -35,6 +35,10 @@ public class ProductEntity {
     @Column(nullable = false, length = 255)
     private String name;
 
+    @Size(max = 255)
+    @Column(name = "name_ar", length = 255)
+    private String nameAr;
+
     @NotBlank
     @Size(max = 255)
     @Pattern(regexp = "^[a-z0-9-]+$", message = "Slug must contain only lowercase letters, numbers, and hyphens")
@@ -48,9 +52,16 @@ public class ProductEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "description_ar", columnDefinition = "TEXT")
+    private String descriptionAr;
+
     @Size(max = 500)
     @Column(name = "short_description", length = 500)
     private String shortDescription;
+
+    @Size(max = 500)
+    @Column(name = "short_description_ar", length = 500)
+    private String shortDescriptionAr;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -151,6 +162,14 @@ public class ProductEntity {
         this.name = name;
     }
 
+    public String getNameAr() {
+        return nameAr;
+    }
+
+    public void setNameAr(String nameAr) {
+        this.nameAr = nameAr;
+    }
+
     public String getSlug() {
         return slug;
     }
@@ -175,12 +194,28 @@ public class ProductEntity {
         this.description = description;
     }
 
+    public String getDescriptionAr() {
+        return descriptionAr;
+    }
+
+    public void setDescriptionAr(String descriptionAr) {
+        this.descriptionAr = descriptionAr;
+    }
+
     public String getShortDescription() {
         return shortDescription;
     }
 
     public void setShortDescription(String shortDescription) {
         this.shortDescription = shortDescription;
+    }
+
+    public String getShortDescriptionAr() {
+        return shortDescriptionAr;
+    }
+
+    public void setShortDescriptionAr(String shortDescriptionAr) {
+        this.shortDescriptionAr = shortDescriptionAr;
     }
 
     public ProductStatus getStatus() {
@@ -315,8 +350,14 @@ public class ProductEntity {
     }
 
     public void addCategory(CategoryEntity category) {
-        ProductCategoryEntity productCategory = new ProductCategoryEntity(this, category, this.tenant);
-        productCategories.add(productCategory);
+        // Check if the category is already associated with this product
+        boolean alreadyExists = productCategories.stream()
+                .anyMatch(pc -> pc.getCategory().getId().equals(category.getId()));
+        
+        if (!alreadyExists) {
+            ProductCategoryEntity productCategory = new ProductCategoryEntity(this, category, this.tenant);
+            productCategories.add(productCategory);
+        }
     }
 
     public void removeCategory(CategoryEntity category) {

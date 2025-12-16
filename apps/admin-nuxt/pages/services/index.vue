@@ -402,10 +402,15 @@ const router = useRouter();
 
 const viewMode = ref<"table" | "cards">("table");
 const { data, pending, refresh } = await useAsyncData("admin-services", () =>
-  fetcher<AdminServiceSummary[]>("/services", [])
+  fetcher<AdminServiceSummary[] | { content?: AdminServiceSummary[]; items?: AdminServiceSummary[] }>("/services", [])
 );
 
-const services = computed(() => data.value ?? []);
+const services = computed(() => {
+  const raw = data.value;
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  return raw.content ?? raw.items ?? [];
+});
 const totalDoctors = computed(() => {
   const set = new Set(services.value.flatMap(service => (service.doctorCount ?? 0) > 0 ? [service.slug] : []));
   return set.size;

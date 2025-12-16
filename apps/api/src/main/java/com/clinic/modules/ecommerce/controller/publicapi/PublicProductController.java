@@ -59,6 +59,7 @@ public class PublicProductController {
             @RequestHeader(name = "X-Tenant-Domain", required = false) String headerDomain,
             @RequestParam(name = "category", required = false) Long category,
             @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "locale", required = false) String locale,
             @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
             @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -83,9 +84,9 @@ public class PublicProductController {
             
             if (hasFilters(category, search, minPrice, maxPrice)) {
                 products = publicProductService.getVisibleProductsWithFilters(
-                        tenant.getId(), category, search, minPrice, maxPrice, pageable);
+                        tenant.getId(), category, search, minPrice, maxPrice, pageable, locale);
             } else {
-                products = publicProductService.getVisibleProducts(tenant.getId(), pageable);
+                products = publicProductService.getVisibleProducts(tenant.getId(), pageable, locale);
             }
             
             PublicProductListResponse response = PublicProductListResponse.fromProductPage(products);
@@ -118,7 +119,8 @@ public class PublicProductController {
             @RequestParam(name = "slug", required = false) String slug,
             @RequestParam(name = "domain", required = false) String domain,
             @RequestHeader(name = "X-Tenant-Slug", required = false) String headerSlug,
-            @RequestHeader(name = "X-Tenant-Domain", required = false) String headerDomain) {
+            @RequestHeader(name = "X-Tenant-Domain", required = false) String headerDomain,
+            @RequestParam(name = "locale", required = false) String locale) {
         
         String effectiveSlug = StringUtils.hasText(slug) ? slug : headerSlug;
         String effectiveDomain = StringUtils.hasText(domain) ? domain : headerDomain;
@@ -130,7 +132,7 @@ public class PublicProductController {
             TenantEntity tenant = publicProductService.resolveTenant(effectiveSlug, effectiveDomain);
             
             // Get product
-            PublicProductResponse product = publicProductService.getVisibleProduct(productId, tenant.getId());
+            PublicProductResponse product = publicProductService.getVisibleProduct(productId, tenant.getId(), locale);
             
             log.info("Retrieved product {} for tenant {}", productId, tenant.getSlug());
             
@@ -159,7 +161,8 @@ public class PublicProductController {
             @RequestParam(name = "slug", required = false) String slug,
             @RequestParam(name = "domain", required = false) String domain,
             @RequestHeader(name = "X-Tenant-Slug", required = false) String headerSlug,
-            @RequestHeader(name = "X-Tenant-Domain", required = false) String headerDomain) {
+            @RequestHeader(name = "X-Tenant-Domain", required = false) String headerDomain,
+            @RequestParam(name = "locale", required = false) String locale) {
         
         String effectiveSlug = StringUtils.hasText(slug) ? slug : headerSlug;
         String effectiveDomain = StringUtils.hasText(domain) ? domain : headerDomain;
@@ -171,7 +174,7 @@ public class PublicProductController {
             TenantEntity tenant = publicProductService.resolveTenant(effectiveSlug, effectiveDomain);
             
             // Get product by slug
-            PublicProductResponse product = publicProductService.getVisibleProductBySlug(productSlug, tenant.getId());
+            PublicProductResponse product = publicProductService.getVisibleProductBySlug(productSlug, tenant.getId(), locale);
             
             log.info("Retrieved product by slug {} for tenant {}", productSlug, tenant.getSlug());
             
@@ -204,6 +207,7 @@ public class PublicProductController {
             @RequestParam(name = "domain", required = false) String domain,
             @RequestHeader(name = "X-Tenant-Slug", required = false) String headerSlug,
             @RequestHeader(name = "X-Tenant-Domain", required = false) String headerDomain,
+            @RequestParam(name = "locale", required = false) String locale,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
             @RequestParam(name = "sort", defaultValue = "createdAt,desc") String sort) {
@@ -223,7 +227,7 @@ public class PublicProductController {
             
             // Search products
             Page<PublicProductResponse> products = publicProductService.searchVisibleProducts(
-                    tenant.getId(), searchTerm, pageable);
+                    tenant.getId(), searchTerm, pageable, locale);
             
             PublicProductListResponse response = PublicProductListResponse.fromProductPage(products);
             
@@ -259,6 +263,7 @@ public class PublicProductController {
             @RequestParam(name = "domain", required = false) String domain,
             @RequestHeader(name = "X-Tenant-Slug", required = false) String headerSlug,
             @RequestHeader(name = "X-Tenant-Domain", required = false) String headerDomain,
+            @RequestParam(name = "locale", required = false) String locale,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
             @RequestParam(name = "sort", defaultValue = "createdAt,desc") String sort) {
@@ -278,7 +283,7 @@ public class PublicProductController {
             
             // Get products by category
             Page<PublicProductResponse> products = publicProductService.getVisibleProductsByCategory(
-                    tenant.getId(), categoryId, pageable);
+                    tenant.getId(), categoryId, pageable, locale);
             
             PublicProductListResponse response = PublicProductListResponse.fromProductPage(products);
             
@@ -311,6 +316,7 @@ public class PublicProductController {
             @RequestParam(name = "domain", required = false) String domain,
             @RequestHeader(name = "X-Tenant-Slug", required = false) String headerSlug,
             @RequestHeader(name = "X-Tenant-Domain", required = false) String headerDomain,
+            @RequestParam(name = "locale", required = false) String locale,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
         
@@ -329,7 +335,7 @@ public class PublicProductController {
             
             // Get recent products
             Page<PublicProductResponse> products = publicProductService.getRecentVisibleProducts(
-                    tenant.getId(), pageable);
+                    tenant.getId(), pageable, locale);
             
             PublicProductListResponse response = PublicProductListResponse.fromProductPage(products);
             

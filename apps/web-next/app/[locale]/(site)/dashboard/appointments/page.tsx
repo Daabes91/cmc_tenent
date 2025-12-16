@@ -34,6 +34,8 @@ export default function PatientAppointmentsPage() {
   const [appointments, setAppointments] = useState<PatientAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const pageSize = 6;
   const bookingSectionPath = getBookingSectionPath(locale);
 
   const dateFormatter = useMemo(() => {
@@ -142,19 +144,25 @@ export default function PatientAppointmentsPage() {
     return null;
   }
 
+  const totalPages = Math.max(1, Math.ceil(appointments.length / pageSize));
+  const pagedAppointments = appointments.slice(page * pageSize, page * pageSize + pageSize);
+
+  const goPrev = () => setPage((p) => Math.max(0, p - 1));
+  const goNext = () => setPage((p) => Math.min(totalPages - 1, p + 1));
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors">
       {/* Header */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-cyan-600">
+      <section className="py-16 bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900">
         <div className="mx-auto max-w-6xl px-4 md:px-6 lg:px-8">
           <div className="text-center text-white">
             <h1 className="text-4xl md:text-5xl font-bold">{t('title')}</h1>
-            <p className="mt-4 text-lg text-blue-50">{t('subtitle')}</p>
+            <p className="mt-4 text-lg text-blue-50 dark:text-blue-200/80">{t('subtitle')}</p>
 
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-2 rounded-xl border border-white/40 px-5 py-3 text-sm font-semibold transition-colors hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/40 px-5 py-3 text-sm font-semibold transition-colors hover:bg-white/10 dark:hover:bg-white/5"
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -164,7 +172,7 @@ export default function PatientAppointmentsPage() {
                 <Link
                   href={bookingSectionPath}
                   locale={false}
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-blue-600 shadow hover:bg-blue-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-blue-600 shadow hover:bg-blue-50 dark:bg-blue-100 dark:text-blue-800"
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -180,7 +188,7 @@ export default function PatientAppointmentsPage() {
       <section className="py-16">
         <div className="mx-auto max-w-6xl px-4 md:px-6 lg:px-8">
           {error && (
-            <div className="mb-8 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
+            <div className="mb-8 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
               <div className="flex items-center gap-3">
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -191,38 +199,38 @@ export default function PatientAppointmentsPage() {
           )}
 
           {appointments.length === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
-                <svg className="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                <svg className="h-8 w-8 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h2 className="mt-6 text-xl font-semibold text-slate-900">{t('empty.title')}</h2>
-              <p className="mt-2 text-sm text-slate-600">{t('empty.description')}</p>
+              <h2 className="mt-6 text-xl font-semibold text-slate-900 dark:text-slate-100">{t('empty.title')}</h2>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t('empty.description')}</p>
             </div>
           ) : (
             <div className="space-y-5">
-              {appointments.map((appointment) => {
+              {pagedAppointments.map((appointment) => {
                 const statusStyle = STATUS_STYLES[appointment.status];
                 const modeStyle = MODE_ICON_BG[appointment.bookingMode];
 
                 return (
                   <div
                     key={appointment.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-blue-200 hover:shadow-md"
+                    className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-blue-800/60 dark:hover:shadow-blue-900/30"
                   >
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                       <div>
                         <div className="inline-flex items-center gap-3">
-                          <span className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                          <span className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                             {t('labels.service')}
                           </span>
                           <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusStyle}`}>
                             {translateStatus(appointment.status)}
                           </span>
                         </div>
-                        <h3 className="mt-2 text-2xl font-bold text-slate-900">{appointment.service}</h3>
-                        <p className="mt-1 text-sm text-slate-600">
+                        <h3 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">{appointment.service}</h3>
+                        <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
                           {t('labels.doctor')}: {dashboardT('labels.doctor', { name: appointment.doctor.name })}
                         </p>
                       </div>
@@ -252,53 +260,83 @@ export default function PatientAppointmentsPage() {
 
                     <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                       <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                           {t('labels.scheduled')}
                         </p>
-                        <p className="text-sm font-semibold text-slate-900">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                           {formatDate(appointment.scheduledAt)}
                         </p>
-                        <p className="text-xs text-slate-600">{formatTime(appointment.scheduledAt)}</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">{formatTime(appointment.scheduledAt)}</p>
                       </div>
 
                       <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                           {t('labels.booked')}
                         </p>
-                        <p className="text-sm font-semibold text-slate-900">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                           {formatDateTime(appointment.createdAt)}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                           {t('labels.doctor')}
                         </p>
-                        <p className="text-sm font-semibold text-slate-900">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                           {appointment.doctor.name}
                         </p>
-                        <p className="text-xs text-slate-600">{appointment.doctor.specialization}</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">{appointment.doctor.specialization}</p>
                       </div>
 
                       <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                           {t('labels.id')}
                         </p>
-                        <p className="text-sm font-semibold text-slate-900">#{appointment.id}</p>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">#{appointment.id}</p>
                       </div>
                     </div>
 
                     {appointment.notes && (
-                      <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                      <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/70">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                           {t('labels.notes')}
                         </p>
-                        <p className="mt-1 text-sm text-slate-700">{appointment.notes}</p>
+                        <p className="mt-1 text-sm text-slate-700 dark:text-slate-200">{appointment.notes}</p>
                       </div>
                     )}
                   </div>
                 );
               })}
+
+              {totalPages > 1 && (
+                <div className="flex flex-col items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/70 sm:flex-row">
+                  <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    {t('pagination.page', { page: page + 1, total: totalPages })}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={goPrev}
+                      disabled={page === 0}
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-blue-700 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-blue-700 dark:hover:text-blue-200"
+                    >
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      {t('pagination.previous')}
+                    </button>
+                    <button
+                      onClick={goNext}
+                      disabled={page >= totalPages - 1}
+                      className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60 dark:border-blue-800 dark:bg-blue-700"
+                    >
+                      {t('pagination.next')}
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

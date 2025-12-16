@@ -30,7 +30,7 @@ export default function PayPalDebugTest() {
 
   return (
     <div className="p-8 max-w-2xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold">PayPal Debug Test</h1>
+      <h1 className="text-xl font-bold">PayPal Debug Test</h1>
       
       {/* API Test */}
       <div className="border rounded-lg p-4">

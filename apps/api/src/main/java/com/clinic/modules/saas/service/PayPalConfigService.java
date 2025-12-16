@@ -48,9 +48,9 @@ public class PayPalConfigService {
     private final ObjectMapper objectMapper;
     private final ClinicSettingsRepository clinicSettingsRepository;
 
-    // In-memory cache for access token
-    private String cachedAccessToken;
-    private long accessTokenExpiryTime;
+    // In-memory cache for access tokens per tenant
+    private final java.util.concurrent.ConcurrentHashMap<Long, TokenCache> accessTokenCache = new java.util.concurrent.ConcurrentHashMap<>();
+    private TokenCache globalAccessTokenCache;
 
     public PayPalConfigService(
             PayPalConfigRepository payPalConfigRepository,
@@ -159,9 +159,9 @@ public class PayPalConfigService {
 
         PayPalConfigEntity savedConfig = payPalConfigRepository.save(config);
 
-        // Clear cached access token
-        cachedAccessToken = null;
-        accessTokenExpiryTime = 0;
+        // Clear cached access tokens (all tenants) since credentials changed
+        accessTokenCache.clear();
+        globalAccessTokenCache = null;
 
         logger.info("PayPal configuration updated successfully");
 
@@ -225,21 +225,26 @@ public class PayPalConfigService {
      */
     @Cacheable(value = "paypalAccessToken", unless = "#result == null")
     public String getAccessToken() {
-        // Check if cached token is still valid
-        if (cachedAccessToken != null && System.currentTimeMillis() < accessTokenExpiryTime) {
-            return cachedAccessToken;
+        long now = System.currentTimeMillis();
+        if (globalAccessTokenCache != null && globalAccessTokenCache.expiresAt > now
+                && globalAccessTokenCache.token != null && !globalAccessTokenCache.token.isBlank()) {
+            return globalAccessTokenCache.token;
         }
 
         PayPalConfigEntity config = payPalConfigRepository.findFirstByOrderByIdAsc()
                 .orElseThrow(() -> new IllegalStateException("PayPal configuration not found"));
 
+        String clientId = config.getClientId();
+        String clientSecret = encryptionUtil.decrypt(config.getClientSecretEncrypted());
+        if (clientId == null || clientSecret == null || clientId.isBlank() || clientSecret.isBlank()) {
+            throw new IllegalStateException("PayPal client ID/secret not configured");
+        }
+
         try {
-            String clientSecret = encryptionUtil.decrypt(config.getClientSecretEncrypted());
             String baseUrl = Boolean.TRUE.equals(config.getSandboxMode()) ? SANDBOX_BASE_URL : PRODUCTION_BASE_URL;
             String url = baseUrl + TOKEN_ENDPOINT;
 
-            // Create Basic Auth header
-            String auth = config.getClientId() + ":" + clientSecret;
+            String auth = clientId + ":" + clientSecret;
             String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
 
             HttpHeaders headers = new HttpHeaders();
@@ -258,19 +263,15 @@ public class PayPalConfigService {
             );
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                String accessToken = (String) response.getBody().get("access_token");
-
-                // Cache the token
-                cachedAccessToken = accessToken;
-                accessTokenExpiryTime = System.currentTimeMillis() + ACCESS_TOKEN_CACHE_DURATION;
-
-                return accessToken;
+                String token = (String) response.getBody().get("access_token");
+                globalAccessTokenCache = new TokenCache(token, now + ACCESS_TOKEN_CACHE_DURATION);
+                return token;
             }
 
             throw new IllegalStateException("Failed to retrieve PayPal access token");
 
         } catch (Exception e) {
-            logger.error("Failed to get PayPal access token", e);
+            logger.error("Failed to get PayPal access token (global config)", e);
             throw new IllegalStateException("Failed to retrieve PayPal access token", e);
         }
     }
@@ -317,6 +318,12 @@ public class PayPalConfigService {
 
     public String getAccessTokenForTenant(Long tenantId) {
         TenantPayPalConfig config = resolveTenantConfig(tenantId);
+        long now = System.currentTimeMillis();
+        TokenCache cached = accessTokenCache.get(tenantId);
+        if (cached != null && cached.expiresAt > now && cached.token != null && !cached.token.isBlank()) {
+            return cached.token;
+        }
+
         try {
             String baseUrl = config.sandboxMode ? SANDBOX_BASE_URL : PRODUCTION_BASE_URL;
             String url = baseUrl + TOKEN_ENDPOINT;
@@ -340,7 +347,10 @@ public class PayPalConfigService {
             );
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                return (String) response.getBody().get("access_token");
+                String token = (String) response.getBody().get("access_token");
+                // Cache token for 9 hours from now
+                accessTokenCache.put(tenantId, new TokenCache(token, now + ACCESS_TOKEN_CACHE_DURATION));
+                return token;
             }
 
             throw new IllegalStateException("Failed to retrieve PayPal access token for tenant " + tenantId);
@@ -373,6 +383,8 @@ public class PayPalConfigService {
     }
 
     private record TenantPayPalConfig(String clientId, String clientSecret, boolean sandboxMode) {}
+
+    private record TokenCache(String token, long expiresAt) {}
 
     /**
      * Resolve PayPal plan ID for provided tier/cycle, or null if not configured.

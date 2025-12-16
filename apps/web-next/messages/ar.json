@@ -387,7 +387,14 @@
     },
     "actions": {
       "back": "العودة إلى لوحة التحكم",
-      "book": "احجز موعداً"
+      "book": "احجز موعداً",
+      "confirm": "تأكيد الزيارة",
+      "bookAnother": "احجز موعداً آخر"
+    },
+    "pagination": {
+      "previous": "السابق",
+      "next": "التالي",
+      "page": "الصفحة {page} من {total}"
     }
   },
   "booking": {
@@ -719,6 +726,70 @@
       "info": {
         "title": "لماذا ربط الحسابات؟",
         "description": "ربط حساب جوجل الخاص بك يسمح لك بتسجيل الدخول باستخدام البريد الإلكتروني/كلمة المرور أو جوجل. يمكنك استخدام أي طريقة أكثر ملاءمة لك."
+      }
+    }
+  },
+  "productsPage": {
+    "header": {
+      "eyebrow": "المتجر",
+      "title": "المنتجات",
+      "subtitle": "تصفح منتجاتنا المميزة وأضفها إلى سلة التسوق."
+    },
+    "loading": "جاري تحميل المنتجات...",
+    "errors": {
+      "load": "فشل تحميل المنتجات. يرجى المحاولة مرة أخرى."
+    },
+    "empty": {
+      "title": "لا توجد منتجات متاحة",
+      "description": "سيتم إضافة منتجات جديدة قريباً. يرجى التحقق لاحقاً."
+    },
+    "actions": {
+      "viewProduct": "عرض المنتج",
+      "addToCart": "أضف إلى السلة",
+      "added": "تمت الإضافة",
+      "adding": "جاري الإضافة...",
+      "contactForPrice": "تواصل لمعرفة السعر"
+    },
+    "pagination": {
+      "previous": "السابق",
+      "next": "التالي",
+      "page": "الصفحة {page} من {total}"
+    },
+    "disabled": "المتجر غير مفعل حالياً."
+  },
+  "ecommerce": {
+    "featuredProducts": "المنتجات المميزة",
+    "viewAllProducts": "عرض جميع المنتجات",
+    "addToCart": "أضف إلى السلة",
+    "adding": "جاري الإضافة…",
+    "addedToCart": "تمت الإضافة إلى السلة",
+    "contactForPrice": "تواصل لمعرفة السعر",
+    "noImage": "لا توجد صورة",
+    "sale": "تخفيض",
+    "noProductsFound": "لم يتم العثور على منتجات",
+    "adjustSearchCriteria": "جرب تعديل معايير البحث أو التصفية.",
+    "productDetails": {
+      "quantity": "الكمية",
+      "productDetails": "تفاصيل المنتج",
+      "share": "مشاركة",
+      "buyNow": "اشتر الآن",
+      "backToProducts": "العودة إلى المنتجات",
+      "products": "المنتجات",
+      "productNotFound": "المنتج غير موجود",
+      "youSave": "توفر {amount} {currency}",
+      "trustBadges": {
+        "securePayment": "دفع آمن",
+        "fastShipping": "شحن سريع",
+        "qualityGuarantee": "ضمان الجودة",
+        "support247": "دعم على مدار الساعة"
+      },
+      "loading": {
+        "loadingProduct": "جاري تحميل المنتج...",
+        "preparingCheckout": "جاري تجهيز الدفع..."
+      },
+      "errors": {
+        "productNotFound": "المنتج غير موجود",
+        "failedToLoad": "فشل في تحميل المنتج"
       }
     }
   }

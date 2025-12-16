@@ -47,7 +47,7 @@ public class CarouselService {
     /**
      * Create a new carousel.
      */
-    public CarouselEntity createCarousel(TenantEntity tenant, String name, String slug, 
+    public CarouselEntity createCarousel(TenantEntity tenant, String name, String nameAr, String slug, 
                                        CarouselType type, String placement, Platform platform) {
         validateCarouselType(type);
         validatePlatform(platform);
@@ -58,6 +58,7 @@ public class CarouselService {
         }
 
         CarouselEntity carousel = new CarouselEntity(tenant, name, slug, type, placement);
+        carousel.setNameAr(nameAr);
         carousel.setPlatform(platform);
         
         return carouselRepository.save(carousel);
@@ -66,7 +67,7 @@ public class CarouselService {
     /**
      * Update an existing carousel.
      */
-    public CarouselEntity updateCarousel(Long tenantId, Long carouselId, String name, String slug,
+    public CarouselEntity updateCarousel(Long tenantId, Long carouselId, String name, String nameAr, String slug,
                                        CarouselType type, String placement, Platform platform,
                                        Boolean isActive, Integer maxItems) {
         CarouselEntity carousel = getCarouselByTenantAndId(tenantId, carouselId);
@@ -82,6 +83,7 @@ public class CarouselService {
         }
 
         carousel.setName(name);
+        carousel.setNameAr(nameAr);
         carousel.setSlug(slug);
         carousel.setType(type);
         carousel.setPlacement(placement);
@@ -151,9 +153,9 @@ public class CarouselService {
      * Add an item to a carousel.
      */
     public CarouselItemEntity addCarouselItem(Long tenantId, Long carouselId, 
-                                            CarouselContentType contentType, String title, 
-                                            String subtitle, String imageUrl, String linkUrl,
-                                            CallToActionType ctaType, String ctaText,
+                                            CarouselContentType contentType, String title, String titleAr,
+                                            String subtitle, String subtitleAr, String imageUrl, String linkUrl,
+                                            CallToActionType ctaType, String ctaText, String ctaTextAr,
                                             Long productId, Long categoryId) {
         CarouselEntity carousel = getCarouselByTenantAndId(tenantId, carouselId);
         
@@ -163,10 +165,13 @@ public class CarouselService {
         CarouselItemEntity item = new CarouselItemEntity(carousel, carousel.getTenant(), contentType);
         item.setTitle(title);
         item.setSubtitle(subtitle);
+        item.setTitleAr(titleAr);
+        item.setSubtitleAr(subtitleAr);
         item.setImageUrl(imageUrl);
         item.setLinkUrl(linkUrl);
         item.setCtaType(ctaType);
         item.setCtaText(ctaText);
+        item.setCtaTextAr(ctaTextAr);
         
         // Validate and set product/category references
         if (productId != null) {
@@ -197,9 +202,9 @@ public class CarouselService {
      * Update a carousel item.
      */
     public CarouselItemEntity updateCarouselItem(Long tenantId, Long carouselId, Long itemId,
-                                               String title, String subtitle, String imageUrl,
+                                               String title, String titleAr, String subtitle, String subtitleAr, String imageUrl,
                                                String linkUrl, CallToActionType ctaType,
-                                               String ctaText, Boolean isActive, Integer sortOrder) {
+                                               String ctaText, String ctaTextAr, Boolean isActive, Integer sortOrder) {
         CarouselItemEntity item = carouselItemRepository.findByIdAndTenantId(itemId, tenantId)
                 .orElseThrow(() -> new EcommerceException("Carousel item not found"));
 
@@ -215,9 +220,17 @@ public class CarouselService {
         if (StringUtils.hasText(title)) {
             item.setTitle(title);
         }
+
+        if (StringUtils.hasText(titleAr)) {
+            item.setTitleAr(titleAr);
+        }
         
         if (StringUtils.hasText(subtitle)) {
             item.setSubtitle(subtitle);
+        }
+
+        if (StringUtils.hasText(subtitleAr)) {
+            item.setSubtitleAr(subtitleAr);
         }
         
         if (StringUtils.hasText(imageUrl)) {
@@ -230,6 +243,10 @@ public class CarouselService {
         
         if (StringUtils.hasText(ctaText)) {
             item.setCtaText(ctaText);
+        }
+
+        if (StringUtils.hasText(ctaTextAr)) {
+            item.setCtaTextAr(ctaTextAr);
         }
         
         if (isActive != null) {

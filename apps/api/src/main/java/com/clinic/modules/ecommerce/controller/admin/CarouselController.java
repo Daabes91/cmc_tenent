@@ -56,6 +56,7 @@ public class CarouselController {
         CarouselEntity carousel = carouselService.createCarousel(
                 tenant,
                 request.getName(),
+                request.getNameAr(),
                 request.getSlug(),
                 request.getType(),
                 request.getPlacement(),
@@ -77,6 +78,7 @@ public class CarouselController {
                 tenantId,
                 carouselId,
                 request.getName(),
+                request.getNameAr(),
                 request.getSlug(),
                 request.getType(),
                 request.getPlacement(),
@@ -157,11 +159,14 @@ public class CarouselController {
                 carouselId,
                 request.getContentType(),
                 request.getTitle(),
+                request.getTitleAr(),
                 request.getSubtitle(),
+                request.getSubtitleAr(),
                 request.getImageUrl(),
                 request.getLinkUrl(),
                 request.getCtaType(),
                 request.getCtaText(),
+                request.getCtaTextAr(),
                 request.getProductId(),
                 request.getCategoryId()
         );
@@ -183,11 +188,14 @@ public class CarouselController {
                 carouselId,
                 itemId,
                 request.getTitle(),
+                request.getTitleAr(),
                 request.getSubtitle(),
+                request.getSubtitleAr(),
                 request.getImageUrl(),
                 request.getLinkUrl(),
                 request.getCtaType(),
                 request.getCtaText(),
+                request.getCtaTextAr(),
                 request.getIsActive(),
                 request.getSortOrder()
         );
@@ -238,6 +246,7 @@ public class CarouselController {
         CarouselResponse response = new CarouselResponse();
         response.setId(carousel.getId());
         response.setName(carousel.getName());
+        response.setNameAr(carousel.getNameAr());
         response.setSlug(carousel.getSlug());
         response.setType(carousel.getType());
         response.setPlacement(carousel.getPlacement());
@@ -260,11 +269,14 @@ public class CarouselController {
         response.setId(item.getId());
         response.setContentType(item.getContentType());
         response.setTitle(item.getTitle());
+        response.setTitleAr(item.getTitleAr());
         response.setSubtitle(item.getSubtitle());
+        response.setSubtitleAr(item.getSubtitleAr());
         response.setImageUrl(item.getImageUrl());
         response.setLinkUrl(item.getLinkUrl());
         response.setCtaType(item.getCtaType());
         response.setCtaText(item.getCtaText());
+        response.setCtaTextAr(item.getCtaTextAr());
         response.setSortOrder(item.getSortOrder());
         response.setIsActive(item.getIsActive());
         response.setCreatedAt(item.getCreatedAt());

@@ -45,4 +45,9 @@ public class TenantService {
                 .filter(tenant -> tenant.getStatus() == TenantStatus.ACTIVE)
                 .orElseThrow(() -> new TenantNotFoundException("Tenant not found for id: " + tenantId));
     }
+
+    @Transactional(readOnly = true)
+    public TenantEntity requireActiveTenantById(Long tenantId) {
+        return requireTenant(tenantId);
+    }
 }

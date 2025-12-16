@@ -19,10 +19,10 @@ export function useEcommerceFeature(): UseEcommerceFeature {
   return { enabled, settings: clinicSettings, isLoading, error };
 }
 
-export function usePublicCarousels(enabled: boolean) {
+export function usePublicCarousels(enabled: boolean, locale?: string) {
   const { data, error, isLoading, mutate } = useSWR<PublicCarousel[]>(
-    enabled ? 'public-carousels' : null,
-    api.getCarousels,
+    enabled ? ['public-carousels', locale] : null,
+    () => api.getCarousels(locale),
     {
       revalidateOnFocus: false,
       dedupingInterval: 2 * 60 * 1000, // 2 minutes

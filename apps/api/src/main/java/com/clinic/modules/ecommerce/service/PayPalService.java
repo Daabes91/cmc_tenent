@@ -224,6 +224,17 @@ public class PayPalService {
     }
 
     /**
+     * Get payment by provider order id (e.g., PayPal order id).
+     *
+     * @param providerOrderId PayPal order id
+     * @param tenantId Tenant id for isolation
+     * @return Optional PaymentEntity
+     */
+    public Optional<PaymentEntity> getPaymentByProviderOrderId(String providerOrderId, Long tenantId) {
+        return paymentRepository.findByProviderOrderIdAndTenantId(providerOrderId, tenantId);
+    }
+
+    /**
      * Verify webhook signature (simplified implementation).
      * In production, implement proper PayPal webhook signature verification.
      *
@@ -256,17 +267,25 @@ public class PayPalService {
         // Shipping address
         Map<String, Object> shipping = new HashMap<>();
         Map<String, Object> address = new HashMap<>();
-        address.put("address_line_1", order.getBillingAddressLine1());
-        if (order.getBillingAddressLine2() != null) {
+        String line1 = order.getBillingAddressLine1() != null && !order.getBillingAddressLine1().isBlank()
+                ? order.getBillingAddressLine1()
+                : "N/A";
+        address.put("address_line_1", line1);
+        if (order.getBillingAddressLine2() != null && !order.getBillingAddressLine2().isBlank()) {
             address.put("address_line_2", order.getBillingAddressLine2());
         }
-        address.put("admin_area_2", order.getBillingAddressCity());
-        if (order.getBillingAddressState() != null) {
+        String city = order.getBillingAddressCity() != null && !order.getBillingAddressCity().isBlank()
+                ? order.getBillingAddressCity()
+                : "N/A";
+        address.put("admin_area_2", city);
+        if (order.getBillingAddressState() != null && !order.getBillingAddressState().isBlank()) {
             address.put("admin_area_1", order.getBillingAddressState());
         }
-        if (order.getBillingAddressPostalCode() != null) {
-            address.put("postal_code", order.getBillingAddressPostalCode());
+        String postal = order.getBillingAddressPostalCode();
+        if (postal == null || postal.isBlank()) {
+            postal = "00000";
         }
+        address.put("postal_code", postal);
         address.put("country_code", getCountryCode(order.getBillingAddressCountry()));
         shipping.put("address", address);
         

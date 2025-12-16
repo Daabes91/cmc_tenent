@@ -131,7 +131,7 @@ export function VirtualCheckoutClient({ locale, searchParams }: VirtualCheckoutC
   if (!summary || !user) {
     return (
       <div className="mx-auto max-w-3xl rounded-2xl border border-red-200/60 bg-red-50 dark:bg-red-900/20 dark:border-red-800/60 p-8 text-center shadow-lg">
-        <h2 className="text-2xl font-bold text-red-600 dark:text-red-300 mb-3">{t('payment.paypal.configurationError')}</h2>
+        <h2 className="text-xl font-bold text-red-600 dark:text-red-300 mb-3">{t('payment.paypal.configurationError')}</h2>
         <p className="text-sm text-red-600 dark:text-red-300 mb-6">
           {locale === 'ar' ? 'تعذر تجهيز تفاصيل الحجز.' : 'Unable to prepare booking details.'}
         </p>
@@ -148,7 +148,7 @@ export function VirtualCheckoutClient({ locale, searchParams }: VirtualCheckoutC
   if (!paymentSettings) {
     return (
       <div className="mx-auto max-w-3xl rounded-2xl border border-red-200/60 bg-red-50 dark:bg-red-900/20 dark:border-red-800/60 p-8 text-center shadow-lg">
-        <h2 className="text-2xl font-bold text-red-600 dark:text-red-300 mb-3">
+        <h2 className="text-xl font-bold text-red-600 dark:text-red-300 mb-3">
           {t('payment.paypal.configurationError')}
         </h2>
         <p className="text-sm text-red-600 dark:text-red-300 mb-6">
@@ -172,7 +172,7 @@ export function VirtualCheckoutClient({ locale, searchParams }: VirtualCheckoutC
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="text-3xl font-bold text-green-700 dark:text-green-200 mb-4">
+        <h2 className="text-2xl font-bold text-green-700 dark:text-green-200 mb-4">
           {t('status.confirmedTitle')}
         </h2>
         <p className="text-slate-700 dark:text-slate-200 mb-6">{t('status.confirmedSubtitle')}</p>

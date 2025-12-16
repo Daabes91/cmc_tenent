@@ -70,7 +70,7 @@ export default function OAuthErrorDisplay({
       </div>
 
       {/* Error Title */}
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+      <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
         {t('auth.google.callback.error.title')}
       </h1>
 

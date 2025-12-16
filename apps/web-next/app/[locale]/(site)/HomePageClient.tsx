@@ -48,6 +48,7 @@ export default function Home() {
   const insurance = useTranslations('insurance');
   const cta = useTranslations('cta');
   const common = useTranslations('common');
+  const ecommerce = useTranslations('ecommerce');
   const locale = useLocale();
   const isRTL = locale === 'ar';
   const getLocalizedText = useCallback(
@@ -75,7 +76,7 @@ export default function Home() {
   });
 
   const { enabled: ecommerceEnabled } = useEcommerceFeature();
-  const { carousels, isLoading: loadingCarousels } = usePublicCarousels(ecommerceEnabled);
+  const { carousels, isLoading: loadingCarousels } = usePublicCarousels(ecommerceEnabled, locale);
   const homePageCarousels = useMemo(() => carousels, [carousels]);
 
   useEffect(() => {
@@ -385,7 +386,7 @@ export default function Home() {
               </svg>
               {hero('badge')}
             </div>
-            <h1 className="text-5xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-slate-100 md:text-6xl lg:text-7xl">
+            <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl lg:text-4xl">
               {hero('title')}{' '}
               <span className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
                 {common('clinicName')}
@@ -421,7 +422,7 @@ export default function Home() {
             <div className="mt-12 grid max-w-2xl grid-cols-3 gap-6">
               {stats.map((stat) => (
                 <div key={stat.label} className="text-center">
-                  <div className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-4xl font-extrabold text-transparent md:text-5xl transition-colors">
+                  <div className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-xl font-extrabold text-transparent md:text-2xl transition-colors">
                     {stat.value}
                   </div>
                   <div className="mt-2 text-sm font-medium text-slate-600 dark:text-slate-300">{stat.label}</div>
@@ -435,19 +436,19 @@ export default function Home() {
               {loadingHeroMedia ? (
                 // Loading skeleton for hero media - responsive height
                 <div className="relative">
-                  <div className="animate-pulse h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] w-full rounded-2xl sm:rounded-3xl border border-slate-100/60 bg-slate-200 dark:border-slate-800/60 dark:bg-slate-800 transition-colors duration-300" />
+                  <div className="animate-pulse h-[200px] sm:h-[280px] md:h-[320px] lg:h-[360px] w-full rounded-2xl sm:rounded-3xl border border-slate-100/60 bg-slate-200 dark:border-slate-800/60 dark:bg-slate-800 transition-colors duration-300" />
                 </div>
               ) : heroMedia.type === 'video' && heroMedia.videoId && !heroMediaError ? (
                 // YouTube video embed with error handling - responsive
-                <div className="relative">
+                <div className="relative h-[200px] sm:h-[280px] md:h-[320px] lg:h-[360px]">
                   <YouTubeEmbed
                     videoId={heroMedia.videoId}
-                    className="border border-slate-100/60 shadow-xl sm:shadow-2xl transition-all duration-300 dark:border-slate-800/60 dark:shadow-blue-900/50"
+                    className="border border-slate-100/60 shadow-xl sm:shadow-2xl transition-all duration-300 dark:border-slate-800/60 dark:shadow-blue-900/50 h-full"
                     onError={handleVideoError}
                   />
                   {/* Fallback to image if video fails to render */}
                   {heroMediaError && (
-                    <div className="absolute inset-0">
+                    <div className="absolute inset-0 h-[200px] sm:h-[280px] md:h-[320px] lg:h-[360px]">
                       <Image
                         src={DEFAULT_HERO_IMAGE}
                         alt={hero('imageAlt')}
@@ -463,7 +464,7 @@ export default function Home() {
                 </div>
               ) : (
                 // Image display (default or custom) - responsive
-                <div className="relative">
+                <div className="relative h-[200px] sm:h-[280px] md:h-[320px] lg:h-[360px]">
                   <Image
                     src={heroMedia.imageUrl || DEFAULT_HERO_IMAGE}
                     alt={hero('imageAlt')}
@@ -499,7 +500,7 @@ export default function Home() {
       </section>
 
       {ecommerceEnabled && homePageCarousels.length > 0 && (
-        <CarouselRail title="Featured products" carousels={homePageCarousels} />
+        <CarouselRail title={ecommerce('featuredProducts')} carousels={homePageCarousels} />
       )}
 
       <section
@@ -510,7 +511,7 @@ export default function Home() {
         <div className="pointer-events-none absolute right-[-6rem] bottom-[-6rem] h-72 w-72 rounded-full bg-gradient-to-tl from-cyan-200/40 to-transparent dark:from-cyan-900/30" />
         <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
           <div className="mx-auto mb-8 max-w-2xl text-center">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 md:text-4xl">{booking('title')}</h2>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 md:text-3xl">{booking('title')}</h2>
             <p className="mt-3 text-base text-slate-600 dark:text-slate-300">{booking('subtitle')}</p>
           </div>
           <BookingSlider />
@@ -522,7 +523,7 @@ export default function Home() {
         <div className="pointer-events-none absolute right-[-8rem] bottom-0 h-64 w-64 rounded-full bg-cyan-100/30 dark:bg-cyan-900/20 blur-3xl" />
         <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-3xl text-center">
-            <h2 className="text-4xl font-bold text-slate-900 dark:text-slate-100 md:text-5xl">{servicesT('title')}</h2>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 md:text-3xl">{servicesT('title')}</h2>
             <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">{servicesT('subtitle')}</p>
           </div>
 
@@ -569,7 +570,7 @@ export default function Home() {
                       )}
                     </svg>
                   </div>
-                  <h3 className="mb-2 text-xl font-bold text-slate-900 dark:text-slate-100">{service.name}</h3>
+                  <h3 className="mb-2 text-lg font-bold text-slate-900 dark:text-slate-100">{service.name}</h3>
                   <p className="text-slate-600 dark:text-slate-300">{service.summary}</p>
                 </div>
               ))}
@@ -604,7 +605,7 @@ export default function Home() {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-cyan-100/30 to-transparent dark:from-cyan-900/20" />
         <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-3xl text-center">
-            <h2 className="text-4xl font-bold text-slate-900 dark:text-slate-100 md:text-5xl">{whySectionTitle}</h2>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 md:text-3xl">{whySectionTitle}</h2>
             <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">{whySectionSubtitle}</p>
           </div>
 
@@ -617,7 +618,7 @@ export default function Home() {
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-600 dark:from-blue-500 dark:to-cyan-500 shadow-lg dark:shadow-blue-900/40 transition-transform">
                   {feature.icon}
                 </div>
-                <h3 className="mb-2 text-lg font-bold text-slate-900 dark:text-slate-100">{feature.title}</h3>
+                <h3 className="mb-2 text-base font-bold text-slate-900 dark:text-slate-100">{feature.title}</h3>
                 <p className="text-sm text-slate-600 dark:text-slate-300">{feature.description}</p>
               </div>
             ))}
@@ -629,7 +630,7 @@ export default function Home() {
       <section className="py-16 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900 transition-colors">
         <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-3xl text-center">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 md:text-4xl">{insurance('title')}</h2>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 md:text-3xl">{insurance('title')}</h2>
             <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">{insurance('subtitle')}</p>
           </div>
 
@@ -687,7 +688,7 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="mb-2 text-xl font-semibold text-slate-900 dark:text-slate-100">{insurance('empty.title')}</h3>
+              <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">{insurance('empty.title')}</h3>
               <p className="text-slate-600 dark:text-slate-400">{insurance('empty.description')}</p>
             </div>
           )}
@@ -696,7 +697,7 @@ export default function Home() {
 
       <section className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-800/80 dark:via-blue-900/80 dark:to-slate-900 py-20 transition-colors">
         <div className="mx-auto max-w-7xl px-4 text-center md:px-6 lg:px-8">
-          <h2 className="mb-6 text-4xl font-bold text-white md:text-5xl">{cta('title')}</h2>
+          <h2 className="mb-6 text-2xl font-bold text-white md:text-3xl">{cta('title')}</h2>
           <p className="mx-auto mb-8 max-w-2xl text-xl text-blue-50 dark:text-blue-100">{cta('subtitle')}</p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <button

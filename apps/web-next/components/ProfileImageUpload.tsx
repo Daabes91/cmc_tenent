@@ -92,7 +92,7 @@ export function ProfileImageUpload({
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">{initials}</span>
+              <span className="text-xl font-bold text-white">{initials}</span>
             </div>
           )}
         </div>

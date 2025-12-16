@@ -130,8 +130,8 @@ export function YouTubeEmbed({ videoId, className = '', onError }: YouTubeEmbedP
 
   return (
     <div ref={containerRef} className={`relative overflow-hidden rounded-2xl sm:rounded-3xl ${className}`}>
-      {/* Responsive 16:9 aspect ratio container */}
-      <div className="relative pb-[56.25%]">
+      {/* Responsive container - uses aspect ratio if no height class, otherwise fills parent */}
+      <div className={`relative ${className.includes('h-full') ? 'h-full' : 'pb-[56.25%]'}`}>
         {shouldLoad ? (
           <iframe
             ref={iframeRef}

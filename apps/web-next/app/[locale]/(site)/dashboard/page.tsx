@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
-import type { PatientAppointment, TreatmentPlan } from '@/lib/types';
+import type { PatientAppointment, TreatmentPlan, OrderResponse, ClinicSettings } from '@/lib/types';
+import { useEcommerceFeature } from '@/hooks/useEcommerce';
 import { ProfileImageUpload } from '@/components/ProfileImageUpload';
 import { getBookingSectionPath } from '@/utils/basePath';
 
@@ -96,10 +97,47 @@ export default function DashboardPage() {
   const translateBookingMode = (mode: PatientAppointment['bookingMode']) =>
     t(`modes.${mode}` as any);
 
+  const formatCurrency = (amount?: number | null, currency?: string | null) => {
+    if (amount === undefined || amount === null) return '—';
+    try {
+      return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: currency || 'USD',
+        minimumFractionDigits: 2,
+      }).format(amount);
+    } catch {
+      return `${currency ?? 'USD'} ${amount.toFixed(2)}`;
+    }
+  };
+
+  const orderStatusBadge = (status?: string) => {
+    const normalized = (status || '').toUpperCase();
+    if (['COMPLETED', 'PAID', 'CAPTURED', 'DELIVERED'].includes(normalized)) {
+      return 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400';
+    }
+    if (['PENDING_PAYMENT', 'CREATED', 'APPROVED', 'PROCESSING', 'SHIPPED'].includes(normalized)) {
+      return 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400';
+    }
+    if (['FAILED', 'CANCELLED'].includes(normalized)) {
+      return 'bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400';
+    }
+    return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200';
+  };
+
   // Treatment Plans state
   const [treatmentPlans, setTreatmentPlans] = useState<TreatmentPlan[]>([]);
   const [treatmentPlansLoading, setTreatmentPlansLoading] = useState(true);
   const [treatmentPlansError, setTreatmentPlansError] = useState<string | null>(null);
+
+  // Orders state
+  const [orders, setOrders] = useState<OrderResponse[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
+  const { enabled: ecommerceEnabled, isLoading: ecommerceLoading } = useEcommerceFeature();
+
+  // Clinic settings state for contact info
+  const [clinicSettings, setClinicSettings] = useState<ClinicSettings | null>(null);
+  const [settingsLoading, setSettingsLoading] = useState(true);
 
   // Profile edit state
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -163,6 +201,50 @@ export default function DashboardPage() {
 
     fetchTreatmentPlans();
   }, [isAuthenticated, t]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!isAuthenticated || !user?.email || !ecommerceEnabled) return;
+      try {
+        setOrdersLoading(true);
+        setOrdersError(null);
+        const res = await api.getPatientOrders(user.email, { size: 5 });
+        const list = (res as any)?.orders ?? [];
+        setOrders(list);
+      } catch (error) {
+        console.error('Failed to fetch orders:', error);
+        setOrdersError('Unable to load your orders right now.');
+      } finally {
+        setOrdersLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [isAuthenticated, user?.email, ecommerceEnabled]);
+
+  useEffect(() => {
+    if (!ecommerceEnabled && !ecommerceLoading) {
+      setOrders([]);
+      setOrdersLoading(false);
+      setOrdersError(null);
+    }
+  }, [ecommerceEnabled, ecommerceLoading]);
+
+  useEffect(() => {
+    const fetchClinicSettings = async () => {
+      try {
+        setSettingsLoading(true);
+        const data = await api.getClinicSettings();
+        setClinicSettings(data);
+      } catch (error) {
+        console.error('Failed to fetch clinic settings:', error);
+      } finally {
+        setSettingsLoading(false);
+      }
+    };
+
+    fetchClinicSettings();
+  }, []);
 
   const handleEditProfile = async () => {
     if (!user) return;
@@ -507,6 +589,75 @@ export default function DashboardPage() {
                   )}
                 </div>
               </div>
+
+              {/* Recent Orders (only when ecommerce is enabled) */}
+              {ecommerceEnabled && (
+                <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Recent Orders</h2>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">View your latest purchases and payment status.</p>
+                    </div>
+                    <Link
+                      href="/dashboard/orders"
+                      className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                    >
+                      View all
+                    </Link>
+                  </div>
+                  <div className="p-6">
+                    {ordersLoading ? (
+                      <div className="text-center py-10">
+                        <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent"></div>
+                      </div>
+                    ) : ordersError ? (
+                      <div className="text-center py-8">
+                        <p className="text-red-600 dark:text-red-400 font-medium">{ordersError}</p>
+                      </div>
+                    ) : orders.length === 0 ? (
+                      <div className="text-center py-10">
+                        <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3">
+                          <svg className="w-7 h-7 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h18v4H3zm0 4h18v14H3z" />
+                          </svg>
+                        </div>
+                        <p className="text-slate-600 dark:text-slate-300 font-medium">No orders yet.</p>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Place an order to see it appear here.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {orders.map((order) => (
+                          <div
+                            key={order.id}
+                            className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm transition-all flex items-start justify-between gap-4"
+                          >
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold text-slate-900 dark:text-slate-100">Order {order.orderNumber}</h3>
+                                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${orderStatusBadge(order.status)}`}>
+                                  {order.statusDisplayName || order.status || 'Unknown'}
+                                </span>
+                              </div>
+                              <p className="text-sm text-slate-600 dark:text-slate-300">
+                                Placed on {formatDateValue(order.createdAt, { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </p>
+                              {order.totalItemCount ? (
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{order.totalItemCount} item(s)</p>
+                              ) : null}
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-slate-500 dark:text-slate-400">Total</p>
+                              <p className="text-lg font-bold text-slate-900 dark:text-white">
+                                {formatCurrency(order.totalAmount ?? undefined, order.currency ?? undefined)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Treatment Plans */}
               <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -883,41 +1034,112 @@ export default function DashboardPage() {
               {/* Contact Card */}
               <div className="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl p-6 text-white shadow-lg">
                 <h3 className="font-bold mb-4">{t('contact.title')}</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                      />
-                    </svg>
-                    <span>{t('contact.phone')}</span>
+                {settingsLoading ? (
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-white/20 rounded animate-pulse"></div>
+                      <div className="h-4 bg-white/20 rounded animate-pulse flex-1"></div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-white/20 rounded animate-pulse"></div>
+                      <div className="h-4 bg-white/20 rounded animate-pulse flex-1"></div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-white/20 rounded animate-pulse"></div>
+                      <div className="h-4 bg-white/20 rounded animate-pulse flex-1"></div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                      />
-                    </svg>
-                    <span>{t('contact.email')}</span>
+                ) : (
+                  <div className="space-y-3 text-sm">
+                    {clinicSettings?.phone && (
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                          />
+                        </svg>
+                        <a href={`tel:${clinicSettings.phone}`} className="hover:underline">
+                          {clinicSettings.phone}
+                        </a>
+                      </div>
+                    )}
+                    {clinicSettings?.email && (
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <a href={`mailto:${clinicSettings.email}`} className="hover:underline">
+                          {clinicSettings.email}
+                        </a>
+                      </div>
+                    )}
+                    {clinicSettings?.workingHours && (
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <span>
+                          {(() => {
+                            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+                            const todayHours = clinicSettings.workingHours[today as keyof typeof clinicSettings.workingHours];
+                            return todayHours || t('contact.hours');
+                          })()}
+                        </span>
+                      </div>
+                    )}
+                    {/* Fallback to translation values if no clinic settings */}
+                    {!clinicSettings?.phone && !clinicSettings?.email && !clinicSettings?.workingHours && (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                            />
+                          </svg>
+                          <span>{t('contact.phone')}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                            />
+                          </svg>
+                          <span>{t('contact.email')}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <span>{t('contact.hours')}</span>
+                        </div>
+                      </>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span>{t('contact.hours')}</span>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

@@ -69,21 +69,29 @@
             Basic Information
           </h3>
           
-          <div class="grid gap-4 sm:grid-cols-2">
-            <UFormGroup label="Name" required :error="errors.name">
-              <UInput
-                v-model="form.name"
-                placeholder="Enter carousel name"
-                icon="i-lucide-type"
-                @input="generateSlug"
-              />
-            </UFormGroup>
-            <UFormGroup label="Slug" required :error="errors.slug">
-              <UInput
-                v-model="form.slug"
-                placeholder="carousel-slug"
-                icon="i-lucide-link"
-              />
+        <div class="grid gap-4 sm:grid-cols-2">
+          <UFormGroup label="Name" required :error="errors.name">
+            <UInput
+              v-model="form.name"
+              placeholder="Enter carousel name"
+              icon="i-lucide-type"
+              @input="generateSlug"
+            />
+          </UFormGroup>
+          <UFormGroup label="Name (Arabic)">
+            <UInput
+              v-model="form.nameAr"
+              dir="rtl"
+              placeholder="اسم المعرض بالعربية"
+              icon="i-lucide-type"
+            />
+          </UFormGroup>
+          <UFormGroup label="Slug" required :error="errors.slug">
+            <UInput
+              v-model="form.slug"
+              placeholder="carousel-slug"
+              icon="i-lucide-link"
+            />
             </UFormGroup>
           </div>
         </div>
@@ -97,13 +105,15 @@
           </h3>
           
           <div class="grid gap-4 sm:grid-cols-2">
-            <UFormGroup label="Content Type" required :error="errors.type">
-              <USelectMenu
-                v-model="form.type"
-                :options="typeOptions"
-                placeholder="Select content type"
-                searchable
-              >
+              <UFormGroup label="Content Type" required :error="errors.type">
+                <USelectMenu
+                  v-model="form.type"
+                  :options="typeOptions"
+                  value-attribute="value"
+                  option-attribute="label"
+                  placeholder="Select content type"
+                  searchable
+                >
                 <template #label>
                   <span v-if="form.type" class="flex items-center gap-2">
                     <UIcon :name="getTypeIcon(form.type)" class="w-4 h-4" />
@@ -113,14 +123,16 @@
                 </template>
               </USelectMenu>
             </UFormGroup>
-            <UFormGroup label="Placement" required :error="errors.placement">
-              <USelectMenu
-                v-model="form.placement"
-                :options="placementOptions"
-                placeholder="Select placement"
-                searchable
-                creatable
-              >
+              <UFormGroup label="Placement" required :error="errors.placement">
+                <USelectMenu
+                  v-model="form.placement"
+                  :options="placementOptions"
+                  value-attribute="value"
+                  option-attribute="label"
+                  placeholder="Select placement"
+                  searchable
+                  creatable
+                >
                 <template #label>
                   <span v-if="form.placement" class="flex items-center gap-2">
                     <UIcon name="i-lucide-map-pin" class="w-4 h-4" />
@@ -271,6 +283,7 @@ const ecommerce = useEcommerceService();
 // Form state
 const form = reactive<Partial<Carousel>>({
   name: "",
+  nameAr: "",
   slug: "",
   type: "",
   placement: "",

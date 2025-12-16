@@ -5,12 +5,17 @@ import { useLocale } from 'next-intl';
 import { api } from '@/lib/api';
 
 interface PayPalCheckoutProps {
-  amount: number;
-  currency: string;
-  patientId: number;
-  doctorId: number;
-  serviceId: number;
-  slotId: string;
+  // Legacy virtual consultation flow
+  amount?: number;
+  currency?: string;
+  patientId?: number;
+  doctorId?: number;
+  serviceId?: number;
+  slotId?: string;
+  // Cart flow
+  orderId?: number;
+  returnUrl?: string;
+  cancelUrl?: string;
   onSuccess: (orderID: string) => void;
   onError: (error: string) => void;
   onCancel: () => void;
@@ -35,6 +40,9 @@ export default function PayPalCheckoutIsolated({
   doctorId,
   serviceId,
   slotId,
+  orderId,
+  returnUrl,
+  cancelUrl,
   onSuccess,
   onError,
   onCancel,
@@ -47,6 +55,9 @@ export default function PayPalCheckoutIsolated({
   const [error, setError] = useState<string>('');
   const locale = useLocale();
   const isRTL = locale === 'ar';
+
+  const safeAmount = Number.isFinite(amount as number) ? (amount as number) : 0;
+  const safeCurrency = currency || 'USD';
 
   // Assign unique instance ID
   useEffect(() => {
@@ -192,11 +203,26 @@ export default function PayPalCheckoutIsolated({
         style: buttonStyle,
         createOrder: async () => {
           try {
+            // Cart flow: use existing orderId
+            if (orderId) {
+              const response = await api.initiateCartPayPalOrder(
+                orderId,
+                returnUrl || window.location.href,
+                cancelUrl || window.location.href
+              );
+              const oid = response.providerOrderId || response.paymentId;
+              if (!oid) {
+                throw new Error(response.message || 'Failed to create PayPal order');
+              }
+              return oid;
+            }
+
+            // Virtual consultation flow
             const response = await api.createPayPalOrder({
-              patientId,
-              doctorId,
-              serviceId,
-              slotId,
+              patientId: patientId as number,
+              doctorId: doctorId as number,
+              serviceId: serviceId as number,
+              slotId: slotId as string,
             });
             return response.orderID;
           } catch (error: any) {
@@ -208,13 +234,19 @@ export default function PayPalCheckoutIsolated({
         onApprove: async (data: any) => {
           try {
             console.log(`Instance ${instanceIdRef.current}: PayPal onApprove called with data:`, data);
-            const response = await api.capturePayPalOrder(data.orderID);
-            console.log(`Instance ${instanceIdRef.current}: Capture response:`, response);
-            if (response.success) {
-              onSuccess(data.orderID);
+            if (orderId) {
+              const capture = await api.captureCartPayPalPayment(data.orderID);
+              if (!capture?.success) {
+                throw new Error(capture?.message || 'Payment capture failed');
+              }
             } else {
-              onError(response.message || 'Payment capture failed');
+              const response = await api.capturePayPalOrder(data.orderID);
+              console.log(`Instance ${instanceIdRef.current}: Capture response:`, response);
+              if (!response.success) {
+                throw new Error(response.message || 'Payment capture failed');
+              }
             }
+            onSuccess(data.orderID);
           } catch (error: any) {
             console.error(`Instance ${instanceIdRef.current}: Error capturing PayPal order:`, error);
             onError(error.message || 'Payment processing failed');
@@ -256,7 +288,7 @@ export default function PayPalCheckoutIsolated({
 
     const initializePayPal = async () => {
       try {
-        await loadPayPalScript(paypalClientId, currency, locale);
+        await loadPayPalScript(paypalClientId, safeCurrency, locale);
         await renderPayPalButton();
       } catch (error) {
         console.error(`Instance ${instanceIdRef.current}: Failed to initialize PayPal:`, error);
@@ -267,7 +299,7 @@ export default function PayPalCheckoutIsolated({
     };
 
     initializePayPal();
-  }, [paypalClientId, currency, locale, loadPayPalScript, renderPayPalButton]);
+  }, [paypalClientId, safeCurrency, locale, loadPayPalScript, renderPayPalButton]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -332,19 +364,25 @@ export default function PayPalCheckoutIsolated({
                   </svg>
                 </div>
                 <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                  {locale === 'ar' ? 'دفع آمن' : 'Secure Payment'}
+                  {orderId ? (locale === 'ar' ? 'إجمالي الطلب' : 'Order Total') : locale === 'ar' ? 'دفع آمن' : 'Secure Payment'}
                 </h4>
               </div>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                {locale === 'ar' ? 'رسوم الاستشارة الافتراضية' : 'Virtual consultation fee'}
+                {orderId
+                  ? locale === 'ar'
+                    ? 'سيتم دفع هذا المبلغ عبر PayPal'
+                    : 'This amount will be charged via PayPal'
+                  : locale === 'ar'
+                  ? 'رسوم الاستشارة الافتراضية'
+                  : 'Virtual consultation fee'}
               </p>
             </div>
             <div className={`${isRTL ? 'text-left' : 'text-right'}`}>
-              <div className="text-3xl font-bold bg-gradient-to-r from-violet-600 to-cyan-600 dark:from-violet-400 dark:to-cyan-400 bg-clip-text text-transparent">
-                ${amount.toFixed(2)}
+              <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-cyan-600 dark:from-violet-400 dark:to-cyan-400 bg-clip-text text-transparent">
+                ${safeAmount.toFixed(2)}
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                {currency}
+                {safeCurrency}
               </div>
             </div>
           </div>

@@ -83,11 +83,11 @@ public class PublicProductService {
      * @return page of visible products
      */
     @Transactional(readOnly = true)
-    public Page<PublicProductResponse> getVisibleProducts(Long tenantId, Pageable pageable) {
+    public Page<PublicProductResponse> getVisibleProducts(Long tenantId, Pageable pageable, String locale) {
         log.debug("Getting visible products for tenant {} with pagination", tenantId);
         
         Page<ProductEntity> products = productRepository.findVisibleByTenant(tenantId, pageable);
-        return products.map(PublicProductResponse::fromEntity);
+        return products.map(product -> PublicProductResponse.fromEntity(product, locale));
     }
 
     /**
@@ -99,7 +99,7 @@ public class PublicProductService {
      * @throws ProductNotFoundException if product not found or not visible
      */
     @Transactional(readOnly = true)
-    public PublicProductResponse getVisibleProduct(Long productId, Long tenantId) {
+    public PublicProductResponse getVisibleProduct(Long productId, Long tenantId, String locale) {
         log.debug("Getting visible product {} for tenant {}", productId, tenantId);
         
         ProductEntity product = productRepository.findByIdAndTenant(productId, tenantId)
@@ -110,7 +110,7 @@ public class PublicProductService {
             throw new ProductNotFoundException(productId, tenantId, "Product not available");
         }
         
-        return PublicProductResponse.fromEntity(product);
+        return PublicProductResponse.fromEntity(product, locale);
     }
 
     /**
@@ -122,7 +122,7 @@ public class PublicProductService {
      * @throws ProductNotFoundException if product not found or not visible
      */
     @Transactional(readOnly = true)
-    public PublicProductResponse getVisibleProductBySlug(String slug, Long tenantId) {
+    public PublicProductResponse getVisibleProductBySlug(String slug, Long tenantId, String locale) {
         log.debug("Getting visible product by slug {} for tenant {}", slug, tenantId);
         
         ProductEntity product = productRepository.findBySlugAndTenant(slug, tenantId)
@@ -133,7 +133,7 @@ public class PublicProductService {
             throw new ProductNotFoundException(null, tenantId, "Product not available");
         }
         
-        return PublicProductResponse.fromEntity(product);
+        return PublicProductResponse.fromEntity(product, locale);
     }
 
     /**
@@ -145,11 +145,11 @@ public class PublicProductService {
      * @return page of matching products
      */
     @Transactional(readOnly = true)
-    public Page<PublicProductResponse> searchVisibleProducts(Long tenantId, String searchTerm, Pageable pageable) {
+    public Page<PublicProductResponse> searchVisibleProducts(Long tenantId, String searchTerm, Pageable pageable, String locale) {
         log.debug("Searching visible products for tenant {} with term: {}", tenantId, searchTerm);
         
         Page<ProductEntity> products = productRepository.searchVisibleByTenant(tenantId, searchTerm, pageable);
-        return products.map(PublicProductResponse::fromEntity);
+        return products.map(product -> PublicProductResponse.fromEntity(product, locale));
     }
 
     /**
@@ -161,11 +161,11 @@ public class PublicProductService {
      * @return page of products in the category
      */
     @Transactional(readOnly = true)
-    public Page<PublicProductResponse> getVisibleProductsByCategory(Long tenantId, Long categoryId, Pageable pageable) {
+    public Page<PublicProductResponse> getVisibleProductsByCategory(Long tenantId, Long categoryId, Pageable pageable, String locale) {
         log.debug("Getting visible products by category {} for tenant {}", categoryId, tenantId);
         
         Page<ProductEntity> products = productRepository.findVisibleByTenantAndCategory(tenantId, categoryId, pageable);
-        return products.map(PublicProductResponse::fromEntity);
+        return products.map(product -> PublicProductResponse.fromEntity(product, locale));
     }
 
     /**
@@ -178,11 +178,11 @@ public class PublicProductService {
      * @return page of products within the price range
      */
     @Transactional(readOnly = true)
-    public Page<PublicProductResponse> getVisibleProductsByPriceRange(Long tenantId, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+    public Page<PublicProductResponse> getVisibleProductsByPriceRange(Long tenantId, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable, String locale) {
         log.debug("Getting visible products by price range [{}, {}] for tenant {}", minPrice, maxPrice, tenantId);
         
         Page<ProductEntity> products = productRepository.findVisibleByTenantAndPriceBetween(tenantId, minPrice, maxPrice, pageable);
-        return products.map(PublicProductResponse::fromEntity);
+        return products.map(product -> PublicProductResponse.fromEntity(product, locale));
     }
 
     /**
@@ -203,7 +203,8 @@ public class PublicProductService {
             String searchTerm, 
             BigDecimal minPrice, 
             BigDecimal maxPrice, 
-            Pageable pageable) {
+            Pageable pageable,
+            String locale) {
         
         log.debug("Getting visible products with filters for tenant {}: category={}, search={}, priceRange=[{}, {}]", 
                 tenantId, categoryId, searchTerm, minPrice, maxPrice);
@@ -219,7 +220,7 @@ public class PublicProductService {
                 pageable
         );
         
-        return products.map(PublicProductResponse::fromEntity);
+        return products.map(product -> PublicProductResponse.fromEntity(product, locale));
     }
 
     /**
@@ -230,11 +231,11 @@ public class PublicProductService {
      * @return page of recent products
      */
     @Transactional(readOnly = true)
-    public Page<PublicProductResponse> getRecentVisibleProducts(Long tenantId, Pageable pageable) {
+    public Page<PublicProductResponse> getRecentVisibleProducts(Long tenantId, Pageable pageable, String locale) {
         log.debug("Getting recent visible products for tenant {}", tenantId);
         
         Page<ProductEntity> products = productRepository.findRecentVisibleByTenant(tenantId, pageable);
-        return products.map(PublicProductResponse::fromEntity);
+        return products.map(product -> PublicProductResponse.fromEntity(product, locale));
     }
 
     /**

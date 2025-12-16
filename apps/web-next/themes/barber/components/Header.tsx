@@ -106,7 +106,7 @@ export function Header() {
             </div>
           )}
           <div className="flex flex-col">
-            <span className="font-bold text-lg text-slate-900 dark:text-slate-100 leading-tight">
+            <span className="font-bold text-base text-slate-900 dark:text-slate-100 leading-tight">
               {settings?.clinicName || common('clinicName')}
             </span>
             <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">

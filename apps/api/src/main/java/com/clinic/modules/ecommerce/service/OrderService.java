@@ -1,6 +1,7 @@
 package com.clinic.modules.ecommerce.service;
 
 import com.clinic.modules.core.tenant.TenantEntity;
+import com.clinic.modules.ecommerce.dto.BuyNowRequest;
 import com.clinic.modules.ecommerce.dto.CreateOrderRequest;
 import com.clinic.modules.ecommerce.exception.InvalidCartStateException;
 import com.clinic.modules.ecommerce.exception.ProductNotFoundException;
@@ -35,14 +36,17 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartService cartService;
+    private final ProductService productService;
 
     @Autowired
     public OrderService(OrderRepository orderRepository,
                        OrderItemRepository orderItemRepository,
-                       CartService cartService) {
+                       CartService cartService,
+                       ProductService productService) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.cartService = cartService;
+        this.productService = productService;
     }
 
     /**
@@ -117,6 +121,88 @@ public class OrderService {
     }
 
     /**
+     * Create order directly from product (Buy Now functionality).
+     * Bypasses cart and creates order immediately with single product.
+     */
+    public OrderEntity createDirectOrder(TenantEntity tenant, BuyNowRequest request) {
+        logger.debug("Creating direct order for product {} and tenant {}", 
+                    request.getProductId(), tenant.getId());
+
+        // Validate product exists and is available
+        ProductEntity product = productService.getProductById(tenant, request.getProductId());
+        if (!product.isActive()) {
+            throw new ProductNotFoundException("Product is not available: " + product.getName());
+        }
+
+        // Validate variant if specified
+        ProductVariantEntity variant = null;
+        if (request.getVariantId() != null) {
+            variant = product.getVariants().stream()
+                .filter(v -> v.getId().equals(request.getVariantId()) && v.isActive())
+                .findFirst()
+                .orElseThrow(() -> new ProductNotFoundException("Product variant not found or inactive: " + request.getVariantId()));
+        }
+
+        // Check stock availability
+        int availableStock = variant != null ? variant.getStockQuantity() : product.getStockQuantity();
+        if (availableStock < request.getQuantity()) {
+            throw new InvalidCartStateException("Insufficient stock. Available: " + availableStock + ", Requested: " + request.getQuantity());
+        }
+
+        // Generate unique order number
+        String orderNumber = generateOrderNumber(tenant);
+
+        // Create order entity
+        OrderEntity order = new OrderEntity(tenant, orderNumber);
+        order.setCustomerName(request.getCustomerName());
+        order.setCustomerEmail(request.getCustomerEmail());
+        order.setCustomerPhone(request.getCustomerPhone());
+        order.setBillingAddressLine1(request.getBillingAddressLine1());
+        order.setBillingAddressLine2(request.getBillingAddressLine2());
+        order.setBillingAddressCity(request.getBillingAddressCity());
+        order.setBillingAddressState(request.getBillingAddressState());
+        order.setBillingAddressPostalCode(request.getBillingAddressPostalCode());
+        order.setBillingAddressCountry(request.getBillingAddressCountry());
+        order.setNotes(request.getNotes());
+        order.setCurrency("USD"); // Default currency, could be made configurable
+        order.setStatus(OrderStatus.PENDING_PAYMENT);
+
+        // Save order first to get ID
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        // Create single order item
+        OrderItemEntity orderItem = new OrderItemEntity();
+        orderItem.setOrder(savedOrder);
+        orderItem.setProduct(product);
+        orderItem.setVariant(variant);
+        orderItem.setQuantity(request.getQuantity());
+        
+        // Set pricing
+        java.math.BigDecimal unitPrice = variant != null ? variant.getPrice() : product.getPrice();
+        orderItem.setUnitPrice(unitPrice);
+        orderItem.setTotalPrice(unitPrice.multiply(java.math.BigDecimal.valueOf(request.getQuantity())));
+        
+        // Set display information
+        orderItem.setProductName(product.getName());
+        orderItem.setProductSku(variant != null ? variant.getSku() : product.getSku());
+        if (variant != null) {
+            orderItem.setVariantName(variant.getName());
+        }
+
+        orderItemRepository.save(orderItem);
+        savedOrder.addItem(orderItem);
+
+        // Calculate totals and save
+        savedOrder.calculateTotals();
+        OrderEntity finalOrder = orderRepository.save(savedOrder);
+
+        logger.info("Created direct order {} for product {} and tenant {}", 
+                   finalOrder.getOrderNumber(), product.getName(), tenant.getId());
+
+        return finalOrder;
+    }
+
+    /**
      * Get order by ID with tenant validation.
      */
     @Transactional(readOnly = true)
@@ -165,6 +251,15 @@ public class OrderService {
     }
 
     /**
+     * Get order by id with tenant isolation.
+     */
+    @Transactional(readOnly = true)
+    public OrderEntity getOrderById(TenantEntity tenant, Long orderId) {
+        return orderRepository.findByIdAndTenant(orderId, tenant.getId())
+            .orElseThrow(() -> new ProductNotFoundException("Order not found: " + orderId));
+    }
+
+    /**
      * Update order status.
      */
     public OrderEntity updateOrderStatus(TenantEntity tenant, Long orderId, OrderStatus newStatus) {
@@ -181,6 +276,37 @@ public class OrderService {
         logger.info("Updated order {} status from {} to {} for tenant {}", 
                    order.getOrderNumber(), oldStatus, newStatus, tenant.getId());
 
+        return savedOrder;
+    }
+
+    /**
+     * Update order fields (admin only).
+     */
+    public OrderEntity updateOrder(TenantEntity tenant, Long orderId, com.clinic.modules.ecommerce.dto.AdminUpdateOrderRequest request) {
+        logger.debug("Updating order {} for tenant {}", orderId, tenant.getId());
+
+        OrderEntity order = orderRepository.findByIdAndTenant(orderId, tenant.getId())
+            .orElseThrow(() -> new ProductNotFoundException("Order not found: " + orderId));
+
+        if (request.getCustomerName() != null) order.setCustomerName(request.getCustomerName());
+        if (request.getCustomerEmail() != null) order.setCustomerEmail(request.getCustomerEmail());
+        if (request.getCustomerPhone() != null) order.setCustomerPhone(request.getCustomerPhone());
+        if (request.getBillingAddressLine1() != null) order.setBillingAddressLine1(request.getBillingAddressLine1());
+        if (request.getBillingAddressLine2() != null) order.setBillingAddressLine2(request.getBillingAddressLine2());
+        if (request.getBillingAddressCity() != null) order.setBillingAddressCity(request.getBillingAddressCity());
+        if (request.getBillingAddressState() != null) order.setBillingAddressState(request.getBillingAddressState());
+        if (request.getBillingAddressPostalCode() != null) order.setBillingAddressPostalCode(request.getBillingAddressPostalCode());
+        if (request.getBillingAddressCountry() != null) order.setBillingAddressCountry(request.getBillingAddressCountry());
+        if (request.getStatus() != null) order.setStatus(request.getStatus());
+        if (request.getSubtotal() != null) order.setSubtotal(request.getSubtotal());
+        if (request.getTaxAmount() != null) order.setTaxAmount(request.getTaxAmount());
+        if (request.getShippingAmount() != null) order.setShippingAmount(request.getShippingAmount());
+        if (request.getTotalAmount() != null) order.setTotalAmount(request.getTotalAmount());
+        if (request.getCurrency() != null) order.setCurrency(request.getCurrency());
+        if (request.getNotes() != null) order.setNotes(request.getNotes());
+
+        OrderEntity savedOrder = orderRepository.save(order);
+        logger.info("Updated order {} for tenant {}", savedOrder.getOrderNumber(), tenant.getId());
         return savedOrder;
     }
 

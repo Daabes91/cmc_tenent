@@ -34,6 +34,9 @@
         <UFormGroup label="Name" required :error="errors.name">
           <UInput v-model="form.name" placeholder="Product name" @input="generateSlug" />
         </UFormGroup>
+        <UFormGroup label="Name (Arabic)">
+          <UInput v-model="form.nameAr" dir="rtl" placeholder="الاسم بالعربية" />
+        </UFormGroup>
         <UFormGroup label="Slug" required :error="errors.slug">
           <UInput v-model="form.slug" placeholder="product-slug" />
         </UFormGroup>
@@ -52,24 +55,14 @@
         <UFormGroup label="Short description">
           <UInput v-model="form.shortDescription" placeholder="Shown in cards" />
         </UFormGroup>
+        <UFormGroup label="Short description (Arabic)">
+          <UInput v-model="form.shortDescriptionAr" dir="rtl" placeholder="وصف مختصر" />
+        </UFormGroup>
         <UFormGroup label="Description">
           <UTextarea v-model="form.description" placeholder="Full description" :rows="4" />
         </UFormGroup>
-      </div>
-
-      <UDivider class="my-6" />
-
-      <div class="grid gap-4 md:grid-cols-2">
-        <UFormGroup label="Categories">
-          <USelectMenu
-            v-model="form.categoryIds"
-            :options="categories.map(c => ({ label: c.name, value: c.id }))"
-            value-attribute="value"
-            option-attribute="label"
-            multiple
-            searchable
-            placeholder="Select categories"
-          />
+        <UFormGroup label="Description (Arabic)">
+          <UTextarea v-model="form.descriptionAr" dir="rtl" placeholder="الوصف الكامل" :rows="4" />
         </UFormGroup>
       </div>
 
@@ -161,12 +154,19 @@
 
 <script setup lang="ts">
 import { useEcommerceService } from "@/services/ecommerce.service";
-import type { Category, Product } from "~/types/ecommerce";
+import type { Product } from "~/types/ecommerce";
 
 definePageMeta({
   requiresAuth: true,
   ssr: false,
 });
+
+const props = defineProps<{
+  productId?: number;
+  mode?: "create" | "edit";
+}>();
+
+const isEdit = computed(() => props.mode === "edit" && !!props.productId);
 
 const router = useRouter();
 const toast = useToast();
@@ -175,17 +175,20 @@ const ecommerce = useEcommerceService();
 
 const form = reactive<Partial<Product>>({
   name: "",
+  nameAr: "",
   slug: "",
   sku: "",
   description: "",
+  descriptionAr: "",
   shortDescription: "",
+  shortDescriptionAr: "",
   price: null,
   compareAtPrice: null,
   currency: "USD",
   status: "DRAFT",
   isTaxable: true,
   isVisible: true,
-  categoryIds: [],
+
   images: [],
 });
 
@@ -194,7 +197,7 @@ const saving = ref(false);
 const errorMessage = ref<string | null>(null);
 
 const currencyOptions = ["USD", "EUR", "JOD", "SAR", "AED"];
-const categories = ref<Category[]>([]);
+
 const imageInputs = ref<Array<{ url: string; alt: string; isMain: boolean }>>([
   { url: "", alt: "", isMain: true },
 ]);
@@ -255,27 +258,38 @@ const save = async () => {
   try {
     const filledImages = imageInputs.value.filter((img) => img.url?.trim()).map((img) => img.url.trim());
 
-    // Backend createProduct accepts only fields from ProductCreateRequest
-    const created = await ecommerce.createProduct(tenant.value!.id, {
+    const payload: Partial<Product> & { images?: string[] } = {
       name: form.name,
+      nameAr: form.nameAr,
       slug: form.slug,
       sku: form.sku,
       description: form.description,
+      descriptionAr: form.descriptionAr,
       shortDescription: form.shortDescription,
+      shortDescriptionAr: form.shortDescriptionAr,
       price: form.price ?? undefined,
       compareAtPrice: form.compareAtPrice ?? undefined,
       currency: form.currency,
       isTaxable: form.isTaxable,
       isVisible: form.isVisible,
-      images: filledImages,
-    });
+      status: form.status,
 
-    toast.add({
-      title: "Product created",
-      description: `"${form.name}" has been saved.`,
-      color: "green",
-    });
-    router.push(`/ecommerce/products/${created.id}`);
+      images: filledImages,
+    };
+
+    if (isEdit.value) {
+      const updated = await ecommerce.updateProduct(tenant.value!.id, props.productId!, payload);
+      toast.add({ title: "Product updated", description: `"${updated.name}" saved.`, color: "green" });
+      router.push(`/ecommerce/products/${updated.id}`);
+    } else {
+      const created = await ecommerce.createProduct(tenant.value!.id, payload);
+      toast.add({
+        title: "Product created",
+        description: `"${form.name}" has been saved.`,
+        color: "green",
+      });
+      router.push(`/ecommerce/products/${created.id}`);
+    }
   } catch (err: any) {
     console.error("[product create] error", err);
     errorMessage.value = err?.data?.message || err?.message || "Failed to create product";
@@ -292,7 +306,39 @@ const save = async () => {
 onMounted(async () => {
   await ensureTenant();
   if (tenant.value?.id) {
-    categories.value = (await ecommerce.listCategories(tenant.value.id))?.content ?? [];
+    if (isEdit.value && props.productId) {
+      try {
+        const existing = await ecommerce.getProduct(tenant.value.id, props.productId);
+        form.name = existing.name;
+        form.nameAr = existing.nameAr || "";
+        form.slug = existing.slug;
+        form.sku = existing.sku;
+        form.description = existing.description;
+        form.descriptionAr = existing.descriptionAr || "";
+        form.shortDescription = existing.shortDescription;
+        form.shortDescriptionAr = existing.shortDescriptionAr || "";
+        form.price = existing.price;
+        form.compareAtPrice = existing.compareAtPrice;
+        form.currency = existing.currency;
+        form.isTaxable = existing.isTaxable;
+        form.isVisible = existing.isVisible;
+        form.status = existing.status || form.status;
+
+
+        // Load images
+        const imgs = await ecommerce.listProductImages(tenant.value.id, props.productId);
+        if (imgs?.length) {
+          imageInputs.value = imgs.map((img, idx) => ({
+            url: img.imageUrl,
+            alt: img.altText || "",
+            isMain: img.isMain || idx === 0,
+          }));
+        }
+      } catch (err: any) {
+        errorMessage.value = err?.data?.message || err?.message || "Failed to load product";
+        toast.add({ title: "Load failed", description: errorMessage.value, color: "red" });
+      }
+    }
   }
 });
 </script>

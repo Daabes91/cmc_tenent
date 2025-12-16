@@ -13,6 +13,7 @@ public class CarouselResponse {
 
     private Long id;
     private String name;
+    private String nameAr;
     private String slug;
     private CarouselType type;
     private String placement;
@@ -45,6 +46,14 @@ public class CarouselResponse {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getNameAr() {
+        return nameAr;
+    }
+
+    public void setNameAr(String nameAr) {
+        this.nameAr = nameAr;
     }
 
     public String getSlug() {

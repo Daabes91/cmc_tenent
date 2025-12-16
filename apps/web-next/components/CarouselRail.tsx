@@ -1,111 +1,27 @@
  'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link } from '@/navigation';
 import type { PublicCarousel, PublicCarouselItem } from '@/lib/types';
 import { api } from '@/lib/api';
+import { ProductCard } from './ProductCard';
 
 type CarouselRailProps = {
   title: string;
   carousels: PublicCarousel[];
 };
 
-function ProductCard({ item }: { item: PublicCarouselItem }) {
-  const product = item.product;
-  const [adding, setAdding] = useState(false);
-  const [added, setAdded] = useState(false);
 
-  if (!product) return null;
-  const image =
-    product.mainImageUrl ||
-    (product.images && product.images.length > 0 ? product.images[0] : undefined);
 
-  const addToCart = async () => {
-    try {
-      setAdding(true);
-      await api.addToCart({ product_id: product.id, quantity: 1 });
-      setAdded(true);
-      setTimeout(() => setAdded(false), 2000);
-    } catch (err) {
-      console.error('Add to cart failed', err);
-      setAdded(false);
-      // no toast system here; rely on console for now
-    } finally {
-      setAdding(false);
-    }
-  };
-
-  return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-100/60 bg-white/90 p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-800/60 dark:bg-slate-900/70">
-      {image ? (
-        <div className="relative mb-3 h-40 w-full overflow-hidden rounded-xl bg-slate-50 dark:bg-slate-800">
-          <Image
-            src={image}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 768px) 80vw, 240px"
-          />
-        </div>
-      ) : (
-        <div className="mb-3 flex h-40 w-full items-center justify-center rounded-xl bg-slate-50 text-slate-400 dark:bg-slate-800">
-          <span className="text-sm">No image</span>
-        </div>
-      )}
-      <div className="space-y-1">
-        <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 line-clamp-2">
-          {product.name}
-        </h3>
-        {product.shortDescription && (
-          <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2">
-            {product.shortDescription}
-          </p>
-        )}
-        <div className="flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-300">
-          {product.price != null && product.currency ? (
-            <>
-              <span>
-                {product.price} {product.currency}
-              </span>
-              {product.compareAtPrice && product.compareAtPrice > product.price && (
-                <span className="text-xs font-medium text-slate-500 line-through">
-                  {product.compareAtPrice} {product.currency}
-                </span>
-              )}
-            </>
-          ) : (
-            <span className="text-slate-500 dark:text-slate-400">Contact for price</span>
-          )}
-        </div>
-      </div>
-      <div className="mt-3 flex items-center gap-2">
-        <Link
-          href={`/products/${product.slug}`}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-300 dark:hover:text-blue-200"
-        >
-          View product
-        </Link>
-        <button
-          onClick={addToCart}
-          disabled={adding}
-          className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
-        >
-          {adding ? 'Adding…' : added ? 'Added' : 'Add to cart'}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function CarouselItems({ carousel }: { carousel: PublicCarousel }) {
+function CarouselItems({ carousel, locale }: { carousel: PublicCarousel; locale: string }) {
   const [fallbackItems, setFallbackItems] = useState<PublicCarouselItem[]>([]);
 
   useEffect(() => {
     const loadFallback = async () => {
       if (carousel.type !== 'VIEW_ALL_PRODUCTS' || (carousel.items?.length ?? 0) > 0) return;
       try {
-        const res = await api.getProducts({ size: 12, status: 'ACTIVE' });
+        const res = await api.getProducts({ size: 12, status: 'ACTIVE', locale });
         const items: PublicCarouselItem[] =
           res.items?.map((product) => ({
             id: product.id,
@@ -118,44 +34,57 @@ function CarouselItems({ carousel }: { carousel: PublicCarousel }) {
       }
     };
     loadFallback();
-  }, [carousel]);
+  }, [carousel, locale]);
 
   const items = carousel.items?.length ? carousel.items : fallbackItems;
   if (!items?.length) return null;
 
+  const visibleItems = items.slice(0, 4);
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((item) => (
-        <ProductCard key={item.id} item={item} />
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {visibleItems.map((item) => (
+        <ProductCard key={item.id} item={item} locale={locale} variant="default" />
       ))}
     </div>
   );
 }
 
 export function CarouselRail({ title, carousels }: CarouselRailProps) {
+  const locale = useLocale();
+  const ecommerce = useTranslations('ecommerce');
   if (!carousels.length) return null;
   return (
-    <section className="relative overflow-hidden bg-white dark:bg-slate-950 py-12 transition-colors">
+    <section className="relative overflow-hidden bg-slate-50 dark:bg-slate-950 py-16 transition-colors">
       <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{title}</h2>
+          <Link
+            href="/products"
+            className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-700"
+          >
+            {ecommerce('viewAllProducts')}
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
         </div>
-        <div className="space-y-10">
+        <div className="space-y-12">
           {carousels.map((carousel) => (
-            <div key={carousel.id} className="space-y-4">
+            <div key={carousel.id} className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                    {carousel.name}
+                  <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+                    {locale === 'ar' && carousel.nameAr ? carousel.nameAr : carousel.name}
                   </h3>
                   {carousel.slug && (
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                       {carousel.slug.replace(/[-_]/g, ' ')}
                     </p>
                   )}
                 </div>
               </div>
-              <CarouselItems carousel={carousel} />
+              <CarouselItems carousel={carousel} locale={locale} />
             </div>
           ))}
         </div>

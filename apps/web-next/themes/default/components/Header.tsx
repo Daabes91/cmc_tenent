@@ -9,6 +9,8 @@ import {api} from '@/lib/api';
 import type {ClinicSettings} from '@/lib/types';
 import {ThemeToggle} from '@/components/ui/ThemeToggle';
 import {getBookingSectionUrl} from '@/utils/basePath';
+import { useEcommerceFeature } from '@/hooks/useEcommerce';
+import { useCart } from '@/hooks/useCart';
 
 export function Header() {
   const pathname = usePathname();
@@ -21,6 +23,8 @@ export function Header() {
   const t = useTranslations('nav');
   const common = useTranslations('common');
   const locale = useLocale();
+  const { enabled: ecommerceEnabled } = useEcommerceFeature();
+  const { totalQuantity } = useCart(ecommerceEnabled);
 
   // Prevent hydration mismatch by only showing auth-dependent UI after mount
   useEffect(() => {
@@ -106,7 +110,7 @@ export function Header() {
             </div>
           )}
           <div className="flex flex-col">
-            <span className="font-bold text-lg text-slate-900 dark:text-slate-100 leading-tight">
+            <span className="font-bold text-base text-slate-900 dark:text-slate-100 leading-tight">
               {settings?.clinicName || common('clinicName')}
             </span>
             <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
@@ -158,15 +162,21 @@ export function Header() {
             </Link>
           </div>
 
-          {/* Cart (always visible; backend enforces e-commerce gating) */}
-          <Link
-            href="/cart"
-            className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 shadow-sm transition hover:bg-blue-100 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-100"
-            aria-label="View cart"
-          >
-            <ShoppingCart className="h-5 w-5" />
-            <span>Cart</span>
-          </Link>
+          {/* Cart (ecommerce) */}
+          {ecommerceEnabled && (
+            <Link
+              href="/cart"
+              className="relative inline-flex items-center justify-center rounded-xl border border-blue-200 bg-blue-50 p-2 text-blue-700 shadow-sm transition hover:bg-blue-100 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-100"
+              aria-label="View cart"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {totalQuantity > 0 && (
+                <span className="absolute -top-1 -right-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-emerald-600 px-1 text-[11px] font-bold text-white shadow-sm">
+                  {totalQuantity}
+                </span>
+              )}
+            </Link>
+          )}
 
           {/* Theme Toggle */}
           <ThemeToggle />
@@ -332,6 +342,24 @@ export function Header() {
                 العربية
               </Link>
             </div>
+
+            {/* Cart - Mobile (after language) */}
+            {ecommerceEnabled && (
+              <Link
+                href="/cart"
+                className="mt-3 block rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-400 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-blue-400 dark:hover:text-blue-200 relative"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5" />
+                  {totalQuantity > 0 && (
+                    <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-emerald-600 px-1 text-[11px] font-bold text-white shadow-sm">
+                      {totalQuantity}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            )}
 
             {/* Theme Toggle - Mobile */}
             <div className="flex justify-center">

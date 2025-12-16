@@ -19,12 +19,15 @@ public class PublicCarouselItemResponse {
     private Long id;
     private CarouselContentType contentType;
     private String title;
+    private String titleAr;
     private String subtitle;
+    private String subtitleAr;
     private String imageUrl;
     private String mobileImageUrl;
     private String linkUrl;
     private CallToActionType ctaType;
     private String ctaText;
+    private String ctaTextAr;
     private Integer sortOrder;
     private ProductInfo product;
     private CategoryInfo category;
@@ -43,11 +46,13 @@ public class PublicCarouselItemResponse {
     public static class ProductInfo {
         private Long id;
         private String name;
+        private String nameAr;
         private String slug;
         private BigDecimal price;
         private BigDecimal compareAtPrice;
         private String currency;
         private String shortDescription;
+        private String shortDescriptionAr;
         private String mainImageUrl;
         private java.util.List<String> images;
         private Boolean inStock;
@@ -55,16 +60,18 @@ public class PublicCarouselItemResponse {
         // Constructors
         public ProductInfo() {}
 
-        public ProductInfo(Long id, String name, String slug, BigDecimal price, 
-                          BigDecimal compareAtPrice, String currency, String shortDescription,
+        public ProductInfo(Long id, String name, String nameAr, String slug, BigDecimal price, 
+                          BigDecimal compareAtPrice, String currency, String shortDescription, String shortDescriptionAr,
                           String mainImageUrl, java.util.List<String> images, Boolean inStock) {
             this.id = id;
             this.name = name;
+            this.nameAr = nameAr;
             this.slug = slug;
             this.price = price;
             this.compareAtPrice = compareAtPrice;
             this.currency = currency;
             this.shortDescription = shortDescription;
+            this.shortDescriptionAr = shortDescriptionAr;
             this.mainImageUrl = mainImageUrl;
             this.images = images;
             this.inStock = inStock;
@@ -75,6 +82,8 @@ public class PublicCarouselItemResponse {
         public void setId(Long id) { this.id = id; }
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
+        public String getNameAr() { return nameAr; }
+        public void setNameAr(String nameAr) { this.nameAr = nameAr; }
         public String getSlug() { return slug; }
         public void setSlug(String slug) { this.slug = slug; }
         public BigDecimal getPrice() { return price; }
@@ -85,6 +94,8 @@ public class PublicCarouselItemResponse {
         public void setCurrency(String currency) { this.currency = currency; }
         public String getShortDescription() { return shortDescription; }
         public void setShortDescription(String shortDescription) { this.shortDescription = shortDescription; }
+        public String getShortDescriptionAr() { return shortDescriptionAr; }
+        public void setShortDescriptionAr(String shortDescriptionAr) { this.shortDescriptionAr = shortDescriptionAr; }
         public String getMainImageUrl() { return mainImageUrl; }
         public void setMainImageUrl(String mainImageUrl) { this.mainImageUrl = mainImageUrl; }
         public java.util.List<String> getImages() { return images; }
@@ -146,12 +157,28 @@ public class PublicCarouselItemResponse {
         this.title = title;
     }
 
+    public String getTitleAr() {
+        return titleAr;
+    }
+
+    public void setTitleAr(String titleAr) {
+        this.titleAr = titleAr;
+    }
+
     public String getSubtitle() {
         return subtitle;
     }
 
     public void setSubtitle(String subtitle) {
         this.subtitle = subtitle;
+    }
+
+    public String getSubtitleAr() {
+        return subtitleAr;
+    }
+
+    public void setSubtitleAr(String subtitleAr) {
+        this.subtitleAr = subtitleAr;
     }
 
     public String getImageUrl() {
@@ -192,6 +219,14 @@ public class PublicCarouselItemResponse {
 
     public void setCtaText(String ctaText) {
         this.ctaText = ctaText;
+    }
+
+    public String getCtaTextAr() {
+        return ctaTextAr;
+    }
+
+    public void setCtaTextAr(String ctaTextAr) {
+        this.ctaTextAr = ctaTextAr;
     }
 
     public Integer getSortOrder() {

@@ -202,7 +202,7 @@ export default function BookingSlider() {
               />
             </svg>
           </div>
-          <h3 className="mb-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+          <h3 className="mb-2 text-xl font-bold text-slate-900 dark:text-slate-100">
             {t('status.confirmedTitle')}
           </h3>
           <p className="mb-6 text-slate-600 dark:text-slate-300">{t('status.confirmedSubtitle')}</p>
@@ -226,7 +226,7 @@ export default function BookingSlider() {
   return (
     <div className="relative z-10 mx-auto max-w-2xl rounded-2xl border border-slate-100/70 dark:border-slate-800/60 bg-white/95 dark:bg-slate-900/80 p-8 shadow-xl dark:shadow-blue-900/40 backdrop-blur transition-colors">
       <div className="mb-6 relative z-[2147483649]">
-        <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 relative z-[2147483649]">{heading}</h3>
+        <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 relative z-[2147483649]">{heading}</h3>
         <p className="mt-2 text-slate-600 dark:text-slate-300 relative z-[2147483649]">{subHeading}</p>
       </div>
 

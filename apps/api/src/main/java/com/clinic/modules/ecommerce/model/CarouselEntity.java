@@ -38,6 +38,10 @@ public class CarouselEntity {
     @Size(max = 255)
     private String name;
 
+    @Column(name = "name_ar")
+    @Size(max = 255)
+    private String nameAr;
+
     @Column(name = "slug", nullable = false)
     @NotBlank
     @Size(max = 255)
@@ -110,6 +114,14 @@ public class CarouselEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getNameAr() {
+        return nameAr;
+    }
+
+    public void setNameAr(String nameAr) {
+        this.nameAr = nameAr;
     }
 
     public String getSlug() {
